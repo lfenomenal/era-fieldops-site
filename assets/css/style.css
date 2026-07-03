@@ -970,17 +970,18 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 
 /* ---------- Reduced motion ---------- */
+/* Reduced motion: keep the brand's ambient/looping animations, but calm the
+   large-movement effects (smooth scroll + big scroll-reveal jumps + parallax).
+   Ensures content is never hidden while still feeling alive on macOS "Reduce Motion". */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; }
+  /* content revealed on scroll must always be visible */
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .hero-copy > *, .command-center { opacity: 1 !important; transform: none !important; transition: none !important; }
   .wf-step { opacity: 1; transform: none; }
+  /* charts/bars land in their final state instead of sweeping */
   .chart-bars i { transform: scaleY(1); }
   .spark path { stroke-dashoffset: 0; }
   .in-view .bar-fill, .bar-fill { transition: none; }
-  .hero-copy > *, .command-center { opacity: 1 !important; transform: none !important; }
+  .in-view .ph-bar i, .ph-bar i { transition: none; width: var(--w); }
 }

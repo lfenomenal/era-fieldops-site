@@ -168,7 +168,7 @@
       idx++;
     }
     cycleCards(); cycleCards(); cycleCards();
-    if (!reduceMotion) setInterval(cycleCards, 2600);
+    setInterval(cycleCards, 2600);
   }
 
   /* ---------- Hero: live feed ---------- */
@@ -199,7 +199,7 @@
       fIdx++;
     }
     pushFeed(); pushFeed(); pushFeed();
-    if (!reduceMotion) setInterval(pushFeed, 2100);
+    setInterval(pushFeed, 2100);
   }
 
   /* ---------- Cursor-follow spotlight + subtle tilt on cards ---------- */
@@ -312,7 +312,7 @@
 
   /* ---------- Background particles ---------- */
   var canvas = document.getElementById('particles');
-  if (canvas && !reduceMotion) {
+  if (canvas) {
     var ctx = canvas.getContext('2d');
     var particles = [];
     var W, H, running = true;

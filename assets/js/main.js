@@ -273,6 +273,44 @@
     });
   });
 
+  /* ---------- Price toggle (pe zi / pe lună) ---------- */
+  (function () {
+    var toggle = document.querySelector('.ph-toggle');
+    if (!toggle) return;
+    var tabs = Array.from(toggle.querySelectorAll('.ph-tab'));
+    var nums = ['phValue', 'phCoffee', 'phEra'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+    var per = document.getElementById('phPer');
+
+    function tween(el, to) {
+      var suffix = el.id === 'phValue' ? '' : ' lei';
+      var from = parseFloat(el.textContent.replace(/[^\d.]/g, '')) || 0;
+      if (reduceMotion) { el.textContent = to + suffix; return; }
+      var dur = 500, start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(from + (to - from) * eased) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    function setPeriod(period) {
+      tabs.forEach(function (t) {
+        var on = t.dataset.period === period;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-pressed', String(on));
+      });
+      nums.forEach(function (el) { tween(el, parseFloat(el.dataset[period])); });
+      if (per) per.textContent = period === 'day' ? 'pe zi' : 'pe lună';
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        if (!t.classList.contains('active')) setPeriod(t.dataset.period);
+      });
+    });
+  })();
+
   /* ---------- Background particles ---------- */
   var canvas = document.getElementById('particles');
   if (canvas && !reduceMotion) {

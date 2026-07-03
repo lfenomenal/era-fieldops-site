@@ -784,6 +784,69 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 
 /* ---------- Security badges ---------- */
+/* ---------- Preț: mai puțin de o cafea ---------- */
+.price-sec { position: relative; }
+.price-sec::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse 55% 60% at 30% 50%, rgba(0,212,255,0.08), transparent 70%);
+}
+.price-hook { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+.ph-copy h2 { margin: 12px 0 14px; }
+.ph-copy .lead { margin-bottom: var(--space-3); max-width: 460px; }
+
+.ph-toggle {
+  display: inline-flex; gap: 4px; padding: 5px; border-radius: 100px;
+  background: var(--surface); border: 1px solid var(--border);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  margin-bottom: var(--space-3);
+}
+.ph-tab {
+  border: none; background: transparent; color: var(--text-2);
+  font-family: inherit; font-size: 0.86rem; font-weight: 600;
+  padding: 9px 22px; border-radius: 100px; cursor: pointer;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.ph-tab:hover { color: var(--text); }
+.ph-tab.active { color: #fff; background: var(--grad); box-shadow: 0 4px 16px rgba(79,125,255,0.35); }
+
+.ph-price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: var(--space-4); }
+.ph-from { font-size: 1rem; font-weight: 600; color: var(--text-3); }
+.ph-amount {
+  font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: var(--grad-ai); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.ph-per { font-size: 1.05rem; font-weight: 600; color: var(--text-2); }
+.ph-cta { margin-top: 4px; }
+
+.ph-compare { padding: 22px; }
+.ph-crow { display: grid; grid-template-columns: 34px 1fr 90px auto; align-items: center; gap: 12px; padding: 12px 0; }
+.ph-crow + .ph-crow { border-top: 1px solid var(--border); }
+.ph-ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; }
+.ph-ic svg { width: 18px; height: 18px; }
+.ph-coffee { background: rgba(255,181,71,0.12); color: var(--warning); }
+.ph-era { background: rgba(0,212,255,0.12); color: var(--ai); }
+.ph-clbl { font-size: 0.9rem; font-weight: 600; }
+.ph-bar { height: 8px; border-radius: 100px; background: var(--surface-2); overflow: hidden; }
+.ph-bar i { display: block; height: 100%; border-radius: 100px; width: 0; background: rgba(255,181,71,0.6); transition: width 1.1s var(--ease) 0.2s; }
+.ph-bar i.ok { background: var(--grad-ai); }
+.in-view .ph-bar i { width: var(--w); }
+.ph-cval { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ph-cval.ok { color: var(--success); }
+.ph-crow.hl { position: relative; }
+.ph-foot { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; color: var(--text-2); }
+.ph-foot svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .price-hook { grid-template-columns: 1fr; text-align: center; }
+  .ph-copy .lead { margin-inline: auto; }
+  .ph-toggle, .ph-price { justify-content: center; }
+  .ph-price { justify-content: center; }
+  .ph-visual { order: 2; }
+  .ph-crow { text-align: left; }
+  .ph-cta { width: 100%; max-width: 360px; }
+}
+
 /* ---------- FAQ ---------- */
 .faq { max-width: 760px; margin-inline: auto; }
 .faq details {

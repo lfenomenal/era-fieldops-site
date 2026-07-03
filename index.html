@@ -625,24 +625,20 @@
 
     <div class="tab-group reveal" data-delay="1">
       <div class="tab-nav" role="tablist" aria-label="Module în detaliu">
-        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="vanzari"><svg aria-hidden="true"><use href="#i-users"/></svg>Vânzări</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="stocuri"><svg aria-hidden="true"><use href="#i-box"/></svg>Stocuri</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="lucrari"><svg aria-hidden="true"><use href="#i-wrench"/></svg>Lucrări în teren</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="gps"><svg aria-hidden="true"><use href="#i-pin"/></svg>GPS &amp; Flotă</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="mobil"><svg aria-hidden="true"><use href="#i-phone"/></svg>Aplicație mobilă</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="automatizari"><svg aria-hidden="true"><use href="#i-branch"/></svg>Automatizări</button>
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="vanzari-stocuri"><svg aria-hidden="true"><use href="#i-users"/></svg>Vânzări &amp; Stocuri</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="lucrari-mobil"><svg aria-hidden="true"><use href="#i-wrench"/></svg>Lucrări &amp; Mobil</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="gps-automatizari"><svg aria-hidden="true"><use href="#i-pin"/></svg>GPS &amp; Automatizări</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="rapoarte"><svg aria-hidden="true"><use href="#i-chart"/></svg>Rapoarte</button>
       </div>
       <div class="tab-panels">
-        <div class="tab-panel active" role="tabpanel" data-panel="vanzari">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">Clienți &amp; Vânzări</span>
-              <h3>Vânzările tale, sub control total.</h3>
-              <p>Fiecare client potențial are sursă, valoare și pas următor. Ofertele se generează din șabloane cu prețurile tale, iar urmăririle nu se mai uită niciodată.</p>
-              <div class="feature-tags"><span class="tag">Etape clare de vânzare</span><span class="tag">Oferte din șabloane</span><span class="tag">Istoric complet</span></div>
-            </div>
-            <div class="feature-visual">
+
+        <div class="tab-panel active" role="tabpanel" data-panel="vanzari-stocuri">
+          <div class="dual-grid">
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span>
+                <div><h4>Vânzări</h4><p>Fiecare client potențial are sursă, valoare și pas următor. Urmăririle nu se mai uită niciodată.</p></div>
+              </div>
               <div class="mock" aria-hidden="true">
                 <div class="mock-head">
                   <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-users"/></svg></span>
@@ -654,18 +650,13 @@
                 <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Negociere<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:38%"></span></span><b>6</b></div>
                 <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Câștigate<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:30%"></span></span><b>5</b></div>
               </div>
+              <div class="feature-tags"><span class="tag">Etape clare de vânzare</span><span class="tag">Oferte din șabloane</span></div>
             </div>
-          </div>
-        </div>
-        <div class="tab-panel" role="tabpanel" data-panel="stocuri">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">Stocuri &amp; Echipamente</span>
-              <h3>Stocuri, echipamente și bani — în aceeași ecuație.</h3>
-              <p>Camere, centrale, cabluri și senzori: intrări, ieșiri și serii urmărite pe fiecare lucrare. Știi exact ce ai în depozit, în mașini și la clienți.</p>
-              <div class="feature-tags"><span class="tag">Gestiune pe serii</span><span class="tag">Stoc pe vehicul</span><span class="tag">Cost pe lucrare</span></div>
-            </div>
-            <div class="feature-visual">
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-box"/></svg></span>
+                <div><h4>Stocuri</h4><p>Camere, centrale, cabluri și senzori — intrări, ieșiri și serii urmărite pe fiecare lucrare.</p></div>
+              </div>
               <div class="mock" aria-hidden="true">
                 <div class="mock-head">
                   <span class="fc-icon" style="background:rgba(255,181,71,0.12);color:#FFB547"><svg><use href="#i-box"/></svg></span>
@@ -677,18 +668,18 @@
                 <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cablu UTP cat6 — sub prag<small>comandă automată</small><b>3 role</b></div>
                 <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Cititoare acces — rezervat lucrării #148<small>alocat</small><b>12</b></div>
               </div>
+              <div class="feature-tags"><span class="tag">Gestiune pe serii</span><span class="tag">Cost pe lucrare</span></div>
             </div>
           </div>
         </div>
-        <div class="tab-panel" role="tabpanel" data-panel="lucrari">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">Lucrări în teren</span>
-              <h3>Fiecare lucrare, de la alocare la PV, fără hârtii.</h3>
-              <p>Echipa primește lucrarea pe telefon, bifează pașii lucrării, urcă pozele, ia semnătura pe ecran. PV-ul se generează singur și pleacă instant la birou.</p>
-              <div class="feature-tags"><span class="tag">Listă de verificare</span><span class="tag">Semnătură pe ecran</span><span class="tag">PV automat</span></div>
-            </div>
-            <div class="feature-visual">
+
+        <div class="tab-panel" role="tabpanel" data-panel="lucrari-mobil">
+          <div class="dual-grid">
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span>
+                <div><h4>Lucrări în teren</h4><p>Echipa primește lucrarea pe telefon, bifează pașii, ia semnătura pe ecran. PV-ul se generează singur.</p></div>
+              </div>
               <div class="mock" aria-hidden="true">
                 <div class="mock-head">
                   <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-wrench"/></svg></span>
@@ -700,18 +691,35 @@
                 <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Test înregistrare &amp; notificări<small>13:15</small></div>
                 <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Semnătură beneficiar — în așteptare<small>acum</small></div>
               </div>
+              <div class="feature-tags"><span class="tag">Listă de verificare</span><span class="tag">PV automat</span></div>
+            </div>
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-phone"/></svg></span>
+                <div><h4>Aplicație mobilă</h4><p>Biroul întreg, în buzunarul tehnicianului. Funcționează și fără semnal.</p></div>
+              </div>
+              <div class="mock" style="max-width:340px;margin-inline:auto" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-phone"/></svg></span>
+                  <span><b>Ziua mea — Echipa Alfa</b><small>3 lucrări programate</small></span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>09:00 · Instalare CCTV<small>finalizat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>14:00 · Revizie sistem alarmă<small>în curs</small></div>
+                <div class="mock-row"><span class="dot" style="background:#6B7699"></span>17:00 · Ofertare control acces<small>urmează</small></div>
+                <a class="btn btn-primary" style="width:100%;margin-top:14px;min-height:44px;font-size:0.88rem;pointer-events:none" tabindex="-1" aria-hidden="true">Începe lucrarea</a>
+              </div>
+              <div class="feature-tags"><span class="tag">iOS &amp; Android</span><span class="tag">Mod offline</span></div>
             </div>
           </div>
         </div>
-        <div class="tab-panel" role="tabpanel" data-panel="gps">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">GPS &amp; Flotă</span>
-              <h3>Fiecare vehicul, pe hartă. Fiecare kilometru, justificat.</h3>
-              <p>Vezi flota live, primești alerte când o mașină iese din zona unui obiectiv și confirmi automat sosirea echipelor. Foile de parcurs se scriu singure.</p>
-              <div class="feature-tags"><span class="tag">Urmărire live</span><span class="tag">Perimetru pe hartă</span><span class="tag">Foi de parcurs automate</span></div>
-            </div>
-            <div class="feature-visual">
+
+        <div class="tab-panel" role="tabpanel" data-panel="gps-automatizari">
+          <div class="dual-grid">
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-pin"/></svg></span>
+                <div><h4>GPS &amp; Flotă</h4><p>Vezi flota live și primești alerte când o mașină iese din zona unui obiectiv.</p></div>
+              </div>
               <div class="mock" aria-hidden="true">
                 <div class="mock-head">
                   <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-pin"/></svg></span>
@@ -723,40 +731,13 @@
                 <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-103-ERA — la sediu · încărcare marfă<small>staționar</small></div>
                 <div class="mock-row"><span class="dot" style="background:#FFB547"></span>B-104-ERA — trafic intens pe ruta 3<small>+12 min</small></div>
               </div>
+              <div class="feature-tags"><span class="tag">Urmărire live</span><span class="tag">Perimetru pe hartă</span></div>
             </div>
-          </div>
-        </div>
-        <div class="tab-panel" role="tabpanel" data-panel="mobil">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">Aplicația mobilă</span>
-              <h3>Biroul întreg, în buzunarul tehnicianului.</h3>
-              <p>Lucrări, navigație, liste de verificare, poze și semnături — totul din telefon, cu sincronizare automată. Funcționează și fără semnal, în subsoluri și hale.</p>
-              <div class="feature-tags"><span class="tag">iOS &amp; Android</span><span class="tag">Mod offline</span><span class="tag">Sincronizare live</span></div>
-            </div>
-            <div class="feature-visual">
-              <div class="mock" style="max-width:340px;margin-inline:auto" aria-hidden="true">
-                <div class="mock-head">
-                  <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-phone"/></svg></span>
-                  <span><b>Ziua mea — Echipa Alfa</b><small>3 lucrări programate</small></span>
-                </div>
-                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>09:00 · Instalare CCTV<small>finalizat</small></div>
-                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>14:00 · Revizie sistem alarmă<small>în curs</small></div>
-                <div class="mock-row"><span class="dot" style="background:#6B7699"></span>17:00 · Ofertare control acces<small>urmează</small></div>
-                <a class="btn btn-primary" style="width:100%;margin-top:14px;min-height:44px;font-size:0.88rem;pointer-events:none" tabindex="-1" aria-hidden="true">Începe lucrarea</a>
+            <div class="dual-item">
+              <div class="dual-head">
+                <span class="card-icon"><svg aria-hidden="true"><use href="#i-branch"/></svg></span>
+                <div><h4>Automatizări</h4><p>Construiește fluxuri „dacă X, atunci Y". Fără nicio linie de cod.</p></div>
               </div>
-            </div>
-          </div>
-        </div>
-        <div class="tab-panel" role="tabpanel" data-panel="automatizari">
-          <div class="feature-row">
-            <div class="feature-copy">
-              <span class="eyebrow">Automatizări</span>
-              <h3>Construiește fluxuri „dacă X, atunci Y". Fără cod.</h3>
-              <p>PV semnat? Factura pleacă. Mentenanță scadentă? Intervenția se programează. Client nou? Contractul și dosarul se creează singure. Tu setezi regula o dată.</p>
-              <div class="feature-tags"><span class="tag">Editor vizual</span><span class="tag">100+ declanșatoare</span><span class="tag">Zero cod</span></div>
-            </div>
-            <div class="feature-visual">
               <div class="mock" aria-hidden="true">
                 <div class="mock-head">
                   <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-branch"/></svg></span>
@@ -773,9 +754,11 @@
                   <div class="auto-node"><span class="dot" style="background:#FFB547;width:8px;height:8px;border-radius:50%"></span>Programează mentenanța <small>&nbsp;peste 6 luni</small></div>
                 </div>
               </div>
+              <div class="feature-tags"><span class="tag">Editor vizual</span><span class="tag">Zero cod</span></div>
             </div>
           </div>
         </div>
+
         <div class="tab-panel" role="tabpanel" data-panel="rapoarte">
           <div class="feature-row">
             <div class="feature-copy">
@@ -801,6 +784,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

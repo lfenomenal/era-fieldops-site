@@ -400,6 +400,26 @@ body.loaded .command-center { opacity: 1; transform: none; }
 .logo-item:hover { opacity: 1; color: var(--text-2); }
 .logo-item svg { width: 22px; height: 22px; }
 
+/* Second marquee: platform features, scrolling left-to-right (opposite of logos) */
+.feature-track-wrap {
+  overflow: hidden; margin-top: 20px;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.feature-track { display: flex; gap: 14px; width: max-content; animation: marqueeReverse 24s linear infinite; }
+.feature-track-wrap:hover .feature-track { animation-play-state: paused; }
+@keyframes marqueeReverse { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.feature-pill {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  padding: 8px 16px; border-radius: 100px;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 0.82rem; font-weight: 600; color: var(--text-2);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: border-color 0.25s, color 0.25s, transform 0.25s var(--ease);
+}
+.feature-pill svg { width: 15px; height: 15px; color: var(--ai); flex-shrink: 0; }
+.feature-pill:hover { border-color: rgba(0,212,255,0.4); color: var(--text); transform: translateY(-2px); }
+
 /* ---------- Stats ---------- */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .stat-card {

@@ -62,9 +62,11 @@
     }
   });
 
-  /* ---------- Seamless logo marquee (duplicate content) ---------- */
+  /* ---------- Seamless marquees (duplicate content) ---------- */
   var track = document.getElementById('logoTrack');
   if (track) track.innerHTML += track.innerHTML;
+  var featureTrack = document.getElementById('featureTrack');
+  if (featureTrack) featureTrack.innerHTML += featureTrack.innerHTML;
 
   /* ---------- Reveal on scroll ---------- */
   var revealObs = new IntersectionObserver(function (entries) {

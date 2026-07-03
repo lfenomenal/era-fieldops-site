@@ -48,9 +48,7 @@
           { "@type": "Question", "name": "Cât durează implementarea ERA FieldOPS?", "acceptedAnswer": { "@type": "Answer", "text": "Configurarea de bază durează sub o săptămână. Importăm clienții, contractele și echipamentele existente, iar echipa ta primește training complet." } },
           { "@type": "Question", "name": "Este ERA FieldOPS integrat cu ANAF și e-Factura?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Verificăm automat datele firmelor prin API-ul ANAF, iar facturile se transmit direct la ANAF prin e-Factura, cu status urmărit în timp real." } },
           { "@type": "Question", "name": "Funcționează pe telefon pentru echipele din teren?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Tehnicienii au aplicație mobilă dedicată: lucrări, poze, semnătură pe ecran, PV generat automat — inclusiv offline." } },
-          { "@type": "Question", "name": "Cum mă ajută AI-ul din platformă?", "acceptedAnswer": { "@type": "Answer", "text": "Inspector AI verifică pozele din teren, Marketing AI generează campanii, iar Licitații AI monitorizează SEAP și îți semnalează oportunitățile potrivite." } },
-          { "@type": "Question", "name": "Datele mele sunt în siguranță?", "acceptedAnswer": { "@type": "Answer", "text": "Datele sunt criptate în tranzit și la stocare, găzduite în UE, cu backup automat, roluri granulare și jurnal complet de audit — conform GDPR." } },
-          { "@type": "Question", "name": "Pot migra din Excel sau alt software?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Importăm datele din Excel, CSV sau alte platforme, fără să pierzi istoricul clienților și al contractelor." } }
+          { "@type": "Question", "name": "Datele mele sunt în siguranță?", "acceptedAnswer": { "@type": "Answer", "text": "Datele sunt criptate în tranzit și la stocare, găzduite în UE, cu backup automat, roluri granulare și jurnal complet de audit — conform GDPR." } }
         ]
       }
     ]
@@ -297,13 +295,13 @@
   </div>
 </section>
 
-<!-- ===== 4. PROBLEME ===== -->
-<section class="section">
+<!-- ===== 4-5. PROBLEMA + SOLUȚIA ===== -->
+<section class="section" id="platforma">
   <div class="container">
     <div class="section-head center reveal">
-      <span class="eyebrow">Realitatea din teren</span>
+      <span class="eyebrow">De ce ERA FieldOPS</span>
       <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
-      <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute. Cu cât ai mai multe echipe și obiective, cu atât pierzi mai mult control — și mai mulți bani.</p>
+      <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute — cu cât ai mai multe echipe, cu atât pierzi mai mult control.</p>
     </div>
     <div class="grid-3">
       <div class="card tone-error reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
@@ -311,14 +309,10 @@
       <div class="card tone-warning reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
     </div>
   </div>
-</section>
-
-<!-- ===== 5. SOLUȚIA ===== -->
-<section class="section" id="platforma">
-  <div class="container solution-grid">
+  <div class="container solution-grid" style="margin-top:var(--space-5)">
     <div class="reveal">
       <span class="eyebrow">Soluția</span>
-      <h2>Nu o simplă bază de clienți.<br>Nu un simplu program de gestiune.<br><span class="grad-text">Sistemul de operare</span> al firmei tale.</h2>
+      <h2><span class="grad-text">Sistemul de operare</span> al firmei tale.</h2>
       <ul class="check-list">
         <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>O singură sursă de adevăr.</b> Clienți, contracte, echipamente, lucrări și bani — totul conectat.</span></li>
         <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Control în timp real.</b> Vezi fiecare echipă, vehicul și obiectiv pe hartă, live.</span></li>
@@ -364,18 +358,11 @@
       <div class="workflow-progress" id="wfProgress"></div>
       <ol class="workflow" id="workflow">
         <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-target"/></svg></span><span>Client nou</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-file"/></svg></span><span>Ofertă</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-pen"/></svg></span><span>Contract</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-file"/></svg></span><span>Ofertă &amp; Contract</span></li>
         <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span><span>Programare</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-users"/></svg></span><span>Echipă</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-pin"/></svg></span><span>GPS</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-camera"/></svg></span><span>Poze</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-fingerprint"/></svg></span><span>Semnătură</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><span>PV</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><span>Factură</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-globe"/></svg></span><span>e-Factura</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><span>Mentenanță</span></li>
-        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-check"/></svg></span><span>Client fidel</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><span>Execuție teren</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><span>Facturare</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><span>Client fidel</span></li>
       </ol>
     </div>
   </div>
@@ -404,42 +391,12 @@
   </div>
 </section>
 
-<!-- ===== 8. DASHBOARD ===== -->
-<section class="section">
-  <div class="container">
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Tabloul de bord</span>
-        <h3>Pulsul firmei, pe un singur ecran.</h3>
-        <p>Încasări, lucrări în derulare, echipe pe hartă, contracte care expiră — totul agregat live, fără rapoarte cerute prin telefon.</p>
-        <div class="feature-tags"><span class="tag">Timp real</span><span class="tag">Cifre importante</span><span class="tag">Alerte inteligente</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-chart"/></svg></span>
-            <span><b>Venituri — ultimele 8 luni</b><small>actualizat acum 2 min</small></span>
-            <span class="mock-badge ok">+32%</span>
-          </div>
-          <div class="chart-bars">
-            <i style="height:35%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:60%"></i>
-            <i style="height:55%"></i><i style="height:72%"></i><i style="height:66%"></i><i class="hl" style="height:92%"></i>
-          </div>
-          <div style="margin-top:16px" class="mock-row"><span class="dot" style="background:#21D07A"></span>Încasat luna aceasta <b style="margin-left:auto">184.200 lei</b></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>De încasat <b style="margin-left:auto">46.800 lei</b></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ===== 9-12. AI ===== -->
 <section class="section" id="ai">
   <div class="container">
     <div class="section-head center reveal">
       <span class="eyebrow">Inteligență artificială</span>
-      <h2>AI-ul nu e un buton.<br>E un <span class="grad-text">coleg care nu doarme</span>.</h2>
-      <p class="lead">Trei agenți AI specializați lucrează non-stop pentru firma ta. Alege unul mai jos ca să vezi exact ce face.</p>
+      <h2>Trei agenți AI, mereu treji.</h2>
     </div>
 
     <div class="tab-group reveal" data-delay="1">
@@ -528,8 +485,7 @@
   <div class="container">
     <div class="section-head center reveal">
       <span class="eyebrow">Integrări native</span>
-      <h2>Conectat la România reală:<br>WhatsApp, ANAF, e-Factura.</h2>
-      <p class="lead">Alege o integrare mai jos ca să vezi exact cum funcționează.</p>
+      <h2>WhatsApp, ANAF, e-Factura.</h2>
     </div>
 
     <div class="tab-group reveal" data-delay="1">
@@ -619,8 +575,7 @@
   <div class="container">
     <div class="section-head center reveal">
       <span class="eyebrow">Platforma în detaliu</span>
-      <h2>Alege un modul.<br>Vezi cum lucrează.</h2>
-      <p class="lead">De la vânzări la rapoarte de profitabilitate — fiecare modul, așa cum arată în platformă.</p>
+      <h2>Fiecare modul, în acțiune.</h2>
     </div>
 
     <div class="tab-group reveal" data-delay="1">
@@ -797,11 +752,8 @@
       <span class="eyebrow">Securitatea datelor</span>
       <h2>Vinzi siguranță.<br>Platforma ta trebuie să fie la fel.</h2>
     </div>
-    <div class="sec-grid">
+    <div class="grid-3">
       <div class="card tone-success reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-lock"/></svg></span><h3>Criptare end-to-end</h3><p>Date criptate în tranzit (TLS 1.3) și la stocare (AES-256).</p></div>
-      <div class="card tone-success reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-key"/></svg></span><h3>Roluri &amp; permisiuni</h3><p>Fiecare angajat vede exact ce trebuie să vadă. Nimic în plus.</p></div>
-      <div class="card tone-success reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-eye"/></svg></span><h3>Jurnal de audit</h3><p>Orice acțiune e înregistrată: cine, ce, când. Trasabilitate completă.</p></div>
-      <div class="card tone-success reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-server"/></svg></span><h3>Backup automat</h3><p>Copii de siguranță zilnice, replicate în centre de date separate.</p></div>
       <div class="card tone-success reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><h3>Conform GDPR</h3><p>Procese și contracte de prelucrare aliniate legislației europene.</p></div>
       <div class="card tone-success reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-globe"/></svg></span><h3>Găzduire în UE</h3><p>Infrastructură în Uniunea Europeană, cu disponibilitate 99.98%.</p></div>
     </div>
@@ -829,16 +781,8 @@
         <div class="faq-a">Da. Tehnicienii au aplicație mobilă dedicată (iOS și Android): lucrări, navigație, liste de verificare, poze, semnătură pe ecran și PV generat automat — inclusiv fără semnal la internet.</div>
       </details>
       <details>
-        <summary>Cum mă ajută concret AI-ul din platformă?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
-        <div class="faq-a">Inspector AI verifică pozele montajelor și semnalează neconformitățile. Marketing AI generează oferte și campanii pentru clienții existenți. Licitații AI monitorizează SEAP și îți aduce doar oportunitățile potrivite profilului tău.</div>
-      </details>
-      <details>
         <summary>Datele mele sunt în siguranță?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
         <div class="faq-a">Da. Datele sunt criptate în tranzit și la stocare, găzduite în UE, cu backup zilnic, roluri granulare de acces și jurnal complet de audit — conform GDPR.</div>
-      </details>
-      <details>
-        <summary>Pot migra din Excel sau din alt software?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
-        <div class="faq-a">Da. Importăm datele din Excel, CSV sau alte platforme (clienți, contracte, echipamente, istoric), astfel încât pornești cu tot istoricul firmei în ERA FieldOPS.</div>
       </details>
     </div>
   </div>

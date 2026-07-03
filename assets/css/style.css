@@ -44,7 +44,7 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --nav-h: 72px;
   --space-1: 8px; --space-2: 16px; --space-3: 24px;
-  --space-4: 40px; --space-5: 64px; --space-6: 104px;
+  --space-4: 40px; --space-5: 56px; --space-6: 80px;
 }
 
 /* ---------- Base ---------- */
@@ -486,7 +486,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
 /* ---------- Workflow ---------- */
 .workflow-wrap { position: relative; }
 .workflow {
-  display: grid; grid-template-columns: repeat(13, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   gap: 8px; position: relative; list-style: none;
 }
 .workflow::before {
@@ -672,8 +672,6 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 
 /* ---------- Security badges ---------- */
-.sec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-
 /* ---------- FAQ ---------- */
 .faq { max-width: 760px; margin-inline: auto; }
 .faq details {
@@ -740,8 +738,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .bento { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .sec-grid { grid-template-columns: repeat(2, 1fr); }
-  .workflow { grid-template-columns: repeat(7, 1fr); row-gap: 32px; }
+  .workflow { grid-template-columns: repeat(3, 1fr); row-gap: 32px; }
   .workflow::before, .workflow-progress { display: none; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .nav-links { display: none; }
@@ -750,7 +747,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 
 @media (max-width: 768px) {
-  :root { --space-6: 72px; --space-5: 48px; }
+  :root { --space-6: 56px; --space-5: 40px; }
   .hero { padding-top: calc(var(--nav-h) + 32px); text-align: center; }
   .hero-grid { grid-template-columns: 1fr; }
   .hero .lead { margin-inline: auto; }
@@ -769,7 +766,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .feature-row.flip .feature-copy { order: 1; }
   .feature-row.flip .feature-visual { order: 2; }
   .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-3, .bento, .sec-grid { grid-template-columns: 1fr; }
+  .grid-3, .bento { grid-template-columns: 1fr; }
   .bento .span-2 { grid-column: span 1; }
   .workflow { grid-template-columns: repeat(3, 1fr); }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }

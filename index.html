@@ -308,10 +308,7 @@
     <div class="grid-3">
       <div class="card tone-error reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
       <div class="card tone-error reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
-      <div class="card tone-error reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><h3>Facturi întârziate</h3><p>PV-ul stă zile întregi în mașină. Factura pleacă târziu, banii vin și mai târziu.</p></div>
-      <div class="card tone-warning reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Mentenanțe uitate</h3><p>Contractele de mentenanță expiră neobservate. Venit recurent pierdut, clienți vulnerabili.</p></div>
-      <div class="card tone-warning reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-eye"/></svg></span><h3>Zero vizibilitate</h3><p>Nu ai un singur loc în care să vezi pipeline-ul, lucrările, flota și încasările în timp real.</p></div>
-      <div class="card tone-warning reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-clock"/></svg></span><h3>Ofertare lentă</h3><p>O ofertă durează ore. Clientul semnează cu firma care a răspuns prima.</p></div>
+      <div class="card tone-warning reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
     </div>
   </div>
 </section>
@@ -442,74 +439,84 @@
     <div class="section-head center reveal">
       <span class="eyebrow">Inteligență artificială</span>
       <h2>AI-ul nu e un buton.<br>E un <span class="grad-text">coleg care nu doarme</span>.</h2>
-      <p class="lead">Trei agenți AI specializați lucrează non-stop pentru firma ta: verifică, vinde și vânează oportunități.</p>
+      <p class="lead">Trei agenți AI specializați lucrează non-stop pentru firma ta. Alege unul mai jos ca să vezi exact ce face.</p>
     </div>
 
-    <!-- 10. Inspector AI -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Inspector AI</span>
-        <h3>Fiecare montaj, verificat de AI înainte de recepție.</h3>
-        <p>Tehnicianul urcă pozele, Inspector AI le analizează: trasee de cablu, poziționare camere, etichetare, conformitate cu proiectul. Problemele apar înainte să devină reclamații.</p>
-        <div class="feature-tags"><span class="tag">Analiză foto</span><span class="tag">Verificare conformitate</span><span class="tag">Raport automat</span></div>
+    <div class="tab-group reveal" data-delay="1">
+      <div class="tab-nav" role="tablist" aria-label="Agenți AI">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="inspector"><svg aria-hidden="true"><use href="#i-cpu"/></svg>Inspector AI</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="marketing"><svg aria-hidden="true"><use href="#i-megaphone"/></svg>Marketing AI</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="licitatii"><svg aria-hidden="true"><use href="#i-search"/></svg>Licitații AI</button>
       </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-cpu"/></svg></span>
-            <span><b>Inspector AI — Obiectiv „Rezidence Park"</b><small>12 poze analizate în 8 secunde</small></span>
-            <span class="mock-badge ai">AI</span>
+      <div class="tab-panels">
+        <div class="tab-panel active" role="tabpanel" data-panel="inspector">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Inspector AI</span>
+              <h3>Fiecare montaj, verificat de AI înainte de recepție.</h3>
+              <p>Tehnicianul urcă pozele, Inspector AI le analizează: trasee de cablu, poziționare camere, etichetare, conformitate cu proiectul. Problemele apar înainte să devină reclamații.</p>
+              <div class="feature-tags"><span class="tag">Analiză foto</span><span class="tag">Verificare conformitate</span><span class="tag">Raport automat</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-cpu"/></svg></span>
+                  <span><b>Inspector AI — Obiectiv „Rezidence Park"</b><small>12 poze analizate în 8 secunde</small></span>
+                  <span class="mock-badge ai">AI</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Cameră 1 — unghi &amp; înălțime conforme<small>99%</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Tablou alarmă — cablare etichetată<small>97%</small></div>
+                <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cameră 4 — câmp obstrucționat parțial<small>detectat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Recomandare: repoziționare 40 cm stânga<small>automat</small></div>
+              </div>
+            </div>
           </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Cameră 1 — unghi &amp; înălțime conforme<small>99%</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Tablou alarmă — cablare etichetată<small>97%</small></div>
-          <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cameră 4 — câmp obstrucționat parțial<small>detectat</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Recomandare: repoziționare 40 cm stânga<small>automat</small></div>
         </div>
-      </div>
-    </div>
-
-    <!-- 11. Marketing AI -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Marketing AI</span>
-        <h3>Campanii care aduc lucrări, generate automat.</h3>
-        <p>Marketing AI scrie oferte comerciale, follow-up-uri și campanii pentru clienții existenți: extinderi de sistem, upgrade-uri, contracte de mentenanță. Tu doar aprobi.</p>
-        <div class="feature-tags"><span class="tag">Oferte în 60 sec</span><span class="tag">Reamintiri automate</span><span class="tag">Oferte suplimentare</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-megaphone"/></svg></span>
-            <span><b>Marketing AI — Campanii active</b><small>3 campanii · 28 clienți vizați</small></span>
-            <span class="mock-badge ai">AI</span>
+        <div class="tab-panel" role="tabpanel" data-panel="marketing">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Marketing AI</span>
+              <h3>Campanii care aduc lucrări, generate automat.</h3>
+              <p>Marketing AI scrie oferte comerciale, reamintiri și campanii pentru clienții existenți: extinderi de sistem, upgrade-uri, contracte de mentenanță. Tu doar aprobi.</p>
+              <div class="feature-tags"><span class="tag">Oferte în 60 sec</span><span class="tag">Reamintiri automate</span><span class="tag">Oferte suplimentare</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-megaphone"/></svg></span>
+                  <span><b>Marketing AI — Campanii active</b><small>3 campanii · 28 clienți vizați</small></span>
+                  <span class="mock-badge ai">AI</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Upgrade CCTV 4K — 12 clienți eligibili<small>8 răspunsuri</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Reînnoire mentenanță — expiră în 30 zile<small>trimis</small></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Ofertă control acces — clienți potențiali noi<small>ciornă</small></div>
+                <div class="mock-row" style="align-items:center"><span class="dot" style="background:#6D5BFF"></span>Rată de conversie campanii<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:68%"></span></span><small>34%</small></div>
+              </div>
+            </div>
           </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Upgrade CCTV 4K — 12 clienți eligibili<small>8 răspunsuri</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Reînnoire mentenanță — expiră în 30 zile<small>trimis</small></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Ofertă control acces — clienți potențiali noi<small>ciornă</small></div>
-          <div class="mock-row" style="align-items:center"><span class="dot" style="background:#6D5BFF"></span>Rată de conversie campanii<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:68%"></span></span><small>34%</small></div>
         </div>
-      </div>
-    </div>
-
-    <!-- 12. Licitatii AI -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Licitații AI</span>
-        <h3>Nicio licitație potrivită nu-ți mai scapă.</h3>
-        <p>Licitații AI monitorizează SEAP non-stop, filtrează anunțurile după profilul firmei tale și îți pregătește rezumatul: valoare, cerințe, scadență, șanse de câștig.</p>
-        <div class="feature-tags"><span class="tag">Monitorizare SEAP 24/7</span><span class="tag">Scor de potrivire</span><span class="tag">Rezumat automat</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-search"/></svg></span>
-            <span><b>Licitații AI — SEAP live</b><small>3 oportunități noi azi</small></span>
-            <span class="mock-badge ai">AI</span>
+        <div class="tab-panel" role="tabpanel" data-panel="licitatii">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Licitații AI</span>
+              <h3>Nicio licitație potrivită nu-ți mai scapă.</h3>
+              <p>Licitații AI monitorizează SEAP non-stop, filtrează anunțurile după profilul firmei tale și îți pregătește rezumatul: valoare, cerințe, scadență, șanse de câștig.</p>
+              <div class="feature-tags"><span class="tag">Monitorizare SEAP 24/7</span><span class="tag">Scor de potrivire</span><span class="tag">Rezumat automat</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-search"/></svg></span>
+                  <span><b>Licitații AI — SEAP live</b><small>3 oportunități noi azi</small></span>
+                  <span class="mock-badge ai">AI</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>CCTV — campus universitar<b style="margin-left:auto">96%</b></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Control acces — spital județean<b style="margin-left:auto">91%</b></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Antiefracție — depozit logistic<b style="margin-left:auto">74%</b></div>
+                <div class="mock-row"><span class="dot" style="background:#6B7699"></span>Interfonie — bloc rezidențial<b style="margin-left:auto">42%</b></div>
+              </div>
+            </div>
           </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>CCTV — campus universitar<b style="margin-left:auto">96%</b></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Control acces — spital județean<b style="margin-left:auto">91%</b></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Antiefracție — depozit logistic<b style="margin-left:auto">74%</b></div>
-          <div class="mock-row"><span class="dot" style="background:#6B7699"></span>Interfonie — bloc rezidențial<b style="margin-left:auto">42%</b></div>
         </div>
       </div>
     </div>
@@ -522,261 +529,277 @@
     <div class="section-head center reveal">
       <span class="eyebrow">Integrări native</span>
       <h2>Conectat la România reală:<br>WhatsApp, ANAF, e-Factura.</h2>
+      <p class="lead">Alege o integrare mai jos ca să vezi exact cum funcționează.</p>
     </div>
 
-    <!-- 13. WhatsApp -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow" style="color:#21D07A">WhatsApp Business</span>
-        <h3>Clienții rămân pe WhatsApp.<br>Tu rămâi organizat.</h3>
-        <p>Confirmări de programare, notificări de sosire a echipei, PV-uri și facturi — trimise automat pe WhatsApp. Toate conversațiile, salvate pe fișa clientului.</p>
-        <div class="feature-tags"><span class="tag">Notificări automate</span><span class="tag">Istoric pe client</span><span class="tag">Șabloane aprobate</span></div>
+    <div class="tab-group reveal" data-delay="1">
+      <div class="tab-nav" role="tablist" aria-label="Integrări">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="whatsapp"><svg aria-hidden="true"><use href="#i-msg"/></svg>WhatsApp</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="anaf"><svg aria-hidden="true"><use href="#i-database"/></svg>ANAF</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="efactura"><svg aria-hidden="true"><use href="#i-receipt"/></svg>e-Factura</button>
       </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-msg"/></svg></span>
-            <span><b>WhatsApp — Rezidence Park</b><small>conectat la fișa clientului</small></span>
-            <span class="mock-badge ok">Automat</span>
-          </div>
-          <div class="chat">
-            <div class="bubble out">Echipa ERA ajunge azi la 14:00 pentru revizia sistemului CCTV. <small>13:12 <span class="ticks">✓✓</span></small></div>
-            <div class="bubble in">Perfect, vă așteptăm!</div>
-            <div class="bubble out">Intervenție finalizată ✔ PV-ul semnat și factura au fost trimise pe email. <small>15:47 <span class="ticks">✓✓</span></small></div>
+      <div class="tab-panels">
+        <div class="tab-panel active" role="tabpanel" data-panel="whatsapp">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow" style="color:#21D07A">WhatsApp Business</span>
+              <h3>Clienții rămân pe WhatsApp.<br>Tu rămâi organizat.</h3>
+              <p>Confirmări de programare, notificări de sosire a echipei, PV-uri și facturi — trimise automat pe WhatsApp. Toate conversațiile, salvate pe fișa clientului.</p>
+              <div class="feature-tags"><span class="tag">Notificări automate</span><span class="tag">Istoric pe client</span><span class="tag">Șabloane aprobate</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-msg"/></svg></span>
+                  <span><b>WhatsApp — Rezidence Park</b><small>conectat la fișa clientului</small></span>
+                  <span class="mock-badge ok">Automat</span>
+                </div>
+                <div class="chat">
+                  <div class="bubble out">Echipa ERA ajunge azi la 14:00 pentru revizia sistemului CCTV. <small>13:12 <span class="ticks">✓✓</span></small></div>
+                  <div class="bubble in">Perfect, vă așteptăm!</div>
+                  <div class="bubble out">Intervenție finalizată ✔ PV-ul semnat și factura au fost trimise pe email. <small>15:47 <span class="ticks">✓✓</span></small></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- 14. ANAF -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Integrare ANAF</span>
-        <h3>Scrii CUI-ul. Restul se completează singur.</h3>
-        <p>Datele firmelor se preiau direct de la ANAF: denumire, adresă, status TVA, stare firmă. Zero erori de facturare, zero timp pierdut copiind datele manual.</p>
-        <div class="feature-tags"><span class="tag">Verificare CUI instant</span><span class="tag">Status TVA live</span><span class="tag">Date mereu corecte</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-database"/></svg></span>
-            <span><b>Client nou — verificare ANAF</b><small>CUI 38442917</small></span>
-            <span class="mock-badge ok">Valid</span>
+        <div class="tab-panel" role="tabpanel" data-panel="anaf">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Integrare ANAF</span>
+              <h3>Scrii CUI-ul. Restul se completează singur.</h3>
+              <p>Datele firmelor se preiau direct de la ANAF: denumire, adresă, status TVA, stare firmă. Zero erori de facturare, zero timp pierdut copiind datele manual.</p>
+              <div class="feature-tags"><span class="tag">Verificare CUI instant</span><span class="tag">Status TVA live</span><span class="tag">Date mereu corecte</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-database"/></svg></span>
+                  <span><b>Client nou — verificare ANAF</b><small>CUI 38442917</small></span>
+                  <span class="mock-badge ok">Valid</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Denumire: DELTA LOGISTICS SRL<small>automat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Plătitor de TVA: Da<small>automat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Adresă sediu: completată automat<small>automat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Stare firmă: activă · fără risc fiscal<small>live</small></div>
+              </div>
+            </div>
           </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Denumire: DELTA LOGISTICS SRL<small>automat</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Plătitor de TVA: Da<small>automat</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Adresă sediu: completată automat<small>automat</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Stare firmă: activă · fără risc fiscal<small>live</small></div>
         </div>
-      </div>
-    </div>
-
-    <!-- 15. eFactura -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">e-Factura</span>
-        <h3>Din PV semnat, direct la ANAF.<br>În minute, nu în zile.</h3>
-        <p>Factura se generează automat din procesul-verbal, se transmite la ANAF și îi urmărești statusul în timp real. Fără XML-uri, fără portaluri, fără stres.</p>
-        <div class="feature-tags"><span class="tag">Transmitere automată</span><span class="tag">Status în timp real</span><span class="tag">Arhivă conformă</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-receipt"/></svg></span>
-            <span><b>Factura #2841 — 8.640 lei</b><small>generată din PV #2841</small></span>
-            <span class="mock-badge ok">Acceptată</span>
+        <div class="tab-panel" role="tabpanel" data-panel="efactura">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">e-Factura</span>
+              <h3>Din PV semnat, direct la ANAF.<br>În minute, nu în zile.</h3>
+              <p>Factura se generează automat din procesul-verbal, se transmite la ANAF și îi urmărești statusul în timp real. Fără XML-uri, fără portaluri, fără stres.</p>
+              <div class="feature-tags"><span class="tag">Transmitere automată</span><span class="tag">Status în timp real</span><span class="tag">Arhivă conformă</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-receipt"/></svg></span>
+                  <span><b>Factura #2841 — 8.640 lei</b><small>generată din PV #2841</small></span>
+                  <span class="mock-badge ok">Acceptată</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>PV semnat în teren<small>15:47</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Factură generată automat<small>15:48</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Trimisă la ANAF (e-Factura)<small>15:49</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Acceptată de ANAF<small>15:52</small></div>
+              </div>
+            </div>
           </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>PV semnat în teren<small>15:47</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Factură generată automat<small>15:48</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Trimisă la ANAF (e-Factura)<small>15:49</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Acceptată de ANAF<small>15:52</small></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== 16-20. PLATFORMA COMPLETA ===== -->
-<section class="section">
-  <div class="container">
-    <div class="section-head center reveal">
-      <span class="eyebrow">Platforma completă</span>
-      <h2>Clienți. Stocuri. Lucrări în teren.<br>Fără sincronizări, fără exporturi.</h2>
-    </div>
-
-    <!-- 16. Clienți & Vânzări -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Clienți &amp; Vânzări</span>
-        <h3>Vânzările tale, sub control total.</h3>
-        <p>Fiecare client potențial are sursă, valoare și pas următor. Ofertele se generează din șabloane cu prețurile tale, iar urmăririle nu se mai uită niciodată.</p>
-        <div class="feature-tags"><span class="tag">Etape clare de vânzare</span><span class="tag">Oferte din șabloane</span><span class="tag">Istoric complet</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-users"/></svg></span>
-            <span><b>Vânzări — Iulie</b><small>valoare totală: 412.000 lei</small></span>
-            <span class="mock-badge ok">+9 noi</span>
-          </div>
-          <div class="mock-row"><span class="dot" style="background:#4F7DFF"></span>Clienți noi<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:85%"></span></span><b>17</b></div>
-          <div class="mock-row"><span class="dot" style="background:#6D5BFF"></span>Ofertă trimisă<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:60%"></span></span><b>11</b></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Negociere<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:38%"></span></span><b>6</b></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Câștigate<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:30%"></span></span><b>5</b></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 17. Stocuri & Echipamente -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Stocuri &amp; Echipamente</span>
-        <h3>Stocuri, echipamente și bani — în aceeași ecuație.</h3>
-        <p>Camere, centrale, cabluri și senzori: intrări, ieșiri și serii urmărite pe fiecare lucrare. Știi exact ce ai în depozit, în mașini și la clienți.</p>
-        <div class="feature-tags"><span class="tag">Gestiune pe serii</span><span class="tag">Stoc pe vehicul</span><span class="tag">Cost pe lucrare</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(255,181,71,0.12);color:#FFB547"><svg><use href="#i-box"/></svg></span>
-            <span><b>Inventar — Depozit central</b><small>sincronizat cu 6 vehicule</small></span>
-            <span class="mock-badge warn">2 alerte stoc</span>
-          </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Camere IP 4MP<small>stoc</small><b>124</b></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Centrale alarmă 8 zone<small>stoc</small><b>38</b></div>
-          <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cablu UTP cat6 — sub prag<small>comandă automată</small><b>3 role</b></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Cititoare acces — rezervat lucrării #148<small>alocat</small><b>12</b></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 18. Lucrări în teren -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Lucrări în teren</span>
-        <h3>Fiecare lucrare, de la alocare la PV, fără hârtii.</h3>
-        <p>Echipa primește lucrarea pe telefon, bifează pașii lucrării, urcă pozele, ia semnătura pe ecran. PV-ul se generează singur și pleacă instant la birou.</p>
-        <div class="feature-tags"><span class="tag">Listă de verificare</span><span class="tag">Semnătură pe ecran</span><span class="tag">PV automat</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-wrench"/></svg></span>
-            <span><b>Lucrarea #148 — instalare CCTV</b><small>Echipa Alfa · în derulare</small></span>
-            <span class="mock-badge ok">83%</span>
-          </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Sosire la obiectiv confirmată GPS<small>09:02</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>8 camere montate · poze urcate<small>12:30</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Test înregistrare &amp; notificări<small>13:15</small></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Semnătură beneficiar — în așteptare<small>acum</small></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 19. GPS -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">GPS &amp; Flotă</span>
-        <h3>Fiecare vehicul, pe hartă. Fiecare kilometru, justificat.</h3>
-        <p>Vezi flota live, primești alerte când o mașină iese din zona unui obiectiv și confirmi automat sosirea echipelor. Foile de parcurs se scriu singure.</p>
-        <div class="feature-tags"><span class="tag">Urmărire live</span><span class="tag">Perimetru pe hartă</span><span class="tag">Foi de parcurs automate</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-pin"/></svg></span>
-            <span><b>Flotă — 6 vehicule</b><small>toate în zonele autorizate</small></span>
-            <span class="mock-badge ok">Live</span>
-          </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-101-ERA — la Obiectiv 12<small>staționar · 42 min</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>B-102-ERA — în drum spre Pipera<small>sosire 14:05</small></div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-103-ERA — la sediu · încărcare marfă<small>staționar</small></div>
-          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>B-104-ERA — trafic intens pe ruta 3<small>+12 min</small></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 20. Mobile App -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Aplicația mobilă</span>
-        <h3>Biroul întreg, în buzunarul tehnicianului.</h3>
-        <p>Lucrări, navigație, liste de verificare, poze și semnături — totul din telefon, cu sincronizare automată. Funcționează și fără semnal, în subsoluri și hale.</p>
-        <div class="feature-tags"><span class="tag">iOS &amp; Android</span><span class="tag">Mod offline</span><span class="tag">Sincronizare live</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" style="max-width:340px;margin-inline:auto" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-phone"/></svg></span>
-            <span><b>Ziua mea — Echipa Alfa</b><small>3 lucrări programate</small></span>
-          </div>
-          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>09:00 · Instalare CCTV<small>finalizat</small></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>14:00 · Revizie sistem alarmă<small>în curs</small></div>
-          <div class="mock-row"><span class="dot" style="background:#6B7699"></span>17:00 · Ofertare control acces<small>urmează</small></div>
-          <a class="btn btn-primary" style="width:100%;margin-top:14px;min-height:44px;font-size:0.88rem;pointer-events:none" tabindex="-1" aria-hidden="true">Începe lucrarea</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== 21-22. AUTOMATIZARI + ANALYTICS ===== -->
-<section class="section">
+<!-- ===== 16-22. PLATFORMA ÎN DETALIU ===== -->
+<section class="section" id="detalii">
   <div class="container">
     <div class="section-head center reveal">
-      <span class="eyebrow">Operare autonomă</span>
-      <h2>Firma lucrează și când tu nu lucrezi.</h2>
+      <span class="eyebrow">Platforma în detaliu</span>
+      <h2>Alege un modul.<br>Vezi cum lucrează.</h2>
+      <p class="lead">De la vânzări la rapoarte de profitabilitate — fiecare modul, așa cum arată în platformă.</p>
     </div>
 
-    <!-- 21. Automatizari -->
-    <div class="feature-row flip">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Automatizări</span>
-        <h3>Construiește fluxuri „dacă X, atunci Y". Fără cod.</h3>
-        <p>PV semnat? Factura pleacă. Mentenanță scadentă? Intervenția se programează. Client nou? Contractul și dosarul se creează singure. Tu setezi regula o dată.</p>
-        <div class="feature-tags"><span class="tag">Editor vizual</span><span class="tag">100+ declanșatoare</span><span class="tag">Zero cod</span></div>
+    <div class="tab-group reveal" data-delay="1">
+      <div class="tab-nav" role="tablist" aria-label="Module în detaliu">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="vanzari"><svg aria-hidden="true"><use href="#i-users"/></svg>Vânzări</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="stocuri"><svg aria-hidden="true"><use href="#i-box"/></svg>Stocuri</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="lucrari"><svg aria-hidden="true"><use href="#i-wrench"/></svg>Lucrări în teren</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="gps"><svg aria-hidden="true"><use href="#i-pin"/></svg>GPS &amp; Flotă</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="mobil"><svg aria-hidden="true"><use href="#i-phone"/></svg>Aplicație mobilă</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="automatizari"><svg aria-hidden="true"><use href="#i-branch"/></svg>Automatizări</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="rapoarte"><svg aria-hidden="true"><use href="#i-chart"/></svg>Rapoarte</button>
       </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-branch"/></svg></span>
-            <span><b>Automatizare: „Închidere lucrare"</b><small>activă · rulată de 214 ori</small></span>
-            <span class="mock-badge ok">ON</span>
-          </div>
-          <div class="auto-flow">
-            <div class="auto-node"><span class="dot" style="background:#00D4FF;width:8px;height:8px;border-radius:50%"></span>Când: <small>&nbsp;PV semnat de client</small></div>
-            <div class="auto-link"></div>
-            <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Emite factura <small>&nbsp;→ trimite la ANAF</small></div>
-            <div class="auto-link"></div>
-            <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Trimite pe WhatsApp <small>&nbsp;PV + factură</small></div>
-            <div class="auto-link"></div>
-            <div class="auto-node"><span class="dot" style="background:#FFB547;width:8px;height:8px;border-radius:50%"></span>Programează mentenanța <small>&nbsp;peste 6 luni</small></div>
+      <div class="tab-panels">
+        <div class="tab-panel active" role="tabpanel" data-panel="vanzari">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Clienți &amp; Vânzări</span>
+              <h3>Vânzările tale, sub control total.</h3>
+              <p>Fiecare client potențial are sursă, valoare și pas următor. Ofertele se generează din șabloane cu prețurile tale, iar urmăririle nu se mai uită niciodată.</p>
+              <div class="feature-tags"><span class="tag">Etape clare de vânzare</span><span class="tag">Oferte din șabloane</span><span class="tag">Istoric complet</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-users"/></svg></span>
+                  <span><b>Vânzări — Iulie</b><small>valoare totală: 412.000 lei</small></span>
+                  <span class="mock-badge ok">+9 noi</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#4F7DFF"></span>Clienți noi<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:85%"></span></span><b>17</b></div>
+                <div class="mock-row"><span class="dot" style="background:#6D5BFF"></span>Ofertă trimisă<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:60%"></span></span><b>11</b></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Negociere<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:38%"></span></span><b>6</b></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Câștigate<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:30%"></span></span><b>5</b></div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- 22. Rapoarte -->
-    <div class="feature-row">
-      <div class="feature-copy reveal">
-        <span class="eyebrow">Rapoarte</span>
-        <h3>Știi exact unde faci bani. Și unde îi pierzi.</h3>
-        <p>Profitabilitate pe lucrare, pe echipă, pe tip de sistem. Timp mediu de intervenție, rată de câștig la oferte, valoare pe client. Rapoartele se generează singure.</p>
-        <div class="feature-tags"><span class="tag">Profit pe lucrare</span><span class="tag">Randament echipe</span><span class="tag">Export automat</span></div>
-      </div>
-      <div class="feature-visual reveal" data-delay="1">
-        <div class="mock" aria-hidden="true">
-          <div class="mock-head">
-            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-chart"/></svg></span>
-            <span><b>Marjă medie pe lucrare</b><small>trend 6 luni</small></span>
-            <span class="mock-badge ok">+6.2 pp</span>
+        <div class="tab-panel" role="tabpanel" data-panel="stocuri">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Stocuri &amp; Echipamente</span>
+              <h3>Stocuri, echipamente și bani — în aceeași ecuație.</h3>
+              <p>Camere, centrale, cabluri și senzori: intrări, ieșiri și serii urmărite pe fiecare lucrare. Știi exact ce ai în depozit, în mașini și la clienți.</p>
+              <div class="feature-tags"><span class="tag">Gestiune pe serii</span><span class="tag">Stoc pe vehicul</span><span class="tag">Cost pe lucrare</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(255,181,71,0.12);color:#FFB547"><svg><use href="#i-box"/></svg></span>
+                  <span><b>Inventar — Depozit central</b><small>sincronizat cu 6 vehicule</small></span>
+                  <span class="mock-badge warn">2 alerte stoc</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Camere IP 4MP<small>stoc</small><b>124</b></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Centrale alarmă 8 zone<small>stoc</small><b>38</b></div>
+                <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cablu UTP cat6 — sub prag<small>comandă automată</small><b>3 role</b></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Cititoare acces — rezervat lucrării #148<small>alocat</small><b>12</b></div>
+              </div>
+            </div>
           </div>
-          <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
-            <path class="area" d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10 L 300 64 L 0 64 Z"/>
-            <path d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10"/>
-          </svg>
-          <div class="mock-row" style="margin-top:14px"><span class="dot" style="background:#21D07A"></span>Echipa Alfa — marjă medie<b style="margin-left:auto">38%</b></div>
-          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Echipa Bravo — marjă medie<b style="margin-left:auto">31%</b></div>
+        </div>
+        <div class="tab-panel" role="tabpanel" data-panel="lucrari">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Lucrări în teren</span>
+              <h3>Fiecare lucrare, de la alocare la PV, fără hârtii.</h3>
+              <p>Echipa primește lucrarea pe telefon, bifează pașii lucrării, urcă pozele, ia semnătura pe ecran. PV-ul se generează singur și pleacă instant la birou.</p>
+              <div class="feature-tags"><span class="tag">Listă de verificare</span><span class="tag">Semnătură pe ecran</span><span class="tag">PV automat</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-wrench"/></svg></span>
+                  <span><b>Lucrarea #148 — instalare CCTV</b><small>Echipa Alfa · în derulare</small></span>
+                  <span class="mock-badge ok">83%</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Sosire la obiectiv confirmată GPS<small>09:02</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>8 camere montate · poze urcate<small>12:30</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Test înregistrare &amp; notificări<small>13:15</small></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Semnătură beneficiar — în așteptare<small>acum</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" role="tabpanel" data-panel="gps">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">GPS &amp; Flotă</span>
+              <h3>Fiecare vehicul, pe hartă. Fiecare kilometru, justificat.</h3>
+              <p>Vezi flota live, primești alerte când o mașină iese din zona unui obiectiv și confirmi automat sosirea echipelor. Foile de parcurs se scriu singure.</p>
+              <div class="feature-tags"><span class="tag">Urmărire live</span><span class="tag">Perimetru pe hartă</span><span class="tag">Foi de parcurs automate</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-pin"/></svg></span>
+                  <span><b>Flotă — 6 vehicule</b><small>toate în zonele autorizate</small></span>
+                  <span class="mock-badge ok">Live</span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-101-ERA — la Obiectiv 12<small>staționar · 42 min</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>B-102-ERA — în drum spre Pipera<small>sosire 14:05</small></div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-103-ERA — la sediu · încărcare marfă<small>staționar</small></div>
+                <div class="mock-row"><span class="dot" style="background:#FFB547"></span>B-104-ERA — trafic intens pe ruta 3<small>+12 min</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" role="tabpanel" data-panel="mobil">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Aplicația mobilă</span>
+              <h3>Biroul întreg, în buzunarul tehnicianului.</h3>
+              <p>Lucrări, navigație, liste de verificare, poze și semnături — totul din telefon, cu sincronizare automată. Funcționează și fără semnal, în subsoluri și hale.</p>
+              <div class="feature-tags"><span class="tag">iOS &amp; Android</span><span class="tag">Mod offline</span><span class="tag">Sincronizare live</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" style="max-width:340px;margin-inline:auto" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-phone"/></svg></span>
+                  <span><b>Ziua mea — Echipa Alfa</b><small>3 lucrări programate</small></span>
+                </div>
+                <div class="mock-row"><span class="dot" style="background:#21D07A"></span>09:00 · Instalare CCTV<small>finalizat</small></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>14:00 · Revizie sistem alarmă<small>în curs</small></div>
+                <div class="mock-row"><span class="dot" style="background:#6B7699"></span>17:00 · Ofertare control acces<small>urmează</small></div>
+                <a class="btn btn-primary" style="width:100%;margin-top:14px;min-height:44px;font-size:0.88rem;pointer-events:none" tabindex="-1" aria-hidden="true">Începe lucrarea</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" role="tabpanel" data-panel="automatizari">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Automatizări</span>
+              <h3>Construiește fluxuri „dacă X, atunci Y". Fără cod.</h3>
+              <p>PV semnat? Factura pleacă. Mentenanță scadentă? Intervenția se programează. Client nou? Contractul și dosarul se creează singure. Tu setezi regula o dată.</p>
+              <div class="feature-tags"><span class="tag">Editor vizual</span><span class="tag">100+ declanșatoare</span><span class="tag">Zero cod</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-branch"/></svg></span>
+                  <span><b>Automatizare: „Închidere lucrare"</b><small>activă · rulată de 214 ori</small></span>
+                  <span class="mock-badge ok">ON</span>
+                </div>
+                <div class="auto-flow">
+                  <div class="auto-node"><span class="dot" style="background:#00D4FF;width:8px;height:8px;border-radius:50%"></span>Când: <small>&nbsp;PV semnat de client</small></div>
+                  <div class="auto-link"></div>
+                  <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Emite factura <small>&nbsp;→ trimite la ANAF</small></div>
+                  <div class="auto-link"></div>
+                  <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Trimite pe WhatsApp <small>&nbsp;PV + factură</small></div>
+                  <div class="auto-link"></div>
+                  <div class="auto-node"><span class="dot" style="background:#FFB547;width:8px;height:8px;border-radius:50%"></span>Programează mentenanța <small>&nbsp;peste 6 luni</small></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" role="tabpanel" data-panel="rapoarte">
+          <div class="feature-row">
+            <div class="feature-copy">
+              <span class="eyebrow">Rapoarte</span>
+              <h3>Știi exact unde faci bani. Și unde îi pierzi.</h3>
+              <p>Profitabilitate pe lucrare, pe echipă, pe tip de sistem. Timp mediu de intervenție, rată de câștig la oferte, valoare pe client. Rapoartele se generează singure.</p>
+              <div class="feature-tags"><span class="tag">Profit pe lucrare</span><span class="tag">Randament echipe</span><span class="tag">Export automat</span></div>
+            </div>
+            <div class="feature-visual">
+              <div class="mock" aria-hidden="true">
+                <div class="mock-head">
+                  <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-chart"/></svg></span>
+                  <span><b>Marjă medie pe lucrare</b><small>trend 6 luni</small></span>
+                  <span class="mock-badge ok">+6.2 pp</span>
+                </div>
+                <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
+                  <path class="area" d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10 L 300 64 L 0 64 Z"/>
+                  <path d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10"/>
+                </svg>
+                <div class="mock-row" style="margin-top:14px"><span class="dot" style="background:#21D07A"></span>Echipa Alfa — marjă medie<b style="margin-left:auto">38%</b></div>
+                <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Echipa Bravo — marjă medie<b style="margin-left:auto">31%</b></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -868,6 +891,7 @@
         <ul>
           <li><a href="#platforma">Platformă</a></li>
           <li><a href="#module">Module</a></li>
+          <li><a href="#detalii">Detalii module</a></li>
           <li><a href="#ai">Inteligență artificială</a></li>
           <li><a href="#integrari">Integrări</a></li>
         </ul>

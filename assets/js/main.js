@@ -248,6 +248,29 @@
     });
   });
 
+  /* ---------- Tab groups (AI / Integrări / Platformă în detaliu) ---------- */
+  document.querySelectorAll('.tab-group').forEach(function (group) {
+    var buttons = Array.from(group.querySelectorAll('.tab-btn'));
+    var panels = Array.from(group.querySelectorAll('.tab-panel'));
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.classList.contains('active')) return;
+        var target = btn.dataset.tab;
+        buttons.forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-selected', String(on));
+        });
+        panels.forEach(function (p) {
+          var on = p.dataset.panel === target;
+          p.classList.toggle('active', on);
+          if (on) p.querySelectorAll('.mock').forEach(function (m) { m.classList.add('in-view'); });
+        });
+        btn.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+      });
+    });
+  });
+
   /* ---------- Background particles ---------- */
   var canvas = document.getElementById('particles');
   if (canvas && !reduceMotion) {

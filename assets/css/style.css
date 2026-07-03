@@ -49,12 +49,17 @@
 
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); }
+/* Base size = 16px on phones, tablets and laptops (keeps the tuned hero fit intact);
+   scales up on large monitors / Retina / 4K so all rem-based graphics grow with the display. */
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); font-size: 16px; }
+@media (min-width: 1600px) { html { font-size: 17.5px; } }
+@media (min-width: 2000px) { html { font-size: 19px; } }
+@media (min-width: 2560px) { html { font-size: 21px; } }
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -86,7 +91,10 @@ body::before {
   z-index: 200; pointer-events: none;
 }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 3.5vw, 48px); }
+@media (min-width: 1600px) { .container { max-width: 1360px; } :root { --space-5: 76px; --space-6: 112px; } }
+@media (min-width: 2000px) { .container { max-width: 1560px; } :root { --space-5: 88px; --space-6: 132px; } }
+@media (min-width: 2560px) { .container { max-width: 1800px; } }
 
 /* ---------- Type ---------- */
 h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
@@ -440,7 +448,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
 @keyframes marqueeReverse { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 
 .live-card {
-  flex-shrink: 0; width: 244px;
+  flex-shrink: 0; width: clamp(224px, 19vw, 280px);
   border-radius: 16px; border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);

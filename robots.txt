@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /_backup-old-site/
+
+Sitemap: https://erafieldops.ro/sitemap.xml

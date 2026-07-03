@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ERA FieldOPS — Sistemul de operare al firmelor de securitate</title>
+  <meta name="description" content="ERA FieldOPS unifică CRM, ERP, field service, GPS, facturare, e-Factura și AI într-un singur centru de comandă pentru firmele care instalează și întrețin sisteme de securitate.">
+  <link rel="canonical" href="https://erafieldops.ro/">
+  <meta name="theme-color" content="#050816">
+
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ERA FieldOPS">
+  <meta property="og:title" content="ERA FieldOPS — Sistemul de operare al firmelor de securitate">
+  <meta property="og:description" content="Toată firma ta. Un singur centru de comandă. CRM, field service, GPS, facturare, e-Factura și AI — într-o singură platformă.">
+  <meta property="og:url" content="https://erafieldops.ro/">
+  <meta property="og:locale" content="ro_RO">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ERA FieldOPS — Sistemul de operare al firmelor de securitate">
+  <meta name="twitter:description" content="CRM, field service, GPS, facturare, e-Factura și AI — într-un singur centru de comandă.">
+
+  <link rel="preload" href="assets/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <noscript><style>.reveal{opacity:1;transform:none}.wf-step{opacity:1;transform:none}.chart-bars i{transform:scaleY(1)}.bar-fill{width:var(--w,70%)}.spark path{stroke-dashoffset:0}.float-card{opacity:1;transform:none}#particles{display:none}</style></noscript>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "ERA FieldOPS",
+        "operatingSystem": "Web, iOS, Android",
+        "applicationCategory": "BusinessApplication",
+        "description": "Platformă completă pentru firmele care instalează și întrețin sisteme de securitate: CRM, ERP, field service, GPS, facturare, e-Factura și AI.",
+        "url": "https://erafieldops.ro/",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR", "description": "Demonstrație gratuită" }
+      },
+      {
+        "@type": "Organization",
+        "name": "ERA FieldOPS",
+        "url": "https://erafieldops.ro/",
+        "email": "contact@erafieldops.ro"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Cât durează implementarea ERA FieldOPS?", "acceptedAnswer": { "@type": "Answer", "text": "Configurarea de bază durează sub o săptămână. Importăm clienții, contractele și echipamentele existente, iar echipa ta primește training complet." } },
+          { "@type": "Question", "name": "Este ERA FieldOPS integrat cu ANAF și e-Factura?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Verificăm automat datele firmelor prin API-ul ANAF, iar facturile se transmit direct în SPV prin e-Factura, cu status urmărit în timp real." } },
+          { "@type": "Question", "name": "Funcționează pe telefon pentru echipele din teren?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Tehnicienii au aplicație mobilă dedicată: lucrări, poze, semnătură pe ecran, PV generat automat — inclusiv offline." } },
+          { "@type": "Question", "name": "Cum mă ajută AI-ul din platformă?", "acceptedAnswer": { "@type": "Answer", "text": "Inspector AI verifică pozele din teren, Marketing AI generează campanii, iar Licitații AI monitorizează SEAP și îți semnalează oportunitățile potrivite." } },
+          { "@type": "Question", "name": "Datele mele sunt în siguranță?", "acceptedAnswer": { "@type": "Answer", "text": "Datele sunt criptate în tranzit și la stocare, găzduite în UE, cu backup automat, roluri granulare și jurnal complet de audit — conform GDPR." } },
+          { "@type": "Question", "name": "Pot migra din Excel sau alt software?", "acceptedAnswer": { "@type": "Answer", "text": "Da. Importăm datele din Excel, CSV sau alte platforme, fără să pierzi istoricul clienților și al contractelor." } }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<!-- ===== SVG sprite ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  <symbol id="i-cctv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="15" height="10" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="11" rx="1"/><path d="M15 10h4l3 3v4h-7"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="12" x2="19" y2="5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-9a3.5 3.5 0 0 1 0-7H12"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7v18L3 15v-4z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-fingerprint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 0 1 18-6"/><path d="M5 19.5A10 10 0 0 1 2 12"/><path d="M17.8 21.2A10 10 0 0 0 22 12a10 10 0 0 0-.6-3.4"/><path d="M8.5 16.5A5.5 5.5 0 0 1 12 6.5a5.5 5.5 0 0 1 5.5 5.5c0 2-.5 3.5-1.3 5"/><path d="M12 12v2a4 4 0 0 0 1.2 2.8"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+</svg>
+
+<!-- ===== NAV ===== -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#top" class="logo" aria-label="ERA FieldOPS — acasă">
+      <span class="logo-mark"><svg fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+      <span>ERA Field<em>OPS</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#platforma">Platformă</a></li>
+      <li><a href="#module">Module</a></li>
+      <li><a href="#ai">AI</a></li>
+      <li><a href="#integrari">Integrări</a></li>
+      <li><a href="#securitate">Securitate</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#platforma" class="btn btn-ghost">Explorează</a>
+      <a href="#demo" class="btn btn-primary">Cere demo</a>
+      <button class="nav-burger" id="burger" aria-label="Meniu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<nav class="mobile-menu" id="mobileMenu" aria-label="Meniu mobil">
+  <a href="#platforma">Platformă</a>
+  <a href="#module">Module</a>
+  <a href="#ai">AI</a>
+  <a href="#integrari">Integrări</a>
+  <a href="#securitate">Securitate</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<main id="top">
+
+<!-- ===== 1. HERO ===== -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="hero-badge"><i class="pulse-dot"></i> Sistemul de operare al firmelor de securitate</span>
+      <h1>Toată firma ta.<br>Un singur <span class="grad-text">centru de comandă</span>.</h1>
+      <p class="lead">De la lead la client fidel: vânzări, instalări, mentenanță, GPS, facturare și AI — orchestrate într-o singură platformă construită pentru firmele care instalează sisteme de securitate.</p>
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary">Cere demonstrația <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="#platforma" class="btn btn-ghost">Explorează platforma</a>
+      </div>
+      <div class="hero-meta">
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> Implementare sub 7 zile</div>
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> e-Factura &amp; ANAF integrate</div>
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> Date găzduite în UE</div>
+      </div>
+    </div>
+
+    <!-- Animated Mission Control mockup -->
+    <div class="command-center" id="commandCenter" aria-hidden="true">
+      <div class="glow-orb" style="width:340px;height:340px;background:#4F7DFF;top:-80px;right:-60px;"></div>
+      <div class="glow-orb" style="width:260px;height:260px;background:#00D4FF;bottom:-70px;left:-50px;opacity:0.3;"></div>
+
+      <div class="cc-frame" id="ccFrame">
+        <div class="cc-top">
+          <div class="cc-dots"><i></i><i></i><i></i></div>
+          <span class="cc-title">ERA FieldOPS — Dispecerat</span>
+          <span class="cc-live"><i class="pulse-dot"></i> LIVE</span>
+        </div>
+        <div class="cc-body">
+          <div class="cc-map">
+            <svg viewBox="0 0 520 380" preserveAspectRatio="xMidYMid slice">
+              <!-- grid -->
+              <g class="map-grid">
+                <line x1="0" y1="47" x2="520" y2="47"/><line x1="0" y1="94" x2="520" y2="94"/>
+                <line x1="0" y1="141" x2="520" y2="141"/><line x1="0" y1="188" x2="520" y2="188"/>
+                <line x1="0" y1="235" x2="520" y2="235"/><line x1="0" y1="282" x2="520" y2="282"/>
+                <line x1="0" y1="329" x2="520" y2="329"/>
+                <line x1="65" y1="0" x2="65" y2="380"/><line x1="130" y1="0" x2="130" y2="380"/>
+                <line x1="195" y1="0" x2="195" y2="380"/><line x1="260" y1="0" x2="260" y2="380"/>
+                <line x1="325" y1="0" x2="325" y2="380"/><line x1="390" y1="0" x2="390" y2="380"/>
+                <line x1="455" y1="0" x2="455" y2="380"/>
+              </g>
+              <!-- streets -->
+              <path class="map-street" d="M0 120 C 120 100, 220 150, 340 130 S 520 90, 520 90"/>
+              <path class="map-street" d="M60 380 C 90 280, 160 220, 260 200 S 430 170, 520 200"/>
+              <path class="map-street" d="M0 260 C 140 250, 240 300, 380 290 S 520 260, 520 260"/>
+              <path class="map-street" d="M180 0 C 190 100, 160 200, 200 380"/>
+              <path class="map-street" d="M400 0 C 380 120, 420 240, 390 380"/>
+              <!-- geofence -->
+              <polygon class="geofence" points="300,60 430,80 450,170 340,190 290,140"/>
+              <!-- animated routes HQ -> objectives -->
+              <path id="route1" class="map-route" stroke="rgba(79,125,255,0.55)" d="M260 200 C 220 170, 180 140, 120 110"/>
+              <path id="route2" class="map-route" stroke="rgba(0,212,255,0.5)" d="M260 200 C 310 190, 360 150, 400 120"/>
+              <path id="route3" class="map-route" stroke="rgba(109,91,255,0.55)" d="M260 200 C 280 250, 330 290, 410 300"/>
+              <!-- objectives -->
+              <g>
+                <circle class="map-obj" cx="120" cy="110" r="5"/>
+                <circle class="map-obj-ring" cx="120" cy="110" r="12"/>
+                <circle class="map-obj" cx="400" cy="120" r="5"/>
+                <circle class="map-obj-ring" cx="400" cy="120" r="12" style="animation-delay:1s"/>
+                <circle class="map-obj" cx="410" cy="300" r="5"/>
+                <circle class="map-obj-ring" cx="410" cy="300" r="12" style="animation-delay:2s"/>
+                <circle class="map-obj" cx="80" cy="300" r="5"/>
+              </g>
+              <!-- HQ -->
+              <g>
+                <rect x="248" y="188" width="24" height="24" rx="7" fill="rgba(79,125,255,0.15)" stroke="#4F7DFF" stroke-width="1.5"/>
+                <path d="M260 194l6 2.6v3.9c0 3.9-3.4 6.5-6 7.5-2.6-1-6-3.6-6-7.5v-3.9z" fill="#4F7DFF"/>
+              </g>
+              <!-- vehicles -->
+              <g>
+                <circle r="6" fill="#050816" stroke="#21D07A" stroke-width="2">
+                  <animateMotion dur="9s" repeatCount="indefinite" rotate="none"><mpath href="#route1"/></animateMotion>
+                </circle>
+                <circle r="6" fill="#050816" stroke="#00D4FF" stroke-width="2">
+                  <animateMotion dur="12s" repeatCount="indefinite" rotate="none" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#route2"/></animateMotion>
+                </circle>
+                <circle r="6" fill="#050816" stroke="#FFB547" stroke-width="2">
+                  <animateMotion dur="10s" repeatCount="indefinite" rotate="none"><mpath href="#route3"/></animateMotion>
+                </circle>
+              </g>
+            </svg>
+          </div>
+          <div class="cc-side">
+            <div class="cc-stat"><b>8</b><span>Echipe active</span></div>
+            <div class="cc-stat accent"><b>14</b><span>Lucrări azi</span></div>
+            <div class="cc-stat ok"><b>98%</b><span>SLA respectat</span></div>
+            <div class="cc-feed" id="ccFeed">
+              <span class="cc-feed-title">Flux live</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- floating notification cards (cycled by JS) -->
+      <div class="float-card fc-success" id="fc1" style="top:6%;left:-9%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span>
+        <span>Factură emisă<small>#2841 · trimisă în SPV</small></span>
+      </div>
+      <div class="float-card fc-ai fc-keep" id="fc2" style="bottom:12%;right:-7%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-cpu"/></svg></span>
+        <span>Inspector AI<small>Montaj verificat · conform</small></span>
+      </div>
+      <div class="float-card fc-primary" id="fc3" style="top:38%;right:-10%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-pen"/></svg></span>
+        <span>PV semnat<small>Client: Rezidence Park</small></span>
+      </div>
+      <div class="float-card fc-warning" id="fc4" style="bottom:-4%;left:8%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-cctv"/></svg></span>
+        <span>Alertă CCTV<small>Obiectiv 12 · cameră offline</small></span>
+      </div>
+      <div class="float-card fc-success" id="fc5" style="top:-5%;right:16%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span>
+        <span>WhatsApp<small>„Confirmăm intervenția la 14:00"</small></span>
+      </div>
+      <div class="float-card fc-primary" id="fc6" style="top:60%;left:-11%;">
+        <span class="fc-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span>
+        <span>Client nou<small>Contract semnat · CCTV + acces</small></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 2. TRUSTED BY ===== -->
+<section class="trusted" aria-label="Companii care folosesc ERA FieldOPS">
+  <div class="container">
+    <p>Ales de firme de instalări securitate din toată România</p>
+  </div>
+  <div class="logo-track-wrap">
+    <div class="logo-track" id="logoTrack">
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-shield"/></svg>SENTINEL SECURITY</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-cctv"/></svg>VIGITECH</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-lock"/></svg>PROTECTA GRUP</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-eye"/></svg>OMNIWATCH</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-key"/></svg>AXIS INSTAL</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-radar"/></svg>SAFEZONE</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-fingerprint"/></svg>SECURA SYSTEMS</span>
+      <span class="logo-item"><svg aria-hidden="true"><use href="#i-bell"/></svg>ALARMTECH</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3. STATISTICI ===== -->
+<section class="section" aria-label="Rezultate">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card reveal"><div class="stat-num"><span class="counter" data-target="43">0</span>%</div><div class="stat-label">mai puțin timp pierdut pe administrare</div></div>
+      <div class="stat-card reveal" data-delay="1"><div class="stat-num"><span class="counter" data-target="2.8" data-decimals="1">0</span>×</div><div class="stat-label">mai multe lucrări finalizate pe lună</div></div>
+      <div class="stat-card reveal" data-delay="2"><div class="stat-num"><span class="counter" data-target="15">0</span> min</div><div class="stat-label">de la PV semnat la factură în SPV</div></div>
+      <div class="stat-card reveal" data-delay="3"><div class="stat-num"><span class="counter" data-target="99.98" data-decimals="2">0</span>%</div><div class="stat-label">disponibilitate a platformei</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 4. PROBLEME ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Realitatea din teren</span>
+      <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+      <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute. Cu cât ai mai multe echipe și obiective, cu atât pierzi mai mult control — și mai mulți bani.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card tone-error reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
+      <div class="card tone-error reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
+      <div class="card tone-error reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><h3>Facturi întârziate</h3><p>PV-ul stă zile întregi în mașină. Factura pleacă târziu, banii vin și mai târziu.</p></div>
+      <div class="card tone-warning reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Mentenanțe uitate</h3><p>Contractele de mentenanță expiră neobservate. Venit recurent pierdut, clienți vulnerabili.</p></div>
+      <div class="card tone-warning reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-eye"/></svg></span><h3>Zero vizibilitate</h3><p>Nu ai un singur loc în care să vezi pipeline-ul, lucrările, flota și încasările în timp real.</p></div>
+      <div class="card tone-warning reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-clock"/></svg></span><h3>Ofertare lentă</h3><p>O ofertă durează ore. Clientul semnează cu firma care a răspuns prima.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5. SOLUȚIA ===== -->
+<section class="section" id="platforma">
+  <div class="container solution-grid">
+    <div class="reveal">
+      <span class="eyebrow">Soluția</span>
+      <h2>Nu un CRM.<br>Nu un ERP.<br><span class="grad-text">Sistemul de operare</span> al firmei tale.</h2>
+      <ul class="check-list">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>O singură sursă de adevăr.</b> Clienți, contracte, echipamente, lucrări și bani — totul conectat.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Control în timp real.</b> Vezi fiecare echipă, vehicul și obiectiv pe hartă, live.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>AI care lucrează pentru tine.</b> Verifică montaje, scrie oferte, monitorizează licitații.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Automatizare cap-coadă.</b> De la lead la factura în SPV, fără pași manuali.</span></li>
+      </ul>
+    </div>
+    <div class="hub reveal" data-delay="1" aria-hidden="true">
+      <svg viewBox="0 0 500 500">
+        <circle cx="250" cy="250" r="120" fill="none" stroke="rgba(255,255,255,0.07)"/>
+        <circle cx="250" cy="250" r="190" fill="none" stroke="rgba(255,255,255,0.05)"/>
+        <g class="orbit">
+          <g transform="translate(250 60)"><circle r="26" fill="rgba(79,125,255,0.1)" stroke="rgba(79,125,255,0.4)"/><svg x="-11" y="-11" width="22" height="22" fill="none" stroke="#4F7DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></g>
+          <g transform="translate(440 250)"><circle r="26" fill="rgba(33,208,122,0.1)" stroke="rgba(33,208,122,0.4)"/><svg x="-11" y="-11" width="22" height="22" fill="none" stroke="#21D07A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/></svg></g>
+          <g transform="translate(250 440)"><circle r="26" fill="rgba(255,181,71,0.1)" stroke="rgba(255,181,71,0.4)"/><svg x="-11" y="-11" width="22" height="22" fill="none" stroke="#FFB547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="6" width="14" height="11" rx="1"/><path d="M15 10h4l3 3v4h-7"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg></g>
+          <g transform="translate(60 250)"><circle r="26" fill="rgba(255,90,90,0.1)" stroke="rgba(255,90,90,0.4)"/><svg x="-11" y="-11" width="22" height="22" fill="none" stroke="#FF5A5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="6" width="15" height="10" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg></g>
+        </g>
+        <g class="orbit rev">
+          <g transform="translate(384 116)"><circle r="22" fill="rgba(0,212,255,0.1)" stroke="rgba(0,212,255,0.4)"/><svg x="-10" y="-10" width="20" height="20" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg></g>
+          <g transform="translate(116 384)"><circle r="22" fill="rgba(109,91,255,0.1)" stroke="rgba(109,91,255,0.4)"/><svg x="-10" y="-10" width="20" height="20" fill="none" stroke="#6D5BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></g>
+          <g transform="translate(116 116)"><circle r="22" fill="rgba(79,125,255,0.1)" stroke="rgba(79,125,255,0.4)"/><svg x="-10" y="-10" width="20" height="20" fill="none" stroke="#4F7DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></g>
+          <g transform="translate(384 384)"><circle r="22" fill="rgba(33,208,122,0.1)" stroke="rgba(33,208,122,0.4)"/><svg x="-10" y="-10" width="20" height="20" fill="none" stroke="#21D07A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg></g>
+        </g>
+        <g class="hub-core">
+          <circle cx="250" cy="250" r="56" fill="rgba(79,125,255,0.12)" stroke="rgba(79,125,255,0.5)" stroke-width="1.5"/>
+          <circle cx="250" cy="250" r="56" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="8" opacity="0.25"/>
+          <path d="M250 224l20 8.7v13c0 13-11.3 21.6-20 25-8.7-3.4-20-12-20-25v-13z" fill="#4F7DFF"/>
+          <text x="250" y="330" text-anchor="middle" fill="#9AA5C4" font-size="13" font-weight="600" font-family="Satoshi, sans-serif" letter-spacing="2">ERA FIELDOPS</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. WORKFLOW ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Workflow complet</span>
+      <h2>De la lead la client fidel.<br>Fără nicio verigă ruptă.</h2>
+    </div>
+    <div class="workflow-wrap reveal">
+      <div class="workflow-progress" id="wfProgress"></div>
+      <ol class="workflow" id="workflow">
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-target"/></svg></span><span>Lead</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-file"/></svg></span><span>Ofertă</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-pen"/></svg></span><span>Contract</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span><span>Programare</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-users"/></svg></span><span>Echipă</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-pin"/></svg></span><span>GPS</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-camera"/></svg></span><span>Poze</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-fingerprint"/></svg></span><span>Semnătură</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><span>PV</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><span>Factură</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-globe"/></svg></span><span>e-Factura</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><span>Mentenanță</span></li>
+        <li class="wf-step"><span class="wf-node"><svg aria-hidden="true"><use href="#i-check"/></svg></span><span>Client fidel</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 7. MODULE ===== -->
+<section class="section" id="module">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Module</span>
+      <h2>Tot ce rulează firma ta.<br>Într-o singură platformă.</h2>
+    </div>
+    <div class="bento">
+      <div class="card span-2 reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>CRM &amp; Pipeline</h3><p>Lead-uri, oferte, contracte și istoric complet pe fiecare client și obiectiv. Nimic nu se mai pierde.</p></div>
+      <div class="card reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span><h3>Dispecerat &amp; Programări</h3><p>Calendar pe echipe, alocare inteligentă, notificări automate.</p></div>
+      <div class="card reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-pin"/></svg></span><h3>GPS &amp; Flotă</h3><p>Vehicule live pe hartă, rute, geofence pe obiective.</p></div>
+      <div class="card reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Field Service</h3><p>Lucrări, checklist-uri, poze, semnătură și PV din teren.</p></div>
+      <div class="card reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><h3>Facturare &amp; e-Factura</h3><p>Factura pleacă în SPV direct din PV. Încasări urmărite automat.</p></div>
+      <div class="card tone-ai reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-cpu"/></svg></span><h3>AI Copilot</h3><p>Inspector AI, Marketing AI și Licitații AI — incluse.</p></div>
+      <div class="card reveal" data-delay="3"><span class="card-icon"><svg aria-hidden="true"><use href="#i-box"/></svg></span><h3>Inventar &amp; Echipamente</h3><p>Stocuri, serii, fișe de echipament pe fiecare obiectiv.</p></div>
+      <div class="card reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><h3>Mentenanță &amp; SLA</h3><p>Contracte recurente, scadențe și intervenții generate automat.</p></div>
+      <div class="card reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-chart"/></svg></span><h3>Analytics</h3><p>Profit pe lucrare, echipă și client. Decizii pe date, nu pe intuiție.</p></div>
+      <div class="card reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-branch"/></svg></span><h3>Automatizări</h3><p>Fluxuri „dacă X, atunci Y" fără nicio linie de cod.</p></div>
+      <div class="card span-2 reveal" data-delay="3"><span class="card-icon"><svg aria-hidden="true"><use href="#i-phone"/></svg></span><h3>Aplicație mobilă</h3><p>Tehnicienii lucrează din telefon, inclusiv offline. Biroul vede totul în timp real.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 8. DASHBOARD ===== -->
+<section class="section">
+  <div class="container">
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Dashboard</span>
+        <h3>Pulsul firmei, pe un singur ecran.</h3>
+        <p>Încasări, lucrări în derulare, echipe pe hartă, contracte care expiră — totul agregat live, fără rapoarte cerute prin telefon.</p>
+        <div class="feature-tags"><span class="tag">Timp real</span><span class="tag">KPI-uri personalizate</span><span class="tag">Alerte inteligente</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-chart"/></svg></span>
+            <span><b>Venituri — ultimele 8 luni</b><small>actualizat acum 2 min</small></span>
+            <span class="mock-badge ok">+32%</span>
+          </div>
+          <div class="chart-bars">
+            <i style="height:35%"></i><i style="height:48%"></i><i style="height:42%"></i><i style="height:60%"></i>
+            <i style="height:55%"></i><i style="height:72%"></i><i style="height:66%"></i><i class="hl" style="height:92%"></i>
+          </div>
+          <div style="margin-top:16px" class="mock-row"><span class="dot" style="background:#21D07A"></span>Încasat luna aceasta <b style="margin-left:auto">184.200 lei</b></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>De încasat <b style="margin-left:auto">46.800 lei</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 9-12. AI ===== -->
+<section class="section" id="ai">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Inteligență artificială</span>
+      <h2>AI-ul nu e un buton.<br>E un <span class="grad-text">coleg care nu doarme</span>.</h2>
+      <p class="lead">Trei agenți AI specializați lucrează non-stop pentru firma ta: verifică, vinde și vânează oportunități.</p>
+    </div>
+
+    <!-- 10. Inspector AI -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Inspector AI</span>
+        <h3>Fiecare montaj, verificat de AI înainte de recepție.</h3>
+        <p>Tehnicianul urcă pozele, Inspector AI le analizează: trasee de cablu, poziționare camere, etichetare, conformitate cu proiectul. Problemele apar înainte să devină reclamații.</p>
+        <div class="feature-tags"><span class="tag">Analiză foto</span><span class="tag">Verificare conformitate</span><span class="tag">Raport automat</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-cpu"/></svg></span>
+            <span><b>Inspector AI — Obiectiv „Rezidence Park"</b><small>12 poze analizate în 8 secunde</small></span>
+            <span class="mock-badge ai">AI</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Cameră 1 — unghi &amp; înălțime conforme<small>99%</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Tablou alarmă — cablare etichetată<small>97%</small></div>
+          <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cameră 4 — câmp obstrucționat parțial<small>detectat</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Recomandare: repoziționare 40 cm stânga<small>auto</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. Marketing AI -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Marketing AI</span>
+        <h3>Campanii care aduc lucrări, generate automat.</h3>
+        <p>Marketing AI scrie oferte comerciale, follow-up-uri și campanii pentru clienții existenți: extinderi de sistem, upgrade-uri, contracte de mentenanță. Tu doar aprobi.</p>
+        <div class="feature-tags"><span class="tag">Oferte în 60 sec</span><span class="tag">Follow-up automat</span><span class="tag">Upsell inteligent</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-megaphone"/></svg></span>
+            <span><b>Marketing AI — Campanii active</b><small>3 campanii · 28 clienți vizați</small></span>
+            <span class="mock-badge ai">AI</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Upgrade CCTV 4K — 12 clienți eligibili<small>8 răspunsuri</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Reînnoire mentenanță — expiră în 30 zile<small>trimis</small></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Ofertă control acces — lead-uri noi<small>draft</small></div>
+          <div class="mock-row" style="align-items:center"><span class="dot" style="background:#6D5BFF"></span>Rată de conversie campanii<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:68%"></span></span><small>34%</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. Licitatii AI -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Licitații AI</span>
+        <h3>Nicio licitație potrivită nu-ți mai scapă.</h3>
+        <p>Licitații AI monitorizează SEAP non-stop, filtrează anunțurile după profilul firmei tale și îți pregătește rezumatul: valoare, cerințe, scadență, șanse de câștig.</p>
+        <div class="feature-tags"><span class="tag">Monitorizare SEAP 24/7</span><span class="tag">Scor de potrivire</span><span class="tag">Rezumat automat</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-search"/></svg></span>
+            <span><b>Licitații AI — SEAP live</b><small>3 oportunități noi azi</small></span>
+            <span class="mock-badge ai">AI</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>CCTV — campus universitar<b style="margin-left:auto">96%</b></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Control acces — spital județean<b style="margin-left:auto">91%</b></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Antiefracție — depozit logistic<b style="margin-left:auto">74%</b></div>
+          <div class="mock-row"><span class="dot" style="background:#6B7699"></span>Interfonie — bloc rezidențial<b style="margin-left:auto">42%</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 13-15. INTEGRARI ===== -->
+<section class="section" id="integrari">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Integrări native</span>
+      <h2>Conectat la România reală:<br>WhatsApp, ANAF, e-Factura.</h2>
+    </div>
+
+    <!-- 13. WhatsApp -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow" style="color:#21D07A">WhatsApp Business</span>
+        <h3>Clienții rămân pe WhatsApp.<br>Tu rămâi organizat.</h3>
+        <p>Confirmări de programare, notificări de sosire a echipei, PV-uri și facturi — trimise automat pe WhatsApp. Toate conversațiile, salvate pe fișa clientului.</p>
+        <div class="feature-tags"><span class="tag">Notificări automate</span><span class="tag">Istoric pe client</span><span class="tag">Șabloane aprobate</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-msg"/></svg></span>
+            <span><b>WhatsApp — Rezidence Park</b><small>conectat la fișa clientului</small></span>
+            <span class="mock-badge ok">Auto</span>
+          </div>
+          <div class="chat">
+            <div class="bubble out">Echipa ERA ajunge azi la 14:00 pentru revizia sistemului CCTV. <small>13:12 <span class="ticks">✓✓</span></small></div>
+            <div class="bubble in">Perfect, vă așteptăm!</div>
+            <div class="bubble out">Intervenție finalizată ✔ PV-ul semnat și factura au fost trimise pe email. <small>15:47 <span class="ticks">✓✓</span></small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. ANAF -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Integrare ANAF</span>
+        <h3>Scrii CUI-ul. Restul se completează singur.</h3>
+        <p>Datele firmelor se preiau direct de la ANAF: denumire, adresă, status TVA, stare firmă. Zero erori de facturare, zero timp pierdut cu copy-paste.</p>
+        <div class="feature-tags"><span class="tag">Verificare CUI instant</span><span class="tag">Status TVA live</span><span class="tag">Date mereu corecte</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-database"/></svg></span>
+            <span><b>Client nou — verificare ANAF</b><small>CUI 38442917</small></span>
+            <span class="mock-badge ok">Valid</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Denumire: DELTA LOGISTICS SRL<small>auto</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Plătitor de TVA: Da<small>auto</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Adresă sediu: completată automat<small>auto</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Stare firmă: activă · fără risc fiscal<small>live</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. eFactura -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">e-Factura</span>
+        <h3>Din PV semnat, direct în SPV.<br>În minute, nu în zile.</h3>
+        <p>Factura se generează automat din procesul-verbal, se transmite în SPV și îi urmărești statusul în timp real. Fără XML-uri, fără portaluri, fără stres.</p>
+        <div class="feature-tags"><span class="tag">Transmitere automată</span><span class="tag">Status în timp real</span><span class="tag">Arhivă conformă</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(33,208,122,0.12);color:#21D07A"><svg><use href="#i-receipt"/></svg></span>
+            <span><b>Factura #2841 — 8.640 lei</b><small>generată din PV #2841</small></span>
+            <span class="mock-badge ok">Acceptată</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>PV semnat în teren<small>15:47</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Factură generată automat<small>15:48</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Transmisă în SPV (e-Factura)<small>15:49</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Acceptată de ANAF<small>15:52</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 16-20. PLATFORMA COMPLETA ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Platforma completă</span>
+      <h2>CRM. ERP. Field Service.<br>Fără sincronizări, fără exporturi.</h2>
+    </div>
+
+    <!-- 16. CRM -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">CRM</span>
+        <h3>Pipeline-ul de vânzări, sub control total.</h3>
+        <p>Fiecare lead are sursă, valoare și pas următor. Ofertele se generează din șabloane cu prețurile tale, iar follow-up-urile nu se mai uită niciodată.</p>
+        <div class="feature-tags"><span class="tag">Pipeline vizual</span><span class="tag">Oferte din șabloane</span><span class="tag">Istoric complet</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-users"/></svg></span>
+            <span><b>Pipeline — Iulie</b><small>valoare totală: 412.000 lei</small></span>
+            <span class="mock-badge ok">+9 lead-uri</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#4F7DFF"></span>Lead-uri noi<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:85%"></span></span><b>17</b></div>
+          <div class="mock-row"><span class="dot" style="background:#6D5BFF"></span>Ofertă trimisă<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:60%"></span></span><b>11</b></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Negociere<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:38%"></span></span><b>6</b></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Câștigate<span class="bar-track" style="margin-left:8px"><span class="bar-fill" style="--w:30%"></span></span><b>5</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17. ERP -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">ERP</span>
+        <h3>Stocuri, echipamente și bani — în aceeași ecuație.</h3>
+        <p>Camere, centrale, cabluri și senzori: intrări, ieșiri și serii urmărite pe fiecare lucrare. Știi exact ce ai în depozit, în mașini și la clienți.</p>
+        <div class="feature-tags"><span class="tag">Gestiune pe serii</span><span class="tag">Stoc pe vehicul</span><span class="tag">Cost pe lucrare</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(255,181,71,0.12);color:#FFB547"><svg><use href="#i-box"/></svg></span>
+            <span><b>Inventar — Depozit central</b><small>sincronizat cu 6 vehicule</small></span>
+            <span class="mock-badge warn">2 alerte stoc</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Camere IP 4MP<small>stoc</small><b>124</b></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Centrale alarmă 8 zone<small>stoc</small><b>38</b></div>
+          <div class="mock-row"><span class="dot" style="background:#FF5A5A"></span>Cablu UTP cat6 — sub prag<small>comandă auto</small><b>3 role</b></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Cititoare acces — rezervat lucrării #148<small>alocat</small><b>12</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18. Field Service -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Field Service</span>
+        <h3>Fiecare lucrare, de la alocare la PV, fără hârtii.</h3>
+        <p>Echipa primește lucrarea pe telefon, bifează checklist-ul, urcă pozele, ia semnătura pe ecran. PV-ul se generează singur și pleacă instant la birou.</p>
+        <div class="feature-tags"><span class="tag">Checklist digital</span><span class="tag">Semnătură pe ecran</span><span class="tag">PV automat</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-wrench"/></svg></span>
+            <span><b>Lucrarea #148 — instalare CCTV</b><small>Echipa Alfa · în derulare</small></span>
+            <span class="mock-badge ok">83%</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Sosire la obiectiv confirmată GPS<small>09:02</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>8 camere montate · poze urcate<small>12:30</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>Test înregistrare &amp; notificări<small>13:15</small></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>Semnătură beneficiar — în așteptare<small>acum</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 19. GPS -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">GPS &amp; Flotă</span>
+        <h3>Fiecare vehicul, pe hartă. Fiecare kilometru, justificat.</h3>
+        <p>Vezi flota live, primești alerte de geofence pe obiective și confirmi automat sosirea echipelor. Foile de parcurs se scriu singure.</p>
+        <div class="feature-tags"><span class="tag">Tracking live</span><span class="tag">Geofence obiective</span><span class="tag">Foi de parcurs auto</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-pin"/></svg></span>
+            <span><b>Flotă — 6 vehicule</b><small>toate în geofence-uri autorizate</small></span>
+            <span class="mock-badge ok">Live</span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-101-ERA — la Obiectiv 12<small>staționar · 42 min</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>B-102-ERA — în drum spre Pipera<small>sosire 14:05</small></div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>B-103-ERA — la sediu · încărcare marfă<small>staționar</small></div>
+          <div class="mock-row"><span class="dot" style="background:#FFB547"></span>B-104-ERA — trafic intens pe ruta 3<small>+12 min</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20. Mobile App -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Aplicația mobilă</span>
+        <h3>Biroul întreg, în buzunarul tehnicianului.</h3>
+        <p>Lucrări, navigație, checklist-uri, poze și semnături — totul din telefon, cu sincronizare automată. Funcționează și fără semnal, în subsoluri și hale.</p>
+        <div class="feature-tags"><span class="tag">iOS &amp; Android</span><span class="tag">Mod offline</span><span class="tag">Sincronizare live</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" style="max-width:340px;margin-inline:auto" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(109,91,255,0.12);color:#6D5BFF"><svg><use href="#i-phone"/></svg></span>
+            <span><b>Ziua mea — Echipa Alfa</b><small>3 lucrări programate</small></span>
+          </div>
+          <div class="mock-row"><span class="dot" style="background:#21D07A"></span>09:00 · Instalare CCTV<small>finalizat</small></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>14:00 · Revizie sistem alarmă<small>în curs</small></div>
+          <div class="mock-row"><span class="dot" style="background:#6B7699"></span>17:00 · Ofertare control acces<small>urmează</small></div>
+          <a class="btn btn-primary" style="width:100%;margin-top:14px;min-height:44px;font-size:0.88rem;pointer-events:none" tabindex="-1" aria-hidden="true">Începe lucrarea</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 21-22. AUTOMATIZARI + ANALYTICS ===== -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Operare autonomă</span>
+      <h2>Firma lucrează și când tu nu lucrezi.</h2>
+    </div>
+
+    <!-- 21. Automatizari -->
+    <div class="feature-row flip">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Automatizări</span>
+        <h3>Construiește fluxuri „dacă X, atunci Y". Fără cod.</h3>
+        <p>PV semnat? Factura pleacă. Mentenanță scadentă? Intervenția se programează. Client nou? Contractul și dosarul se creează singure. Tu setezi regula o dată.</p>
+        <div class="feature-tags"><span class="tag">Editor vizual</span><span class="tag">100+ declanșatoare</span><span class="tag">Zero cod</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(79,125,255,0.12);color:#4F7DFF"><svg><use href="#i-branch"/></svg></span>
+            <span><b>Automatizare: „Închidere lucrare"</b><small>activă · rulată de 214 ori</small></span>
+            <span class="mock-badge ok">ON</span>
+          </div>
+          <div class="auto-flow">
+            <div class="auto-node"><span class="dot" style="background:#00D4FF;width:8px;height:8px;border-radius:50%"></span>Când: <small>&nbsp;PV semnat de client</small></div>
+            <div class="auto-link"></div>
+            <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Emite factura <small>&nbsp;→ trimite în SPV</small></div>
+            <div class="auto-link"></div>
+            <div class="auto-node"><span class="dot" style="background:#21D07A;width:8px;height:8px;border-radius:50%"></span>Trimite pe WhatsApp <small>&nbsp;PV + factură</small></div>
+            <div class="auto-link"></div>
+            <div class="auto-node"><span class="dot" style="background:#FFB547;width:8px;height:8px;border-radius:50%"></span>Programează mentenanța <small>&nbsp;peste 6 luni</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 22. Analytics -->
+    <div class="feature-row">
+      <div class="feature-copy reveal">
+        <span class="eyebrow">Analytics</span>
+        <h3>Știi exact unde faci bani. Și unde îi pierzi.</h3>
+        <p>Profitabilitate pe lucrare, pe echipă, pe tip de sistem. Timp mediu de intervenție, rată de câștig la oferte, valoare pe client. Rapoartele se generează singure.</p>
+        <div class="feature-tags"><span class="tag">Profit pe lucrare</span><span class="tag">Randament echipe</span><span class="tag">Export automat</span></div>
+      </div>
+      <div class="feature-visual reveal" data-delay="1">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-head">
+            <span class="fc-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF"><svg><use href="#i-chart"/></svg></span>
+            <span><b>Marjă medie pe lucrare</b><small>trend 6 luni</small></span>
+            <span class="mock-badge ok">+6.2 pp</span>
+          </div>
+          <svg class="spark" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
+            <path class="area" d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10 L 300 64 L 0 64 Z"/>
+            <path d="M0 50 C 30 46, 55 52, 85 42 S 140 30, 175 34 S 240 18, 300 10"/>
+          </svg>
+          <div class="mock-row" style="margin-top:14px"><span class="dot" style="background:#21D07A"></span>Echipa Alfa — marjă medie<b style="margin-left:auto">38%</b></div>
+          <div class="mock-row"><span class="dot" style="background:#00D4FF"></span>Echipa Bravo — marjă medie<b style="margin-left:auto">31%</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 23. SECURITY ===== -->
+<section class="section" id="securitate">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Securitatea datelor</span>
+      <h2>Vinzi siguranță.<br>Platforma ta trebuie să fie la fel.</h2>
+    </div>
+    <div class="sec-grid">
+      <div class="card tone-success reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-lock"/></svg></span><h3>Criptare end-to-end</h3><p>Date criptate în tranzit (TLS 1.3) și la stocare (AES-256).</p></div>
+      <div class="card tone-success reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-key"/></svg></span><h3>Roluri &amp; permisiuni</h3><p>Fiecare angajat vede exact ce trebuie să vadă. Nimic în plus.</p></div>
+      <div class="card tone-success reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-eye"/></svg></span><h3>Jurnal de audit</h3><p>Orice acțiune e înregistrată: cine, ce, când. Trasabilitate completă.</p></div>
+      <div class="card tone-success reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-server"/></svg></span><h3>Backup automat</h3><p>Copii de siguranță zilnice, replicate în centre de date separate.</p></div>
+      <div class="card tone-success reveal" data-delay="1"><span class="card-icon"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><h3>Conform GDPR</h3><p>Procese și contracte de prelucrare aliniate legislației europene.</p></div>
+      <div class="card tone-success reveal" data-delay="2"><span class="card-icon"><svg aria-hidden="true"><use href="#i-globe"/></svg></span><h3>Găzduire în UE</h3><p>Infrastructură în Uniunea Europeană, cu disponibilitate 99.98%.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 24. FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Întrebări frecvente</span>
+      <h2>Răspunsuri directe.</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>Cât durează implementarea ERA FieldOPS?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Configurarea de bază durează sub o săptămână. Importăm clienții, contractele și echipamentele existente, iar echipa ta primește training complet — la birou și în teren.</div>
+      </details>
+      <details>
+        <summary>Este integrat cu ANAF și e-Factura?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da, nativ. Datele firmelor se verifică automat prin API-ul ANAF, iar facturile se transmit direct în SPV prin e-Factura, cu status urmărit în timp real din platformă.</div>
+      </details>
+      <details>
+        <summary>Funcționează pe telefon pentru echipele din teren?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da. Tehnicienii au aplicație mobilă dedicată (iOS și Android): lucrări, navigație, checklist-uri, poze, semnătură pe ecran și PV generat automat — inclusiv offline.</div>
+      </details>
+      <details>
+        <summary>Cum mă ajută concret AI-ul din platformă?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Inspector AI verifică pozele montajelor și semnalează neconformitățile. Marketing AI generează oferte și campanii pentru clienții existenți. Licitații AI monitorizează SEAP și îți aduce doar oportunitățile potrivite profilului tău.</div>
+      </details>
+      <details>
+        <summary>Datele mele sunt în siguranță?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da. Datele sunt criptate în tranzit și la stocare, găzduite în UE, cu backup zilnic, roluri granulare de acces și jurnal complet de audit — conform GDPR.</div>
+      </details>
+      <details>
+        <summary>Pot migra din Excel sau din alt software?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da. Importăm datele din Excel, CSV sau alte platforme (clienți, contracte, echipamente, istoric), astfel încât pornești cu tot istoricul firmei în ERA FieldOPS.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 25. CTA FINAL ===== -->
+<section class="cta-final" id="demo">
+  <div class="container reveal">
+    <span class="eyebrow" style="justify-content:center">Următorul pas</span>
+    <h2>Preia comanda.<br><span class="grad-text">Cere demonstrația.</span></h2>
+    <p class="lead">30 de minute. Datele firmei tale, nu slide-uri. Vezi exact cum ar arăta ziua ta de mâine cu ERA FieldOPS.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@erafieldops.ro?subject=Cerere%20demonstra%C8%9Bie%20ERA%20FieldOPS" class="btn btn-primary">Programează demo-ul <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="tel:+40700000000" class="btn btn-ghost">Sună-ne direct</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== 26. FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="logo" aria-label="ERA FieldOPS">
+          <span class="logo-mark"><svg fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <span>ERA Field<em>OPS</em></span>
+        </a>
+        <p>Sistemul de operare al firmelor care instalează și întrețin sisteme de securitate.</p>
+      </div>
+      <div>
+        <h4>Produs</h4>
+        <ul>
+          <li><a href="#platforma">Platformă</a></li>
+          <li><a href="#module">Module</a></li>
+          <li><a href="#ai">Inteligență artificială</a></li>
+          <li><a href="#integrari">Integrări</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Companie</h4>
+        <ul>
+          <li><a href="#securitate">Securitatea datelor</a></li>
+          <li><a href="#faq">Întrebări frecvente</a></li>
+          <li><a href="#demo">Cere demo</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="mailto:contact@erafieldops.ro">contact@erafieldops.ro</a></li>
+          <li><a href="tel:+40700000000">+40 700 000 000</a></li>
+          <li><a href="#top">București, România</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ERA FieldOPS. Toate drepturile rezervate.</span>
+      <span class="footer-status"><i class="pulse-dot"></i> Toate sistemele operaționale</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile sticky CTA -->
+<div class="mobile-cta">
+  <a href="#demo" class="btn btn-primary">Cere demonstrația</a>
+</div>
+
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>

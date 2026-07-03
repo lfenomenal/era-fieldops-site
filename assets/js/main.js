@@ -178,8 +178,8 @@
       { c: '#4F7DFF', t: 'Echipa Bravo: sosire' },
       { c: '#FFB547', t: 'Alertă: cameră offline' },
       { c: '#21D07A', t: 'Factură acceptată ANAF' },
-      { c: '#6D5BFF', t: 'Lead nou din site' },
-      { c: '#00D4FF', t: 'Licitații AI: 96% match' },
+      { c: '#6D5BFF', t: 'Client nou de pe site' },
+      { c: '#00D4FF', t: 'Licitații AI: 96% potrivire' },
       { c: '#21D07A', t: 'WhatsApp: confirmare' }
     ];
     var fIdx = 0;

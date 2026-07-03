@@ -809,7 +809,11 @@ body.loaded .command-center { opacity: 1; transform: none; }
 .ph-tab:hover { color: var(--text); }
 .ph-tab.active { color: #fff; background: var(--grad); box-shadow: 0 4px 16px rgba(79,125,255,0.35); }
 
-.ph-price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: var(--space-4); }
+.ph-price { margin-bottom: var(--space-4); min-height: clamp(3rem, 6vw, 4.6rem); display: flex; align-items: baseline; }
+.ph-dayview { font-size: clamp(2rem, 4.4vw, 3.3rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; }
+.ph-monthview { display: none; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.ph-price.month .ph-dayview { display: none; }
+.ph-price.month .ph-monthview { display: inline-flex; }
 .ph-from { font-size: 1rem; font-weight: 600; color: var(--text-3); }
 .ph-amount {
   font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1;

@@ -278,19 +278,18 @@
     var toggle = document.querySelector('.ph-toggle');
     if (!toggle) return;
     var tabs = Array.from(toggle.querySelectorAll('.ph-tab'));
-    var nums = ['phValue', 'phCoffee', 'phEra'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
-    var per = document.getElementById('phPer');
+    var nums = ['phCoffee', 'phEra'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+    var priceBox = document.getElementById('phPrice');
 
     function tween(el, to) {
-      var suffix = el.id === 'phValue' ? '' : ' lei';
       var from = parseFloat(el.textContent.replace(/[^\d.]/g, '')) || 0;
-      if (reduceMotion) { el.textContent = to + suffix; return; }
+      if (reduceMotion) { el.textContent = to + ' lei'; return; }
       var dur = 500, start = null;
       function step(ts) {
         if (!start) start = ts;
         var p = Math.min((ts - start) / dur, 1);
         var eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(from + (to - from) * eased) + suffix;
+        el.textContent = Math.round(from + (to - from) * eased) + ' lei';
         if (p < 1) requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
@@ -301,8 +300,8 @@
         t.classList.toggle('active', on);
         t.setAttribute('aria-pressed', String(on));
       });
+      if (priceBox) priceBox.classList.toggle('month', period === 'month');
       nums.forEach(function (el) { tween(el, parseFloat(el.dataset[period])); });
-      if (per) per.textContent = period === 'day' ? 'pe zi' : 'pe lună';
     }
     tabs.forEach(function (t) {
       t.addEventListener('click', function () {

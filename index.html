@@ -283,14 +283,69 @@
   </div>
   <div class="feature-track-wrap" aria-hidden="true">
     <div class="feature-track" id="featureTrack">
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-cctv"/></svg>CCTV live</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-pin"/></svg>GPS &amp; Flotă</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-receipt"/></svg>Facturare automată</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-globe"/></svg>e-Factura ANAF</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-msg"/></svg>WhatsApp automat</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-cpu"/></svg>Inspector AI</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-fingerprint"/></svg>Semnătură digitală</span>
-      <span class="feature-pill"><svg aria-hidden="true"><use href="#i-branch"/></svg>Automatizări</span>
+
+      <!-- Hartă echipelor -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-pin"/></svg>Hartă echipelor<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-map">
+          <svg viewBox="0 0 226 64" preserveAspectRatio="xMidYMid slice">
+            <g class="lc-grid">
+              <line x1="0" y1="16" x2="226" y2="16"/><line x1="0" y1="32" x2="226" y2="32"/><line x1="0" y1="48" x2="226" y2="48"/>
+              <line x1="56" y1="0" x2="56" y2="64"/><line x1="113" y1="0" x2="113" y2="64"/><line x1="170" y1="0" x2="170" y2="64"/>
+            </g>
+            <path class="lc-route" d="M18 50 C 70 22, 130 54, 208 20"/>
+            <circle class="lc-obj" cx="208" cy="20" r="3"/>
+            <circle class="lc-objring" cx="208" cy="20" r="7"/>
+            <circle class="lc-veh" r="4"><animateMotion dur="5s" repeatCount="indefinite" path="M18 50 C 70 22, 130 54, 208 20"/></circle>
+          </svg>
+        </div>
+        <div class="lc-label">3 echipe pe teren · GPS live</div>
+      </div>
+
+      <!-- Lucrări azi -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-wrench"/></svg>Lucrări azi<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-seg"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="lc-label">Lucrarea #148 · instalare CCTV</div>
+      </div>
+
+      <!-- Alerte auto -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-bell"/></svg>Alerte auto<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-alert">
+          <span class="lc-bell"><svg aria-hidden="true"><use href="#i-bell"/></svg></span>
+          <div><b>ITP / RCA / revizie</b><small>scadențe urmărite automat</small></div>
+          <span class="lc-badge">5</span>
+        </div>
+      </div>
+
+      <!-- Facturare -> ANAF -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-receipt"/></svg>Facturare → ANAF<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-flow">
+          <div class="lc-frow"><i></i>Factură emisă</div>
+          <div class="lc-frow"><i></i>Trimisă la ANAF</div>
+          <div class="lc-frow"><i></i>Acceptată</div>
+        </div>
+      </div>
+
+      <!-- Marketing AI -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-megaphone"/></svg>Marketing AI<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="lc-label">25 prospecte · 3 în aprobare</div>
+      </div>
+
+      <!-- Scanează -->
+      <div class="live-card">
+        <div class="lc-head"><svg aria-hidden="true"><use href="#i-search"/></svg>Scanează<span class="lc-live"><i class="pulse-dot"></i>LIVE</span></div>
+        <div class="lc-scan">
+          <div class="lc-qr"><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i class="off"></i><i></i><i></i><i></i><i class="off"></i><i></i><i class="off"></i><i></i><i class="off"></i><i></i></div>
+          <span class="lc-scanline"></span>
+        </div>
+        <div class="lc-label">QR obiectiv · stoc &amp; echipamente</div>
+      </div>
+
     </div>
   </div>
 </section>

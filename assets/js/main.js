@@ -230,9 +230,9 @@
     addSpotlightTilt('.mock', 0);
   }
 
-  /* ---------- Magnetic pull on primary buttons ---------- */
+  /* ---------- Magnetic pull on primary buttons (on-hover) ---------- */
   if (!reduceMotion && fine) {
-    document.querySelectorAll('.btn-primary').forEach(function (btn) {
+    document.querySelectorAll('.btn-primary:not(.btn-magnetic)').forEach(function (btn) {
       btn.addEventListener('mousemove', function (e) {
         var r = btn.getBoundingClientRect();
         var dx = (e.clientX - r.left - r.width / 2) * 0.22;
@@ -242,6 +242,53 @@
       btn.addEventListener('mouseleave', function () { btn.style.transform = ''; });
     });
   }
+
+  /* ---------- Proximity magnetic button (follows the cursor nearby, eases back) ---------- */
+  (function () {
+    if (reduceMotion || !fine) return; // pointer-follow is a mouse/trackpad feature
+    var els = Array.from(document.querySelectorAll('.btn-magnetic'));
+    if (!els.length) return;
+    var RADIUS = 90;     // proximity zone around the button (px)
+    var STRENGTH = 0.35; // how strongly it leans toward the cursor
+    var MAXOFF = 16;     // clamp so the travel stays restrained
+    var EASE = 0.18;     // lower = slower / lazier follow
+    var states = els.map(function (btn) { return { btn: btn, tx: 0, ty: 0, x: 0, y: 0, active: false }; });
+    var raf = null;
+
+    document.addEventListener('pointermove', function (e) {
+      for (var i = 0; i < states.length; i++) {
+        var s = states[i], r = s.btn.getBoundingClientRect();
+        var dx = e.clientX - (r.left + r.width / 2);
+        var dy = e.clientY - (r.top + r.height / 2);
+        if (Math.abs(dx) < r.width / 2 + RADIUS && Math.abs(dy) < r.height / 2 + RADIUS) {
+          s.active = true;
+          s.tx = Math.max(-MAXOFF, Math.min(MAXOFF, dx * STRENGTH));
+          s.ty = Math.max(-MAXOFF, Math.min(MAXOFF, dy * STRENGTH));
+        } else {
+          s.active = false; s.tx = 0; s.ty = 0;
+        }
+      }
+      if (!raf) raf = requestAnimationFrame(loop);
+    }, { passive: true });
+
+    function loop() {
+      raf = null;
+      var moving = false;
+      for (var i = 0; i < states.length; i++) {
+        var s = states[i];
+        s.x += (s.tx - s.x) * EASE;
+        s.y += (s.ty - s.y) * EASE;
+        if (Math.abs(s.x - s.tx) > 0.1 || Math.abs(s.y - s.ty) > 0.1) moving = true;
+        var scale = s.active ? 1.05 : 1;
+        if (!s.active && Math.abs(s.x) < 0.1 && Math.abs(s.y) < 0.1) {
+          s.btn.style.transform = '';
+        } else {
+          s.btn.style.transform = 'translate(' + s.x.toFixed(2) + 'px,' + s.y.toFixed(2) + 'px) scale(' + scale + ')';
+        }
+      }
+      if (moving) raf = requestAnimationFrame(loop);
+    }
+  })();
 
   /* ---------- Auto-stagger reveal for grid children ---------- */
   document.querySelectorAll('.bento, .grid-3, .sec-grid, .stats-grid').forEach(function (grid) {

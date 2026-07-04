@@ -215,21 +215,37 @@ h3 { font-size: 1.25rem; line-height: 1.3; }
 }
 .nav-links a:hover, .nav-links a.active { color: #fff; }
 .nav-links a:hover::before, .nav-links a.active::before { transform: scale(1); opacity: 1; }
-/* playful periodic hop wave, staggered across the items */
-body.loaded .nav-links a { animation: navHop 6.5s ease-in-out infinite; }
-.nav-links a:hover, .nav-links a.active { animation-play-state: paused; }
-.nav-links li:nth-child(1) a { animation-delay: 0s; }
-.nav-links li:nth-child(2) a { animation-delay: 0.1s; }
-.nav-links li:nth-child(3) a { animation-delay: 0.2s; }
-.nav-links li:nth-child(4) a { animation-delay: 0.3s; }
-.nav-links li:nth-child(5) a { animation-delay: 0.4s; }
-.nav-links li:nth-child(6) a { animation-delay: 0.5s; }
-@keyframes navHop {
-  0%, 90%, 100% { transform: translateY(0) scale(1); }
-  93% { transform: translateY(-6px) scale(1.06); }
-  96% { transform: translateY(0) scale(0.95); }
-  98% { transform: translateY(-2px) scale(1); }
+
+/* CONTINUOUS light that travels across the menu forever (::after, independent of hover) */
+.nav-links a::after {
+  content: ''; position: absolute; inset: 0; border-radius: 100px; z-index: -2;
+  background: var(--grad); box-shadow: 0 0 22px rgba(0,212,255,0.6);
+  opacity: 0; transform: scale(0.6); pointer-events: none;
 }
+body.loaded .nav-links a::after { animation: navPulse 3s ease-in-out infinite; }
+body.loaded .nav-links a { animation: navHop 3s ease-in-out infinite; }
+.nav-links a:hover { animation-play-state: paused; }
+/* same stagger for the glow (::after) and the hop (a) so each link lights up + hops as the wave passes */
+.nav-links li:nth-child(1) a::after, .nav-links li:nth-child(1) a { animation-delay: 0s; }
+.nav-links li:nth-child(2) a::after, .nav-links li:nth-child(2) a { animation-delay: 0.5s; }
+.nav-links li:nth-child(3) a::after, .nav-links li:nth-child(3) a { animation-delay: 1.0s; }
+.nav-links li:nth-child(4) a::after, .nav-links li:nth-child(4) a { animation-delay: 1.5s; }
+.nav-links li:nth-child(5) a::after, .nav-links li:nth-child(5) a { animation-delay: 2.0s; }
+.nav-links li:nth-child(6) a::after, .nav-links li:nth-child(6) a { animation-delay: 2.5s; }
+@keyframes navPulse {
+  0% { opacity: 0; transform: scale(0.6); }
+  8% { opacity: 0.65; transform: scale(1); }
+  18% { opacity: 0; transform: scale(1.12); }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+@keyframes navHop {
+  0% { transform: translateY(0) scale(1); }
+  5% { transform: translateY(-6px) scale(1.07); }
+  11% { transform: translateY(0) scale(0.96); }
+  16% { transform: translateY(-2px) scale(1); }
+  20%, 100% { transform: translateY(0) scale(1); }
+}
+
 /* bold bouncy entrance on load */
 .nav-links li { opacity: 0; transform: translateY(-30px) scale(0.55) rotate(-6deg); transition: opacity 0.45s ease, transform 0.75s cubic-bezier(0.34, 1.7, 0.5, 1); }
 body.loaded .nav-links li { opacity: 1; transform: none; }
@@ -239,20 +255,6 @@ body.loaded .nav-links li { opacity: 1; transform: none; }
 .nav-links li:nth-child(4) { transition-delay: 0.31s; }
 .nav-links li:nth-child(5) { transition-delay: 0.38s; }
 .nav-links li:nth-child(6) { transition-delay: 0.45s; }
-/* one-time "light-up" wave that flashes each pill on load — the eye-catcher */
-body.loaded .nav-links a::before { animation: navIntro 1s var(--ease) 1; }
-.nav-links li:nth-child(1) a::before { animation-delay: 0.45s; }
-.nav-links li:nth-child(2) a::before { animation-delay: 0.58s; }
-.nav-links li:nth-child(3) a::before { animation-delay: 0.71s; }
-.nav-links li:nth-child(4) a::before { animation-delay: 0.84s; }
-.nav-links li:nth-child(5) a::before { animation-delay: 0.97s; }
-.nav-links li:nth-child(6) a::before { animation-delay: 1.10s; }
-@keyframes navIntro {
-  0% { transform: scale(0.4); opacity: 0; }
-  35% { transform: scale(1.14); opacity: 1; }
-  60% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.5); opacity: 0; }
-}
 .nav-cta { display: flex; gap: 12px; align-items: center; }
 .nav .btn { min-height: 42px; padding: 0 20px; font-size: 0.92rem; }
 .nav-burger {
@@ -287,6 +289,12 @@ body.loaded .nav-links a::before { animation: navIntro 1s var(--ease) 1; }
 }
 .mobile-menu a:hover, .mobile-menu a:active { color: #fff; }
 .mobile-menu a:hover::before, .mobile-menu a:active::before { transform: scale(1); opacity: 1; }
+/* continuous traveling glow while the menu is open (::after, keeps tap pill on ::before clean) */
+.mobile-menu a::after {
+  content: ''; position: absolute; inset: 0; border-radius: 12px; z-index: -2;
+  background: var(--grad); box-shadow: 0 0 22px rgba(0,212,255,0.55);
+  opacity: 0; transform: scale(0.85); pointer-events: none;
+}
 /* playful staggered pop-in when the menu opens */
 .mobile-menu.open a { animation: menuPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .mobile-menu.open a:nth-child(1) { animation-delay: 0.04s; }
@@ -297,13 +305,13 @@ body.loaded .nav-links a::before { animation: navIntro 1s var(--ease) 1; }
 .mobile-menu.open a:nth-child(6) { animation-delay: 0.29s; }
 @keyframes menuPop { from { opacity: 0; transform: translateX(-16px) scale(0.96); } to { opacity: 1; transform: none; } }
 /* matching "light-up" wave flashing each pill when the menu opens */
-.mobile-menu.open a::before { animation: navIntro 0.9s var(--ease) 1; }
-.mobile-menu.open a:nth-child(1)::before { animation-delay: 0.20s; }
-.mobile-menu.open a:nth-child(2)::before { animation-delay: 0.28s; }
-.mobile-menu.open a:nth-child(3)::before { animation-delay: 0.36s; }
-.mobile-menu.open a:nth-child(4)::before { animation-delay: 0.44s; }
-.mobile-menu.open a:nth-child(5)::before { animation-delay: 0.52s; }
-.mobile-menu.open a:nth-child(6)::before { animation-delay: 0.60s; }
+.mobile-menu.open a::after { animation: navPulse 3s ease-in-out infinite; }
+.mobile-menu.open a:nth-child(1)::after { animation-delay: 0s; }
+.mobile-menu.open a:nth-child(2)::after { animation-delay: 0.5s; }
+.mobile-menu.open a:nth-child(3)::after { animation-delay: 1.0s; }
+.mobile-menu.open a:nth-child(4)::after { animation-delay: 1.5s; }
+.mobile-menu.open a:nth-child(5)::after { animation-delay: 2.0s; }
+.mobile-menu.open a:nth-child(6)::after { animation-delay: 2.5s; }
 
 /* ---------- Hero ---------- */
 .hero {

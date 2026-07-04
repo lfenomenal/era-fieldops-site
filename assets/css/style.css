@@ -824,7 +824,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 @media (max-width: 768px) {
   .tab-nav { justify-content: flex-start; }
-  .tab-btn { padding: 9px 14px; font-size: 0.82rem; }
+  .tab-btn { min-height: 44px; padding: 10px 16px; font-size: 0.85rem; }
 }
 
 /* ---------- Security badges ---------- */
@@ -921,9 +921,15 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .ph-copy .lead { margin-inline: auto; }
   .ph-toggle, .ph-price { justify-content: center; }
   .ph-price { justify-content: center; }
+  .ph-tab { min-height: 44px; padding: 11px 24px; }
   .ph-visual { order: 2; }
   .ph-crow { text-align: left; }
   .ph-cta { width: 100%; max-width: 360px; }
+}
+@media (max-width: 440px) {
+  .ph-compare { padding: 18px; }
+  .ph-crow { grid-template-columns: 30px 1fr 48px auto; gap: 10px; }
+  .ph-clbl { font-size: 0.84rem; }
 }
 
 /* ---------- FAQ ---------- */
@@ -1008,14 +1014,13 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .hero-actions { justify-content: center; }
   .hero-meta { justify-content: center; }
   .hero-badge { margin-inline: auto; }
-  .command-center { margin-top: 8px; }
+  .command-center { margin-top: 16px; }
   .cc-body { grid-template-columns: 1fr; }
-  .cc-side { flex-direction: row; border-left: 0; border-top: 1px solid var(--border); overflow-x: auto; }
-  .cc-stat { min-width: 110px; }
+  .cc-side { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; border-left: 0; border-top: 1px solid var(--border); }
+  .cc-stat { min-width: 0; text-align: center; }
   .cc-feed { display: none; }
-  .cc-map { min-height: 260px; }
-  .float-card { display: none; }
-  .float-card.fc-keep { display: flex; }
+  .cc-map { min-height: 240px; }
+  .float-card, .float-card.fc-keep { display: none; }
   .solution-grid, .feature-row { grid-template-columns: 1fr; }
   .feature-row.flip .feature-copy { order: 1; }
   .feature-row.flip .feature-visual { order: 2; }
@@ -1038,8 +1043,9 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .wf-node { width: 48px; height: 48px; border-radius: 13px; }
   .wf-node svg { width: 19px; height: 19px; }
   .hero-meta { flex-direction: column; align-items: center; gap: 10px; }
-  .cc-stat { min-width: 96px; padding: 8px 10px; }
+  .cc-stat { min-width: 0; padding: 8px 6px; }
   .cc-stat b { font-size: 1.05rem; }
+  .cc-stat span { font-size: 0.6rem; }
   .logo-track { gap: 40px; }
   h1 { font-size: clamp(2.1rem, 9vw, 2.6rem); }
 }

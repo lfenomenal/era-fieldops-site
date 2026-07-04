@@ -248,10 +248,10 @@
     if (reduceMotion || !fine) return; // pointer-follow is a mouse/trackpad feature
     var els = Array.from(document.querySelectorAll('.btn-magnetic'));
     if (!els.length) return;
-    var RADIUS = 90;     // proximity zone around the button (px)
-    var STRENGTH = 0.35; // how strongly it leans toward the cursor
-    var MAXOFF = 16;     // clamp so the travel stays restrained
-    var EASE = 0.18;     // lower = slower / lazier follow
+    var RADIUS = 130;    // proximity zone around the button (px)
+    var STRENGTH = 0.55; // how strongly it leans toward the cursor
+    var MAXOFF = 32;     // clamp so the travel stays restrained but clearly visible
+    var EASE = 0.2;      // lower = slower / lazier follow
     var states = els.map(function (btn) { return { btn: btn, tx: 0, ty: 0, x: 0, y: 0, active: false }; });
     var raf = null;
 

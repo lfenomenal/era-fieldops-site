@@ -359,7 +359,7 @@
 
   /* ---------- Background particles ---------- */
   var canvas = document.getElementById('particles');
-  if (canvas) {
+  if (canvas && window.innerWidth >= 760) {
     var ctx = canvas.getContext('2d');
     var particles = [];
     var W, H, running = true;

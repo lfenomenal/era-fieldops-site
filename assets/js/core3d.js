@@ -8,7 +8,8 @@
   if (!stage || !cv) return;
   var ctx = cv.getContext('2d');
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var MOBILE = Math.min(window.innerWidth, window.innerHeight) < 720 || (window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  var DPR = Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2);
   var W = 0, H = 0, RAD = 1;
 
   var MODS = ['Clienți & Vânzări', 'Dispecerat', 'GPS & Flotă', 'Lucrări în teren',
@@ -25,7 +26,7 @@
   }
 
   // ambient "neural cloud" + labelled module nodes
-  var cloud = fib(84, 0.82).map(function (p) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1 }; });
+  var cloud = fib(MOBILE ? 48 : 84, 0.82).map(function (p) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1 }; });
   var mods = fib(MODS.length, 1.12).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
 
   var cloudEdges = [];
@@ -43,7 +44,7 @@
   });
 
   var pulses = [];
-  for (var q = 0; q < 14; q++) {
+  for (var q = 0; q < (MOBILE ? 9 : 14); q++) {
     if (q % 2 === 0) pulses.push({ core: true, m: (Math.random() * mods.length) | 0, t: Math.random(), sp: 0.006 + Math.random() * 0.006 });
     else pulses.push({ core: false, e: (Math.random() * modEdges.length) | 0, t: Math.random(), sp: 0.006 + Math.random() * 0.006 });
   }
@@ -114,7 +115,7 @@
     g.addColorStop(0, 'rgba(0,212,255,' + (0.15 * ie) + ')');
     g.addColorStop(0.5, 'rgba(79,125,255,' + (0.06 * ie) + ')');
     g.addColorStop(1, 'rgba(5,8,22,0)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = g; ctx.fillRect(cx - RAD * 1.5, cy - RAD * 1.5, RAD * 3, RAD * 3);
 
     // ambient cloud
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(79,125,255,' + (0.05 * ie) + ')'; ctx.beginPath();
@@ -144,26 +145,34 @@
       if (pu.core) { var mm = mods[pu.m]; ax = mm.sx; ay = mm.sy; bx = cx; by = cy; }
       else { var ea = mods[modEdges[pu.e][0]], eb = mods[modEdges[pu.e][1]]; ax = ea.sx; ay = ea.sy; bx = eb.sx; by = eb.sy; }
       var px = lerp(ax, bx, pu.t), py = lerp(ay, by, pu.t);
-      ctx.beginPath(); ctx.arc(px, py, 2.1, 0, 6.283); ctx.fillStyle = 'rgba(0,212,255,' + (0.9 * ie) + ')';
-      ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = 9; ctx.fill(); ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, 6.283); ctx.fillStyle = 'rgba(0,212,255,' + (0.22 * ie) + ')'; ctx.fill();
+      ctx.beginPath(); ctx.arc(px, py, 2, 0, 6.283); ctx.fillStyle = 'rgba(140,232,255,' + (0.95 * ie) + ')'; ctx.fill();
     }
 
     // module nodes + labels (depth sorted)
     var order = mods.map(function (_, i) { return i; }).sort(function (a, b) { return mods[a].d - mods[b].d; });
     for (var o = 0; o < order.length; o++) {
       var idx = order[o], m4 = mods[idx], dn4 = (m4.d + 1) / 2, isH = idx === hover;
-      var rr = (3.2 + dn4 * 3) * m4.sc; if (isH) rr *= 1.6;
+      var rr = (3.2 + dn4 * 3) * m4.sc; if (isH) rr *= 1.55;
+      // cheap soft halo (no shadowBlur)
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * 2.6, 0, 6.283);
+      ctx.fillStyle = 'rgba(0,212,255,' + ((0.05 + dn4 * 0.06) * ie).toFixed(3) + ')'; ctx.fill();
+      // node — glow only on the hovered one
       ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr, 0, 6.283);
-      ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 18 : 9;
-      ctx.fillStyle = isH ? '#ffffff' : 'rgba(0,212,255,' + ((0.5 + dn4 * 0.5) * ie) + ')';
+      if (isH) { ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 16; }
+      ctx.fillStyle = isH ? '#ffffff' : 'rgba(0,212,255,' + ((0.55 + dn4 * 0.45) * ie).toFixed(3) + ')';
       ctx.fill(); ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.3 + dn4 * 0.4) * ie) + ')'; ctx.lineWidth = 1; ctx.stroke();
-      var la = (isH ? 1 : Math.max(0, dn4 - 0.15)) * ie;
-      if (la > 0.05) {
-        ctx.font = '700 ' + (isH ? 13 : 11.5) + 'px Satoshi, system-ui, sans-serif';
-        ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(237,241,255,' + la.toFixed(2) + ')';
-        ctx.shadowColor = 'rgba(5,8,22,0.95)'; ctx.shadowBlur = 6;
-        ctx.fillText(m4.label, m4.sx, m4.sy - rr - 8); ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.3 + dn4 * 0.4) * ie).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.stroke();
+      // label: only front-facing modules or the hovered one (declutter), crisp stroke for contrast
+      if (isH || dn4 > 0.5) {
+        var la = (isH ? 1 : (dn4 - 0.5) * 2) * ie;
+        if (la > 0.04) {
+          ctx.font = '700 ' + (isH ? 13 : 11.5) + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
+          ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,8,22,' + (0.85 * la).toFixed(2) + ')';
+          ctx.strokeText(m4.label, m4.sx, m4.sy - rr - 8);
+          ctx.fillStyle = 'rgba(237,241,255,' + la.toFixed(2) + ')';
+          ctx.fillText(m4.label, m4.sx, m4.sy - rr - 8);
+        }
       }
     }
 

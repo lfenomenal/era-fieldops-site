@@ -897,59 +897,7 @@ body.loaded .command-center { opacity: 1; transform: none; }
   content: ''; position: absolute; inset: 0; z-index: -1;
   background: radial-gradient(ellipse 55% 60% at 30% 50%, rgba(0,212,255,0.08), transparent 70%);
 }
-/* explosive "eruption" when the section scrolls into view */
-.pw-flash {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0;
-  background: radial-gradient(circle at 42% 48%, rgba(0,212,255,0.28), rgba(79,125,255,0.10) 35%, transparent 60%);
-}
-.pw-shock {
-  position: absolute; left: 42%; top: 48%; width: 44px; height: 44px; z-index: 0; pointer-events: none;
-  border-radius: 50%; border: 4px solid rgba(0,212,255,0.85);
-  box-shadow: 0 0 30px rgba(0,212,255,0.5);
-  transform: translate(-50%,-50%) scale(0); opacity: 0;
-}
-.price-sec.erupt .price-hook { animation: pwQuake 0.7s cubic-bezier(.36,.07,.19,.97) both; }
-.price-sec.erupt .pw-flash { animation: pwFlash 0.6s ease-out; }
-.price-sec.erupt .pw-shock { animation: pwShock 0.9s cubic-bezier(0.2,0.75,0.2,1) 0.04s; }
-@keyframes pwQuake {
-  0%   { transform: translate(0,0) rotate(0); }
-  8%   { transform: translate(-8px,5px) rotate(-0.7deg) scale(1.015); }
-  18%  { transform: translate(9px,-6px) rotate(0.8deg); }
-  28%  { transform: translate(-10px,-4px) rotate(-0.6deg); }
-  38%  { transform: translate(8px,6px) rotate(0.55deg); }
-  48%  { transform: translate(-6px,-5px) rotate(-0.4deg); }
-  60%  { transform: translate(5px,3px) rotate(0.3deg); }
-  72%  { transform: translate(-3px,2px) rotate(-0.2deg); }
-  84%  { transform: translate(2px,-1px); }
-  92%  { transform: translate(-1px,1px); }
-  100% { transform: translate(0,0); }
-}
-@keyframes pwFlash { 0% { opacity: 0; } 14% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes pwShock {
-  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.9; border-width: 5px; }
-  70%  { opacity: 0.35; }
-  100% { transform: translate(-50%,-50%) scale(24); opacity: 0; border-width: 0.5px; }
-}
-/* Mobile: shake vertically only (no horizontal travel) so it can never widen the screen */
-@media (max-width: 768px) {
-  .price-sec.erupt .price-hook { animation-name: pwQuakeM; }
-  .price-sec.erupt .pw-shock { animation-name: pwShockM; }
-}
-@keyframes pwQuakeM {
-  0%,100% { transform: translateY(0); }
-  8%   { transform: translateY(-8px); }
-  20%  { transform: translateY(6px); }
-  32%  { transform: translateY(-5px); }
-  46%  { transform: translateY(4px); }
-  60%  { transform: translateY(-3px); }
-  74%  { transform: translateY(2px); }
-  88%  { transform: translateY(-1px); }
-}
-@keyframes pwShockM {
-  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.9; border-width: 5px; }
-  70%  { opacity: 0.3; }
-  100% { transform: translate(-50%,-50%) scale(14); opacity: 0; border-width: 0.5px; }
-}
+/* gentle coffee ripple when the section scrolls into view (calm, on-theme) */
 .price-hook { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
 .ph-copy h2 { margin: 12px 0 14px; }
 .ph-copy .lead { margin-bottom: var(--space-3); max-width: 460px; }
@@ -977,8 +925,21 @@ body.loaded .command-center { opacity: 1; transform: none; }
 .ph-price.month .ph-cup { display: none; }
 
 /* steaming coffee cup */
-.ph-cup { width: clamp(46px, 4.6vw, 62px); flex-shrink: 0; display: inline-flex; }
+.ph-cup { position: relative; width: clamp(46px, 4.6vw, 62px); flex-shrink: 0; display: inline-flex; }
 .ph-cup svg { width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.35)); }
+/* two gentle ripple rings that emanate from the cup on reveal */
+.ph-cup::before, .ph-cup::after {
+  content: ''; position: absolute; left: 50%; top: 46%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border-radius: 50%; border: 2px solid rgba(0,212,255,0.7); box-shadow: 0 0 16px rgba(0,212,255,0.35);
+  transform: scale(0); opacity: 0; pointer-events: none;
+}
+.ph-copy.in-view .ph-cup::before { animation: cupRipple 1.15s cubic-bezier(0.2,0.75,0.2,1) 0.18s both; }
+.ph-copy.in-view .ph-cup::after { animation: cupRipple 1.15s cubic-bezier(0.2,0.75,0.2,1) 0.42s both; }
+@keyframes cupRipple {
+  0%   { transform: scale(0.2); opacity: 0.75; border-width: 2.5px; }
+  70%  { opacity: 0.22; }
+  100% { transform: scale(9); opacity: 0; border-width: 0.5px; }
+}
 .steam { transform-box: fill-box; transform-origin: bottom center; opacity: 0; animation: steamRise 2.6s ease-in-out infinite; }
 .steam.s2 { animation-delay: 0.55s; }
 .steam.s3 { animation-delay: 1.1s; }
@@ -1181,6 +1142,5 @@ body.loaded .command-center { opacity: 1; transform: none; }
   .spark path { stroke-dashoffset: 0; }
   .in-view .bar-fill, .bar-fill { transition: none; }
   .in-view .ph-bar i, .ph-bar i { transition: none; width: var(--w); }
-  /* no earthquake for motion-sensitive users */
-  .price-sec.erupt .price-hook, .price-sec.erupt .pw-flash, .price-sec.erupt .pw-shock { animation: none !important; }
+  .ph-copy.in-view .ph-cup::before, .ph-copy.in-view .ph-cup::after { animation: none !important; }
 }

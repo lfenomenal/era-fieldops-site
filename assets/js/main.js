@@ -320,21 +320,6 @@
     });
   });
 
-  /* ---------- Price section: explosive "eruption" on scroll-in ---------- */
-  (function () {
-    var sec = document.querySelector('.price-sec');
-    if (!sec || !window.IntersectionObserver) return;
-    var erObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          sec.classList.add('erupt');
-          erObs.unobserve(sec);
-        }
-      });
-    }, { threshold: 0.4 });
-    erObs.observe(sec);
-  })();
-
   /* ---------- Price toggle (pe zi / pe lună) ---------- */
   (function () {
     var toggle = document.querySelector('.ph-toggle');

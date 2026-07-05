@@ -51,7 +51,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 /* Base size = 16px on phones, tablets and laptops (keeps the tuned hero fit intact);
    scales up on large monitors / Retina / 4K so all rem-based graphics grow with the display. */
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); font-size: 16px; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); font-size: 16px; overflow-x: hidden; }
 @media (min-width: 1600px) { html { font-size: 17.5px; } }
 @media (min-width: 2000px) { html { font-size: 19px; } }
 @media (min-width: 2560px) { html { font-size: 21px; } }
@@ -929,6 +929,26 @@ body.loaded .command-center { opacity: 1; transform: none; }
   0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.9; border-width: 5px; }
   70%  { opacity: 0.35; }
   100% { transform: translate(-50%,-50%) scale(24); opacity: 0; border-width: 0.5px; }
+}
+/* Mobile: shake vertically only (no horizontal travel) so it can never widen the screen */
+@media (max-width: 768px) {
+  .price-sec.erupt .price-hook { animation-name: pwQuakeM; }
+  .price-sec.erupt .pw-shock { animation-name: pwShockM; }
+}
+@keyframes pwQuakeM {
+  0%,100% { transform: translateY(0); }
+  8%   { transform: translateY(-8px); }
+  20%  { transform: translateY(6px); }
+  32%  { transform: translateY(-5px); }
+  46%  { transform: translateY(4px); }
+  60%  { transform: translateY(-3px); }
+  74%  { transform: translateY(2px); }
+  88%  { transform: translateY(-1px); }
+}
+@keyframes pwShockM {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.9; border-width: 5px; }
+  70%  { opacity: 0.3; }
+  100% { transform: translate(-50%,-50%) scale(14); opacity: 0; border-width: 0.5px; }
 }
 .price-hook { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
 .ph-copy h2 { margin: 12px 0 14px; }

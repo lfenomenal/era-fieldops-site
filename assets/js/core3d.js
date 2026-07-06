@@ -20,8 +20,8 @@
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
 
-  // ambient cloud spread across the full width (nx in [-1,1])
-  var CLOUD_N = MOBILE ? 60 : 150;
+  // faint ambient cloud for connective texture
+  var CLOUD_N = MOBILE ? 34 : 70;
   var cloud = [];
   for (var i = 0; i < CLOUD_N; i++) cloud.push({ nx: rnd(-1.05, 1.05), ny: rnd(-0.62, 0.62), nz: rnd(-0.9, 0.9), sx: 0, sy: 0, d: 0, sc: 1 });
 
@@ -31,6 +31,21 @@
     var ny = (k % 2 ? 0.3 : -0.3) + rnd(-0.08, 0.08);
     var nz = ((k % 3) - 1) * 0.55 + rnd(-0.1, 0.1);
     return { nx: nx, ny: ny, nz: nz, sx: 0, sy: 0, d: 0, sc: 1, label: label };
+  });
+
+  // real platform "feature" points woven across the whole field
+  var FEATS = ['CCTV', 'Control acces', 'Alarme', 'Interfonie', 'Camere IP', 'Geofence',
+    'Obiectiv', 'Tehnician', 'Vehicul', 'Client nou', 'Ofertă', 'Contract', 'Programare',
+    'PV semnat', 'Semnătură', 'e-Factura', 'ANAF', 'SEAP', 'WhatsApp', 'Stoc',
+    'Backup', 'GDPR', 'SLA', 'Poze din teren', 'Foaie de parcurs', 'Alertă CCTV', 'Încasări', 'Checklist'];
+  var feats = FEATS.map(function (label) {
+    return { nx: rnd(-1, 1), ny: rnd(-0.56, 0.56), nz: rnd(-0.85, 0.85), sx: 0, sy: 0, d: 0, sc: 1, label: label, m: 0 };
+  });
+  // link each feature to its nearest module
+  feats.forEach(function (fn) {
+    var bd = 1e9, bi = 0;
+    mods.forEach(function (m, mi) { var dx = (fn.nx - m.nx) * 0.6, dy = fn.ny - m.ny, dz = fn.nz - m.nz, d = dx * dx + dy * dy + dz * dz; if (d < bd) { bd = d; bi = mi; } });
+    fn.m = bi;
   });
 
   // edges within the cloud (nearest 2, x weighted so horizontal links form)
@@ -57,7 +72,7 @@
   for (var f = 0; f < FLOW_N; f++) flow.push({ nx: rnd(-1.1, 1.1), ny: rnd(-0.55, 0.55), nz: rnd(-0.85, 0.85), sp: rnd(0.004, 0.010) });
 
   var drift = 0, tiltX = 0, tiltY = 0, tTiltX = 0, tTiltY = 0, dragRX = 0, dragRY = 0, velX = 0, velY = 0;
-  var dragging = false, lastX = 0, lastY = 0, ptype = 'mouse', mx = -999, my = -999, hover = -1;
+  var dragging = false, lastX = 0, lastY = 0, ptype = 'mouse', mx = -999, my = -999, hover = -1, hoverF = -1;
   var downX = 0, downY = 0, moved = false, rings = [];
   var vis = false, running = false, intro = 0, last = 0;
 
@@ -71,10 +86,11 @@
   window.addEventListener('resize', resize); resize();
 
   function burst(mi) {
-    rings.push({ mi: mi, start: performance.now() });
+    rings.push({ node: mods[mi], start: performance.now() });
     var added = 0;
     for (var i = 0; i < flowPulse.length && added < 4; i++) { if (Math.random() < 0.6) { flowPulse[i].mi = mi; flowPulse[i].t = 0; flowPulse[i].on = true; added++; } }
   }
+  function ringAt(node) { rings.push({ node: node, start: performance.now() }); }
   // burst pulses that shoot outward from a clicked module along its edges
   var flowPulse = [];
   for (var b2 = 0; b2 < 6; b2++) flowPulse.push({ mi: 0, t: 1, on: false });
@@ -94,7 +110,7 @@
       lastX = e.clientX; lastY = e.clientY;
     } else { tTiltY = ((mx / W) - 0.5) * 0.5; tTiltX = ((my / H) - 0.5) * -0.35; }
   });
-  window.addEventListener('pointerup', function () { if (dragging && !moved && hover >= 0) burst(hover); dragging = false; });
+  window.addEventListener('pointerup', function () { if (dragging && !moved) { if (hover >= 0) burst(hover); else if (hoverF >= 0) ringAt(feats[hoverF]); } dragging = false; });
   stage.addEventListener('pointerleave', function () { if (!dragging) { mx = -999; my = -999; tTiltX = 0; tTiltY = 0; } });
 
   function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
@@ -126,7 +142,7 @@
     cosY = Math.cos(ry); sinY = Math.sin(ry); cosX = Math.cos(rx); sinX = Math.sin(rx);
     cx = W / 2; cy = H / 2;
 
-    proj(cloud); proj(mods);
+    proj(cloud); proj(mods); proj(feats);
 
     // cursor parts the mesh
     if (mx > -900 && !reduce) {
@@ -137,8 +153,14 @@
       }
     }
 
-    hover = -1;
-    if (mx > -900) { var best = 32 * 32; for (var h = 0; h < mods.length; h++) { var ddx = mods[h].sx - mx, ddy = mods[h].sy - my, dd = ddx * ddx + ddy * ddy; if (dd < best) { best = dd; hover = h; } } }
+    hover = -1; hoverF = -1;
+    if (mx > -900) {
+      var bo = 32 * 32, hi = -1;
+      for (var h = 0; h < mods.length; h++) { var ddx = mods[h].sx - mx, ddy = mods[h].sy - my, dd = ddx * ddx + ddy * ddy; if (dd < bo) { bo = dd; hi = h; } }
+      var boF = 24 * 24, hfi = -1;
+      for (var hf = 0; hf < feats.length; hf++) { var fdx = feats[hf].sx - mx, fdy = feats[hf].sy - my, fd = fdx * fdx + fdy * fdy; if (fd < boF) { boF = fd; hfi = hf; } }
+      if (hi >= 0 && (hfi < 0 || bo <= boF)) hover = hi; else if (hfi >= 0) hoverF = hfi;
+    }
 
     ctx.clearRect(0, 0, W, H);
 
@@ -163,6 +185,35 @@
       ctx.beginPath(); ctx.moveTo(a3.sx, a3.sy); ctx.lineTo(b3.sx, b3.sy);
       ctx.strokeStyle = conn ? 'rgba(0,212,255,' + (0.75 * ie) + ')' : 'rgba(0,212,255,' + (hover >= 0 ? base * 0.4 : base) + ')';
       ctx.lineWidth = conn ? 1.6 : 1; ctx.stroke();
+    }
+
+    // feature -> module links (brighten the hovered module's family)
+    for (var fe = 0; fe < feats.length; fe++) {
+      var fn = feats[fe], pm = mods[fn.m], famHot = (hover === fn.m || hoverF === fe);
+      var fdep = (fn.d + 1) / 2;
+      ctx.beginPath(); ctx.moveTo(fn.sx, fn.sy); ctx.lineTo(pm.sx, pm.sy);
+      ctx.strokeStyle = famHot ? 'rgba(0,212,255,' + (0.55 * ie) + ')' : 'rgba(79,125,255,' + ((0.05 + fdep * 0.08) * ie * (hover >= 0 || hoverF >= 0 ? 0.5 : 1)) + ')';
+      ctx.lineWidth = famHot ? 1.4 : 0.8; ctx.stroke();
+    }
+    // feature nodes + labels (depth sorted)
+    var fOrder = feats.map(function (_, i) { return i; }).sort(function (aa, bb) { return feats[aa].d - feats[bb].d; });
+    for (var fo = 0; fo < fOrder.length; fo++) {
+      var fi = fOrder[fo], fn2 = feats[fi], fdn = (fn2.d + 1) / 2, isHF = fi === hoverF;
+      var frr = (2 + fdn * 2) * fn2.sc; if (isHF) frr *= 1.5;
+      ctx.beginPath(); ctx.arc(fn2.sx, fn2.sy, frr, 0, 6.283);
+      if (isHF) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; }
+      ctx.fillStyle = isHF ? '#fff' : 'rgba(0,212,255,' + ((0.35 + fdn * 0.45) * ie).toFixed(3) + ')';
+      ctx.fill(); ctx.shadowBlur = 0;
+      if (isHF || fdn > 0.7) {
+        var fla = (isHF ? 1 : (fdn - 0.7) * 3.3) * ie;
+        if (fla > 0.06) {
+          ctx.font = '600 ' + (isHF ? 11.5 : 10) + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
+          ctx.lineJoin = 'round'; ctx.lineWidth = 2.6; ctx.strokeStyle = 'rgba(5,8,22,' + (0.82 * fla).toFixed(2) + ')';
+          ctx.strokeText(fn2.label, fn2.sx, fn2.sy - frr - 7);
+          ctx.fillStyle = 'rgba(200,214,255,' + fla.toFixed(2) + ')';
+          ctx.fillText(fn2.label, fn2.sx, fn2.sy - frr - 7);
+        }
+      }
     }
 
     // LEFT-TO-RIGHT data flow across the whole width
@@ -208,7 +259,7 @@
     for (var rk = rings.length - 1; rk >= 0; rk--) {
       var age = (now - rings[rk].start) / 700;
       if (age >= 1) { rings.splice(rk, 1); continue; }
-      var rm = mods[rings[rk].mi];
+      var rm = rings[rk].node;
       ctx.beginPath(); ctx.arc(rm.sx, rm.sy, 6 + age * 54, 0, 6.283);
       ctx.strokeStyle = 'rgba(0,212,255,' + ((1 - age) * 0.7) + ')'; ctx.lineWidth = 2.4 * (1 - age); ctx.stroke();
     }

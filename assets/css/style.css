@@ -403,17 +403,19 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   letter-spacing: 0.02em; pointer-events: none; z-index: 2;
 }
 
-/* small description card that appears when a module node is clicked */
+/* small description card that appears when a module node is clicked — the
+   accent color/icon are set inline per module via --tip-accent* custom props */
 .core3d-tip {
   position: absolute; top: 0; left: 0; z-index: 3; pointer-events: none;
   width: 220px; transform: translate(-50%, -100%) translateY(-14px);
   padding: 12px 14px; border-radius: 14px;
   background: rgba(11, 17, 40, 0.86);
   border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--tip-accent, var(--ai));
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0,212,255,0.08);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45), 0 0 26px var(--tip-accent-glow, rgba(0,212,255,0.2));
   opacity: 0; visibility: hidden;
-  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 .core3d-tip.show { opacity: 1; visibility: visible; transform: translate(-50%, -100%) translateY(-20px); }
 .core3d-tip::after {
@@ -421,7 +423,16 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   transform: translateX(-50%) rotate(45deg);
   background: rgba(11, 17, 40, 0.86); border-right: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong);
 }
-.core3d-tip b { display: block; font-size: 0.86rem; font-weight: 800; color: var(--ai); margin-bottom: 4px; }
+.core3d-tip-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.core3d-tip-icon {
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--tip-accent-soft, rgba(0,212,255,0.14));
+  border: 1px solid var(--tip-accent-glow, rgba(0,212,255,0.3));
+  color: var(--tip-accent, var(--ai));
+}
+.core3d-tip-icon svg { width: 15px; height: 15px; }
+.core3d-tip b { font-size: 0.86rem; font-weight: 800; color: var(--tip-accent, var(--ai)); }
 .core3d-tip p { font-size: 0.78rem; line-height: 1.4; color: var(--text-2); }
 @media (max-width: 480px) { .core3d-tip { width: 180px; } }
 

@@ -27,6 +27,20 @@
     'Checklist', 'Semnătură', 'PV semnat', 'Programare', 'Lead', 'Ofertă', 'Deviz', 'Contract', 'e-Factura',
     'ANAF', 'SEAP', 'Încasare', 'Stoc', 'Serie echipament', 'Mentenanță', 'SLA', 'Inspector AI', 'Alertă CCTV',
     'Notificare', 'WhatsApp', 'Backup', 'GDPR', 'Raport', 'Foaie de parcurs'];
+  // same icon each module already uses elsewhere on the site (bento cards / tabs),
+  // and a color grouped by category from the site's existing brand tokens
+  var MOD_ICON = {
+    'Clienți & Vânzări': 'i-users', 'Dispecerat': 'i-calendar', 'GPS & Flotă': 'i-pin',
+    'Lucrări în teren': 'i-wrench', 'Facturare & ANAF': 'i-receipt', 'Inspector AI': 'i-cpu',
+    'Mentenanță': 'i-shield-check', 'Inventar': 'i-box', 'Automatizări': 'i-branch',
+    'Rapoarte': 'i-chart', 'Aplicație mobilă': 'i-phone'
+  };
+  var MOD_COLOR = {
+    'Clienți & Vânzări': [79, 125, 255], 'Dispecerat': [109, 91, 255], 'GPS & Flotă': [255, 181, 71],
+    'Lucrări în teren': [33, 208, 122], 'Facturare & ANAF': [33, 208, 122], 'Inspector AI': [0, 212, 255],
+    'Mentenanță': [33, 208, 122], 'Inventar': [255, 181, 71], 'Automatizări': [109, 91, 255],
+    'Rapoarte': [79, 125, 255], 'Aplicație mobilă': [0, 212, 255]
+  };
 
   function fib(n, r) {
     var p = [], phi = Math.PI * (3 - Math.sqrt(5));
@@ -67,9 +81,17 @@
     function openTip(mi, dur) {
       if (activeTip === mi) { closeTip(); return; }
       activeTip = mi; tipUntil = performance.now() + (dur || 6000);
-      if (tipTitle) tipTitle.textContent = mods[mi].label;
-      if (tipDesc) tipDesc.textContent = MOD_DESC[mods[mi].label] || '';
-      if (tipEl) tipEl.classList.add('show');
+      var label = mods[mi].label, col = MOD_COLOR[label] || [0, 212, 255];
+      if (tipTitle) tipTitle.textContent = label;
+      if (tipDesc) tipDesc.textContent = MOD_DESC[label] || '';
+      if (tipEl) {
+        tipEl.classList.add('show');
+        tipEl.style.setProperty('--tip-accent', 'rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')');
+        tipEl.style.setProperty('--tip-accent-soft', 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.16)');
+        tipEl.style.setProperty('--tip-accent-glow', 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',0.35)');
+        var useEl = tipEl.querySelector('.core3d-tip-icon use');
+        if (useEl) useEl.setAttribute('href', '#' + (MOD_ICON[label] || 'i-cpu'));
+      }
     }
     function closeTip() { activeTip = -1; if (tipEl) tipEl.classList.remove('show'); }
 

@@ -23,14 +23,14 @@
   // faint ambient cloud for connective texture
   var CLOUD_N = MOBILE ? 34 : 70;
   var cloud = [];
-  for (var i = 0; i < CLOUD_N; i++) cloud.push({ nx: rnd(-1.05, 1.05), ny: rnd(-0.62, 0.62), nz: rnd(-0.9, 0.9), sx: 0, sy: 0, d: 0, sc: 1 });
+  for (var i = 0; i < CLOUD_N; i++) cloud.push({ nx: rnd(-1.05, 1.05), ny: rnd(-0.62, 0.62), nz: rnd(-0.9, 0.9), sx: 0, sy: 0, d: 0, sc: 1, ph: rnd(0, 6.283) });
 
   // modules spread left-to-right, layered in depth
   var mods = MODS.map(function (label, k) {
     var nx = -0.92 + k * (1.84 / (MODS.length - 1));
     var ny = (k % 2 ? 0.3 : -0.3) + rnd(-0.08, 0.08);
     var nz = ((k % 3) - 1) * 0.55 + rnd(-0.1, 0.1);
-    return { nx: nx, ny: ny, nz: nz, sx: 0, sy: 0, d: 0, sc: 1, label: label };
+    return { nx: nx, ny: ny, nz: nz, sx: 0, sy: 0, d: 0, sc: 1, label: label, ph: rnd(0, 6.283) };
   });
 
   // real platform "feature" points woven across the whole field
@@ -39,7 +39,7 @@
     'PV semnat', 'Semnătură', 'e-Factura', 'ANAF', 'SEAP', 'WhatsApp', 'Stoc',
     'Backup', 'GDPR', 'SLA', 'Poze din teren', 'Foaie de parcurs', 'Alertă CCTV', 'Încasări', 'Checklist'];
   var feats = FEATS.map(function (label) {
-    return { nx: rnd(-1, 1), ny: rnd(-0.56, 0.56), nz: rnd(-0.85, 0.85), sx: 0, sy: 0, d: 0, sc: 1, label: label, m: 0 };
+    return { nx: rnd(-1, 1), ny: rnd(-0.56, 0.56), nz: rnd(-0.85, 0.85), sx: 0, sy: 0, d: 0, sc: 1, label: label, m: 0, ph: rnd(0, 6.283) };
   });
   // link each feature to its nearest module
   feats.forEach(function (fn) {
@@ -125,28 +125,40 @@
     var x = nx * spanX, y = ny, z = nz;
     var x1 = x * cosY + z * sinY, z1 = -x * sinY + z * cosY;
     var y1 = y * cosX - z1 * sinX, z2 = y * sinX + z1 * cosX;
-    var sc = fov / (fov + z2);
+    var denom = fov + z2; if (denom < 0.5) denom = 0.5; // never let perspective blow up
+    var sc = fov / denom;
     return { sx: cx + x1 * sc * S, sy: cy - y1 * sc * S, d: z2, sc: sc };
   }
-  function proj(list) { for (var i = 0; i < list.length; i++) { var n = list[i], r = P(n.nx, n.ny, n.nz); n.sx = r.sx; n.sy = r.sy; n.d = r.d; n.sc = r.sc; } }
+  function proj(list, wob) {
+    for (var i = 0; i < list.length; i++) {
+      var n = list[i];
+      var ny = n.ny + Math.sin(wob + n.ph) * 0.05;      // gentle continuous undulation
+      var nz = n.nz + Math.cos(wob * 0.7 + n.ph) * 0.035;
+      var r = P(n.nx, ny, nz); n.sx = r.sx; n.sy = r.sy; n.d = r.d; n.sc = r.sc;
+    }
+  }
 
   function loop(now) {
     if (!running || !vis) { running = false; return; }
     var dt = Math.min(2.2, (now - last) / 16.67); last = now;
     intro = Math.min(1, intro + (reduce ? 1 : 0.012 * dt));
     var ie = 1 - Math.pow(1 - intro, 3);
-    drift = reduce ? 0 : Math.sin(now * 0.0002) * 0.08;
+    drift = reduce ? 0 : Math.sin(now * 0.00018) * 0.14 + Math.sin(now * 0.00041) * 0.04;
+    var sway = reduce ? 0 : Math.sin(now * 0.00013 + 1) * 0.07;
     if (!dragging) { dragRY += velY; dragRX += velX; velY *= 0.92; velX *= 0.92; }
+    dragRY = Math.max(-0.55, Math.min(0.55, dragRY));   // clamp rotation so nodes never fall behind the camera
+    dragRX = Math.max(-0.40, Math.min(0.40, dragRX));
     tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
-    var ry = drift + tiltY + dragRY, rx = -0.13 + tiltX + dragRX;
+    var ry = drift + tiltY + dragRY, rx = -0.13 + sway + tiltX + dragRX;
     cosY = Math.cos(ry); sinY = Math.sin(ry); cosX = Math.cos(rx); sinX = Math.sin(rx);
     cx = W / 2; cy = H / 2;
+    var wobT = reduce ? 0 : now * 0.0012;
 
-    proj(cloud); proj(mods); proj(feats);
+    proj(cloud, wobT); proj(mods, wobT); proj(feats, wobT);
 
     // cursor parts the mesh
     if (mx > -900 && !reduce) {
-      var RR = Math.min(W, H) * 0.2, RR2 = RR * RR, STR = RR * 0.5;
+      var RR = Math.min(W, H) * 0.26, RR2 = RR * RR, STR = RR * 0.62;
       for (var rp = 0; rp < cloud.length; rp++) {
         var cnn = cloud[rp], rdx = cnn.sx - mx, rdy = cnn.sy - my, r2 = rdx * rdx + rdy * rdy;
         if (r2 < RR2 && r2 > 1) { var rd = Math.sqrt(r2), ff = (1 - rd / RR) * STR; cnn.sx += rdx / rd * ff; cnn.sy += rdy / rd * ff; }

@@ -52,14 +52,19 @@
     var mods = fib(MODS.length, 1.2).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
 
     var activeTip = -1, tipUntil = 0;
-    function openTip(mi) {
+    function openTip(mi, dur) {
       if (activeTip === mi) { closeTip(); return; }
-      activeTip = mi; tipUntil = performance.now() + 6000;
+      activeTip = mi; tipUntil = performance.now() + (dur || 6000);
       if (tipTitle) tipTitle.textContent = mods[mi].label;
       if (tipDesc) tipDesc.textContent = MOD_DESC[mods[mi].label] || '';
       if (tipEl) tipEl.classList.add('show');
     }
     function closeTip() { activeTip = -1; if (tipEl) tipEl.classList.remove('show'); }
+
+    // autonomous cycle: every ~2-3s (when idle), settle on a random module and
+    // pop its detail card open for ~1-1.5s, then close and wait for the next one
+    var autoIdx = -1, autoOn = false, autoCloseAt = 0;
+    var autoOpenAt = performance.now() + 2000 + Math.random() * 1200;
 
     // Stellarium-style selection reticle: 4 corner brackets locked onto a point
     function drawReticle(x, y, r, alpha, color, lw) {
@@ -74,10 +79,6 @@
       });
       ctx.restore();
     }
-
-    // autonomous "spotlight" — only 1-2 modules pulse at any moment, cycling in turn
-    var SPOT_SLOTS = mini ? 1 : 2, SPOT_HOLD = 2600, SPOT_FADE = 500;
-    var spots = []; for (var ssi = 0; ssi < SPOT_SLOTS; ssi++) spots.push({ idx: ssi % mods.length, at: 0 });
 
     var cloudEdges = [];
     cloud.forEach(function (a, i) {
@@ -161,23 +162,20 @@
       var dt = Math.min(2.2, (now - last) / 16.67); last = now;
       intro = Math.min(1, intro + (reduce ? 1 : 0.012 * dt));
       var ie = 1 - Math.pow(1 - intro, 3);
-      var spotAmtByIdx = []; for (var zz = 0; zz < mods.length; zz++) spotAmtByIdx.push(0);
-      for (var ssj = 0; ssj < spots.length; ssj++) {
-        var slot = spots[ssj];
-        if (!slot.at) slot.at = now - ssj * (SPOT_HOLD / SPOT_SLOTS);
-        if (!reduce && now - slot.at > SPOT_HOLD) {
-          var others = spots.map(function (s) { return s.idx; });
-          var pick; var tries = 0;
-          do { pick = (Math.random() * mods.length) | 0; tries++; } while (tries < 8 && (pick === slot.idx || others.indexOf(pick) !== -1));
-          slot.idx = pick; slot.at = now;
+
+      if (!reduce) {
+        if (autoOn) {
+          if (activeTip !== autoIdx) { autoOn = false; autoOpenAt = now + 2000 + Math.random() * 1200; }
+          else if (now >= autoCloseAt) { closeTip(); autoOn = false; autoOpenAt = now + 2000 + Math.random() * 1200; }
+        } else if (activeTip === -1 && !dragging && mx <= -900 && now >= autoOpenAt) {
+          autoIdx = (Math.random() * mods.length) | 0;
+          var autoDur = 1200 + Math.random() * 800;
+          openTip(autoIdx, autoDur);
+          rings.push({ mi: autoIdx, start: now });
+          autoOn = true; autoCloseAt = now + autoDur;
         }
-        var age = now - slot.at;
-        var spotIn = Math.min(1, age / SPOT_FADE);
-        var spotOut = age > SPOT_HOLD - SPOT_FADE ? Math.max(0, 1 - (age - (SPOT_HOLD - SPOT_FADE)) / SPOT_FADE) : 1;
-        var amt = reduce ? 0 : spotIn * spotOut;
-        if (amt > spotAmtByIdx[slot.idx]) spotAmtByIdx[slot.idx] = amt;
       }
-      if (!dragging) { rotY += (reduce ? 0 : 0.00035) * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
+      if (!dragging) { var spin = (reduce || autoOn) ? 0 : 0.00035; rotY += spin * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
       tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
       var ry = rotY + tiltY, rx = rotX + tiltX;
       var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
@@ -229,10 +227,10 @@
       }
 
       for (var mi = 0; mi < mods.length; mi++) {
-        var m = mods[mi], dep = (m.d + 1) / 2, hot = (hover === mi), spotL = spotAmtByIdx[mi];
+        var m = mods[mi], dep = (m.d + 1) / 2, hot = (hover === mi), sel = (mi === activeTip);
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(m.sx, m.sy);
-        ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.8 * ie) + ')' : (spotL > 0.05 ? 'rgba(0,212,255,' + (spotL * 0.7 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie * (hover >= 0 ? 0.45 : 1)) + ')');
-        ctx.lineWidth = hot ? 1.8 : (1 + spotL * 0.8); ctx.stroke();
+        ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.8 * ie) + ')' : (sel ? 'rgba(0,212,255,' + (0.55 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie * (hover >= 0 ? 0.45 : 1)) + ')');
+        ctx.lineWidth = hot ? 1.8 : (sel ? 1.6 : 1); ctx.stroke();
       }
       for (var me = 0; me < modEdges.length; me++) {
         var i0 = modEdges[me][0], i1 = modEdges[me][1], a3 = mods[i0], b3 = mods[i1];
@@ -256,35 +254,31 @@
       var order = mods.map(function (_, i) { return i; }).sort(function (a, b) { return mods[a].d - mods[b].d; });
       for (var o = 0; o < order.length; o++) {
         var idx = order[o], m4 = mods[idx], dn4 = (m4.d + 1) / 2, isH = idx === hover;
-        var thisSpot = spotAmtByIdx[idx], isSpot = thisSpot > 0.01, isSel = idx === activeTip;
-        var rr = (3.2 + dn4 * 2.4) * m4.sc * (1 + thisSpot * 0.3);
+        var isSel = idx === activeTip, selAmt = isSel ? 1 : 0;
+        var rr = (3.2 + dn4 * 2.4) * m4.sc * (1 + selAmt * 0.3);
         if (isH) rr *= 1.4;
-        ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * (2.4 + thisSpot * 1.1), 0, 6.283);
-        ctx.fillStyle = 'rgba(0,212,255,' + ((0.04 + dn4 * 0.04 + thisSpot * 0.09) * ie).toFixed(3) + ')'; ctx.fill();
+        ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * (2.4 + selAmt * 1.1), 0, 6.283);
+        ctx.fillStyle = 'rgba(0,212,255,' + ((0.04 + dn4 * 0.04 + selAmt * 0.09) * ie).toFixed(3) + ')'; ctx.fill();
         ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr, 0, 6.283);
-        if (isH || isSpot) { ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 16 : 7 + thisSpot * 7; }
-        var baseAl = (0.5 + dn4 * 0.35 + thisSpot * 0.25) * ie;
-        ctx.fillStyle = isH ? '#ffffff' : (isSpot ? 'rgba(180,235,255,' + Math.min(1, baseAl) + ')' : 'rgba(0,212,255,' + Math.min(1, baseAl).toFixed(3) + ')');
+        if (isH || isSel) { ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 16 : 12; }
+        var baseAl = (0.5 + dn4 * 0.35 + selAmt * 0.25) * ie;
+        ctx.fillStyle = isH ? '#ffffff' : (isSel ? 'rgba(180,235,255,' + Math.min(1, baseAl) + ')' : 'rgba(0,212,255,' + Math.min(1, baseAl).toFixed(3) + ')');
         ctx.fill(); ctx.shadowBlur = 0;
-        ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.25 + dn4 * 0.3 + thisSpot * 0.2) * ie).toFixed(3) + ')'; ctx.lineWidth = 1 + thisSpot * 0.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.25 + dn4 * 0.3 + selAmt * 0.2) * ie).toFixed(3) + ')'; ctx.lineWidth = 1 + selAmt * 0.5; ctx.stroke();
 
         if (isH) drawReticle(m4.sx, m4.sy, rr + 9, 0.9 * ie, 'rgba(255,255,255,1)', 1.6);
-        if (isSpot) {
-          var retPulse = 0.55 + 0.45 * Math.sin(now * 0.0032 + idx * 1.7);
-          drawReticle(m4.sx, m4.sy, rr + 7 + retPulse * 5, thisSpot * (0.4 + retPulse * 0.5) * ie, 'rgba(0,212,255,1)', 1.4);
-        }
         if (isSel && !isH) {
           var selPulse = 0.55 + 0.45 * Math.sin(now * 0.0026);
-          drawReticle(m4.sx, m4.sy, rr + 12 + selPulse * 4, (0.55 + selPulse * 0.35) * ie, 'rgba(140,232,255,1)', 1.8);
+          drawReticle(m4.sx, m4.sy, rr + 10 + selPulse * 5, (0.6 + selPulse * 0.35) * ie, 'rgba(0,212,255,1)', 1.6);
         }
-        if (isH || isSpot || isSel || dn4 > 0.5) {
-          var la = Math.max(isH ? 1 : 0, isSpot ? thisSpot : 0, isSel ? 1 : 0, dn4 > 0.5 ? (dn4 - 0.5) * 2 : 0) * ie;
-          if (la > 0.04 && !(mini && !isH && !isSpot && !isSel)) {
-            var fsz = (isH ? 13 : (isSpot || isSel) ? 12.5 + thisSpot * 1.5 : 11.5) * (mini ? 0.86 : 1);
+        if (isH || isSel || dn4 > 0.5) {
+          var la = Math.max(isH ? 1 : 0, isSel ? 1 : 0, dn4 > 0.5 ? (dn4 - 0.5) * 2 : 0) * ie;
+          if (la > 0.04) {
+            var fsz = (isH || isSel ? 13 : 11.5) * (mini ? 0.86 : 1);
             ctx.font = '700 ' + fsz + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
             ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,8,22,' + (0.85 * la).toFixed(2) + ')';
             ctx.strokeText(m4.label, m4.sx, m4.sy - rr - 8);
-            ctx.fillStyle = (isSpot || isSel) ? 'rgba(210,242,255,' + la.toFixed(2) + ')' : 'rgba(237,241,255,' + la.toFixed(2) + ')';
+            ctx.fillStyle = isSel ? 'rgba(210,242,255,' + la.toFixed(2) + ')' : 'rgba(237,241,255,' + la.toFixed(2) + ')';
             ctx.fillText(m4.label, m4.sx, m4.sy - rr - 8);
           }
         }

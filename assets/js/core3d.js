@@ -144,18 +144,19 @@
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(79,125,255,' + (0.05 * ie) + ')'; ctx.beginPath();
     for (var c = 0; c < cloudEdges.length; c++) { var a = cloud[cloudEdges[c][0]], b = cloud[cloudEdges[c][1]]; ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); }
     ctx.stroke();
-    // feature dots: occasional twinkle + grow/brighten near the cursor
-    var PR = Math.min(W, H) * 0.16, fhBest = 0; featHover = -1;
+    // feature dots: always breathing + occasional flash + grow strongly near the cursor
+    var PR = Math.min(W, H) * 0.2, fhBest = 0; featHover = -1;
     for (var cn = 0; cn < cloud.length; cn++) {
       var n2 = cloud[cn], dn2 = (n2.d + 1) / 2;
-      var tw = Math.pow(0.5 + 0.5 * Math.sin(now * 0.001 * n2.ps + n2.ph), 6); // twinkle 0..1, spikes now and then
+      var breathe = reduce ? 0 : 0.5 + 0.5 * Math.sin(now * 0.0016 * n2.ps + n2.ph);          // continuous pulse
+      var tw = reduce ? 0 : Math.pow(0.5 + 0.5 * Math.sin(now * 0.0009 * n2.ps + n2.ph * 1.7), 8); // bright flash now and then
       var prox = 0;
       if (mx > -900) { var pdx = n2.sx - mx, pdy = n2.sy - my, pd = Math.sqrt(pdx * pdx + pdy * pdy); if (pd < PR) { prox = 1 - pd / PR; if (prox > fhBest) { fhBest = prox; featHover = cn; } } }
-      var rad = (0.9 + dn2 * 1.4) * n2.sc * (1 + tw * 1.1 + prox * 2.4);
-      var al = Math.min(1, (0.14 + dn2 * 0.3) * ie * (1 + tw * 1.1 + prox * 1.6));
+      var rad = (0.9 + dn2 * 1.4) * n2.sc * (1 + breathe * 0.55 + tw * 1.4 + prox * 3.4);
+      var al = Math.min(1, (0.14 + dn2 * 0.3) * ie * (1 + breathe * 0.45 + tw * 1.2 + prox * 1.9));
       ctx.beginPath(); ctx.arc(n2.sx, n2.sy, rad, 0, 6.283);
-      if (prox > 0.45) { ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = 10 * prox; }
-      ctx.fillStyle = prox > 0.6 ? 'rgba(205,240,255,' + al + ')' : 'rgba(120,190,255,' + al + ')';
+      if (prox > 0.3 || tw > 0.5) { ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = prox > 0.3 ? 13 * prox : 8 * tw; }
+      ctx.fillStyle = prox > 0.5 ? 'rgba(210,242,255,' + al + ')' : 'rgba(130,195,255,' + al + ')';
       ctx.fill(); ctx.shadowBlur = 0;
     }
     // label the feature nearest the cursor (only when not focusing a module)

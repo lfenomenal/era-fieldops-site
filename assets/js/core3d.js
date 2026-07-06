@@ -26,7 +26,7 @@
   }
 
   // ambient "neural cloud" + labelled module nodes
-  var cloud = fib(MOBILE ? 48 : 84, 0.82).map(function (p) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1 }; });
+  var cloud = fib(MOBILE ? 48 : 120, 0.82).map(function (p) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, ox: 0, oy: 0, d: 0, sc: 1 }; });
   var mods = fib(MODS.length, 1.12).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
 
   var cloudEdges = [];
@@ -52,28 +52,42 @@
   var rotY = 0.5, rotX = -0.22, velY = 0, velX = 0;
   var tiltX = 0, tiltY = 0, tTiltX = 0, tTiltY = 0;
   var dragging = false, lastX = 0, lastY = 0, ptype = 'mouse', mx = -999, my = -999, hover = -1;
+  var downX = 0, downY = 0, moved = false, rings = [];
   var vis = false, running = false, intro = 0, last = 0;
 
   function resize() {
     var r = stage.getBoundingClientRect(); W = r.width; H = r.height;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    RAD = Math.min(W, H) * 0.30;
+    RAD = Math.min(W, H) * 0.36;
   }
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
   window.addEventListener('resize', resize); resize();
 
-  stage.addEventListener('pointerdown', function (e) { ptype = e.pointerType; dragging = true; lastX = e.clientX; lastY = e.clientY; });
+  function burst(mi) {
+    rings.push({ mi: mi, start: performance.now() });
+    var added = 0;
+    for (var i = 0; i < pulses.length && added < 5; i++) { if (Math.random() < 0.5) { pulses[i].core = true; pulses[i].m = mi; pulses[i].t = 0; pulses[i].sp = 0.012; added++; } }
+  }
+  stage.addEventListener('pointerdown', function (e) {
+    ptype = e.pointerType; dragging = true; moved = false;
+    lastX = e.clientX; lastY = e.clientY; downX = e.clientX; downY = e.clientY;
+    var r = stage.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top;
+  });
   stage.addEventListener('pointermove', function (e) {
     var r = stage.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top;
     if (dragging) {
       var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) moved = true;
       rotY += dx * 0.007; velY = dx * 0.007;
       if (ptype === 'mouse') { rotX += dy * 0.006; velX = dy * 0.006; }
       lastX = e.clientX; lastY = e.clientY;
     } else { tTiltY = ((mx / W) - 0.5) * 0.6; tTiltX = ((my / H) - 0.5) * -0.4; }
   });
-  window.addEventListener('pointerup', function () { dragging = false; });
-  stage.addEventListener('pointerleave', function () { mx = -999; my = -999; tTiltX = 0; tTiltY = 0; });
+  window.addEventListener('pointerup', function () {
+    if (dragging && !moved && hover >= 0) burst(hover);
+    dragging = false;
+  });
+  stage.addEventListener('pointerleave', function () { if (!dragging) { mx = -999; my = -999; tTiltX = 0; tTiltY = 0; } });
 
   function start() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
   if (window.IntersectionObserver) {
@@ -105,6 +119,15 @@
     proj(cloud, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
     proj(mods, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
 
+    // cursor repels the ambient cloud — the mesh parts around the pointer (interactive)
+    if (mx > -900 && !reduce) {
+      var RR = Math.min(W, H) * 0.22, RR2 = RR * RR, STR = RR * 0.5;
+      for (var rp = 0; rp < cloud.length; rp++) {
+        var cnn = cloud[rp], rdx = cnn.sx - mx, rdy = cnn.sy - my, r2 = rdx * rdx + rdy * rdy;
+        if (r2 < RR2 && r2 > 1) { var rd = Math.sqrt(r2), f = (1 - rd / RR) * STR; cnn.sx += rdx / rd * f; cnn.sy += rdy / rd * f; }
+      }
+    }
+
     hover = -1;
     if (mx > -900) { var best = 30 * 30; for (var h = 0; h < mods.length; h++) { var ddx = mods[h].sx - mx, ddy = mods[h].sy - my, dd = ddx * ddx + ddy * ddy; if (dd < best) { best = dd; hover = h; } } }
 
@@ -123,18 +146,20 @@
     ctx.stroke();
     for (var cn = 0; cn < cloud.length; cn++) { var n2 = cloud[cn], dn2 = (n2.d + 1) / 2; ctx.beginPath(); ctx.arc(n2.sx, n2.sy, (0.6 + dn2 * 1.2) * n2.sc, 0, 6.283); ctx.fillStyle = 'rgba(120,160,255,' + ((0.12 + dn2 * 0.28) * ie) + ')'; ctx.fill(); }
 
-    // module -> core links
+    // module -> core links (dim the rest when one is focused)
     for (var mi = 0; mi < mods.length; mi++) {
       var m = mods[mi], dep = (m.d + 1) / 2, hot = (hover === mi);
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(m.sx, m.sy);
-      ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.7 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie) + ')';
-      ctx.lineWidth = hot ? 1.6 : 1; ctx.stroke();
+      ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.8 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie * (hover >= 0 ? 0.45 : 1)) + ')';
+      ctx.lineWidth = hot ? 1.8 : 1; ctx.stroke();
     }
-    // module <-> module
+    // module <-> module (highlight the hovered module's links)
     for (var me = 0; me < modEdges.length; me++) {
-      var a3 = mods[modEdges[me][0]], b3 = mods[modEdges[me][1]];
+      var i0 = modEdges[me][0], i1 = modEdges[me][1], a3 = mods[i0], b3 = mods[i1];
+      var conn = (hover === i0 || hover === i1), base = (0.06 + ((a3.d + b3.d) / 2 + 1) * 0.06) * ie;
       ctx.beginPath(); ctx.moveTo(a3.sx, a3.sy); ctx.lineTo(b3.sx, b3.sy);
-      ctx.strokeStyle = 'rgba(0,212,255,' + ((0.06 + ((a3.d + b3.d) / 2 + 1) * 0.06) * ie) + ')'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.strokeStyle = conn ? 'rgba(0,212,255,' + (0.75 * ie) + ')' : 'rgba(0,212,255,' + (hover >= 0 ? base * 0.4 : base) + ')';
+      ctx.lineWidth = conn ? 1.6 : 1; ctx.stroke();
     }
 
     // data pulses
@@ -181,6 +206,15 @@
     ctx.shadowColor = '#4F7DFF'; ctx.shadowBlur = 24; ctx.fill(); ctx.shadowBlur = 0;
     ctx.font = '800 13px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(237,241,255,' + ie + ')'; ctx.fillText('ERA', cx, cy + 28);
+
+    // click ripple rings on modules
+    for (var rk = rings.length - 1; rk >= 0; rk--) {
+      var age = (now - rings[rk].start) / 700;
+      if (age >= 1) { rings.splice(rk, 1); continue; }
+      var rm = mods[rings[rk].mi];
+      ctx.beginPath(); ctx.arc(rm.sx, rm.sy, 6 + age * 52, 0, 6.283);
+      ctx.strokeStyle = 'rgba(0,212,255,' + ((1 - age) * 0.7) + ')'; ctx.lineWidth = 2.4 * (1 - age); ctx.stroke();
+    }
 
     requestAnimationFrame(loop);
   }

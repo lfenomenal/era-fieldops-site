@@ -423,8 +423,12 @@ body.loaded .command-center { opacity: 1; transform: none; }
   background: rgba(33, 208, 122, 0.1); border: 1px solid rgba(33, 208, 122, 0.25);
 }
 .cc-body { display: grid; grid-template-columns: 1fr 148px; }
-.cc-map { position: relative; min-height: 340px; overflow: hidden; }
-.cc-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cc-map {
+  position: relative; min-height: 340px; overflow: hidden;
+  cursor: grab; touch-action: pan-y;
+}
+.cc-map:active { cursor: grabbing; }
+.cc-map svg, .cc-map canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cc-side {
   border-left: 1px solid var(--border); padding: 14px 12px;
   display: flex; flex-direction: column; gap: 10px;
@@ -490,18 +494,9 @@ body.loaded .command-center { opacity: 1; transform: none; }
   50% { transform: translate(-18px, 16px) scale(1.08); }
 }
 
-/* ---------- SVG map anims ---------- */
-.map-grid line { stroke: rgba(255,255,255,0.04); stroke-width: 1; }
-.map-street { stroke: rgba(255,255,255,0.09); stroke-width: 1.5; fill: none; }
-.map-route {
-  stroke-width: 1.5; fill: none; stroke-dasharray: 6 6;
-  animation: dashMove 1.4s linear infinite;
-}
+/* ---------- shared dash/ping keyframes (used by the mini live-card map) ---------- */
 @keyframes dashMove { to { stroke-dashoffset: -12; } }
-.map-obj { fill: rgba(255,255,255,0.15); }
-.map-obj-ring { fill: none; stroke: rgba(0,212,255,0.4); stroke-width: 1; transform-origin: center; transform-box: fill-box; animation: objPing 3s var(--ease) infinite; }
 @keyframes objPing { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
-.geofence { fill: rgba(79,125,255,0.05); stroke: rgba(79,125,255,0.3); stroke-width: 1; stroke-dasharray: 4 4; }
 
 /* ---------- 3D module core (full-bleed, interactive) ---------- */
 .core3d-sec { padding-top: var(--space-5); }

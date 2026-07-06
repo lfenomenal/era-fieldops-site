@@ -55,11 +55,11 @@
     var NF = mini ? 18 : (MOBILE ? 30 : 64);
     var cloud = fib(NF, 1).map(function (p, i) {
       var rr = 0.5 + Math.random() * 0.48;
-      var o = orbitize({ x: p.x * rr, y: p.y * rr, z: p.z * rr }, 0.0006, 0.0016);
-      return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7 };
+      var o = orbitize({ x: p.x * rr, y: p.y * rr, z: p.z * rr }, 0.0013, 0.0032);
+      return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7, flareAt: 0 };
     });
     var mods = fib(MODS.length, 1.2).map(function (p, i) {
-      var o = orbitize(p, 0.0005, 0.0012);
+      var o = orbitize(p, 0.0011, 0.0024);
       return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] };
     });
 
@@ -187,13 +187,16 @@
           autoOn = true; autoCloseAt = now + autoDur;
         }
       }
-      if (!dragging) { var spin = (reduce || autoOn) ? 0 : 0.00035; rotY += spin * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
+      if (!dragging) { var spin = (reduce || autoOn) ? 0 : 0.0006; rotY += spin * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
       tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
       var ry = rotY + tiltY, rx = rotX + tiltX;
       var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
       var cx = W / 2, cy = H / 2, fov = 3.4;
       if (!reduce) {
-        for (var oi = 0; oi < cloud.length; oi++) { var oc = cloud[oi]; oc.ang += oc.spin * dt; oc.x = Math.cos(oc.ang) * oc.r; oc.z = Math.sin(oc.ang) * oc.r; }
+        for (var oi = 0; oi < cloud.length; oi++) {
+          var oc = cloud[oi]; oc.ang += oc.spin * dt; oc.x = Math.cos(oc.ang) * oc.r; oc.z = Math.sin(oc.ang) * oc.r;
+          if (!oc.flareAt && Math.random() < 0.00035 * dt) oc.flareAt = now;
+        }
         for (var oj = 0; oj < mods.length; oj++) { var om = mods[oj]; om.ang += om.spin * dt; om.x = Math.cos(om.ang) * om.r; om.z = Math.sin(om.ang) * om.r; }
       }
       proj(cloud, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
@@ -224,13 +227,18 @@
         var n2 = cloud[cn], dn2 = (n2.d + 1) / 2;
         var breathe = reduce ? 0 : 0.5 + 0.5 * Math.sin(now * 0.0016 * n2.ps + n2.ph);
         var tw = reduce ? 0 : Math.pow(0.5 + 0.5 * Math.sin(now * 0.0009 * n2.ps + n2.ph * 1.7), 8);
+        var flare = 0;
+        if (n2.flareAt) {
+          var fAge = now - n2.flareAt;
+          if (fAge > 900) { n2.flareAt = 0; } else { flare = Math.sin((fAge / 900) * Math.PI); }
+        }
         var prox = 0;
         if (mx > -900) { var pdx = n2.sx - mx, pdy = n2.sy - my, pd = Math.sqrt(pdx * pdx + pdy * pdy); if (pd < PR) { prox = 1 - pd / PR; if (prox > fhBest) { fhBest = prox; featHover = cn; } } }
-        var rad = (0.9 + dn2 * 1.4) * n2.sc * (1 + breathe * 0.55 + tw * 1.4 + prox * 3.4);
-        var al = Math.min(1, (0.14 + dn2 * 0.3) * ie * (1 + breathe * 0.45 + tw * 1.2 + prox * 1.9));
+        var rad = (0.9 + dn2 * 1.4) * n2.sc * (1 + breathe * 0.55 + tw * 1.4 + prox * 3.4 + flare * 2.6);
+        var al = Math.min(1, (0.14 + dn2 * 0.3) * ie * (1 + breathe * 0.45 + tw * 1.2 + prox * 1.9 + flare * 2.1));
         ctx.beginPath(); ctx.arc(n2.sx, n2.sy, rad, 0, 6.283);
-        if (prox > 0.3 || tw > 0.5) { ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = prox > 0.3 ? 13 * prox : 8 * tw; }
-        ctx.fillStyle = prox > 0.5 ? 'rgba(210,242,255,' + al + ')' : 'rgba(130,195,255,' + al + ')';
+        if (prox > 0.3 || tw > 0.5 || flare > 0.25) { ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = prox > 0.3 ? 13 * prox : (flare > 0.25 ? 15 * flare : 8 * tw); }
+        ctx.fillStyle = (prox > 0.5 || flare > 0.4) ? 'rgba(210,242,255,' + al + ')' : 'rgba(130,195,255,' + al + ')';
         ctx.fill(); ctx.shadowBlur = 0;
       }
       if (!mini && featHover >= 0 && fhBest > 0.35 && hover < 0) {

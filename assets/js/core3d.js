@@ -134,6 +134,19 @@
   document.addEventListener('visibilitychange', function () { if (document.hidden) running = false; else if (vis) start(); });
 
   function lerp(a, b, t) { return a + (b - a) * t; }
+  // Stellarium-style selection reticle: a square of 4 corner brackets locked onto a point
+  function drawReticle(x, y, r, alpha, color, lw) {
+    if (alpha <= 0.01) return;
+    var tick = r * 0.55;
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw || 1.5; ctx.lineCap = 'round';
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function (c) {
+      var px = x + c[0] * r, py = y + c[1] * r;
+      ctx.beginPath();
+      ctx.moveTo(px - c[0] * tick, py); ctx.lineTo(px, py); ctx.lineTo(px, py - c[1] * tick);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
   function proj(list, cosY, sinY, cosX, sinX, cx, cy, fov, s) {
     for (var i = 0; i < list.length; i++) {
       var n = list[i], X = n.x * s, Y = n.y * s, Z = n.z * s;
@@ -164,11 +177,15 @@
       var age = now - slot.at;
       var spotIn = Math.min(1, age / SPOT_FADE);
       var spotOut = age > SPOT_HOLD - SPOT_FADE ? Math.max(0, 1 - (age - (SPOT_HOLD - SPOT_FADE)) / SPOT_FADE) : 1;
-      var wave = 0.78 + 0.22 * Math.sin(now * 0.0055 + slot.seed);
-      var amt = reduce ? 0 : spotIn * spotOut * wave;
+      // clean, steady envelope — the pulsing sensation comes from the reticle animation
+      // drawn around the node, not from wobbling this value, so the highlight reads clearly.
+      var amt = reduce ? 0 : spotIn * spotOut;
       if (amt > spotAmtByIdx[slot.idx]) spotAmtByIdx[slot.idx] = amt;
     }
-    if (!dragging) { rotY += (reduce ? 0 : 0.0016) * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
+    // Stellarium-like calm ambient motion: the core drifts slowly on its own so depth
+    // (and therefore size/brightness) barely changes frame to frame — this is what lets
+    // the deliberate reticle pulses read as distinct instead of "everything moving at once".
+    if (!dragging) { rotY += (reduce ? 0 : 0.00035) * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
     tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
     var ry = rotY + tiltY, rx = rotX + tiltX;
     var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
@@ -256,28 +273,39 @@
     var order = mods.map(function (_, i) { return i; }).sort(function (a, b) { return mods[a].d - mods[b].d; });
     for (var o = 0; o < order.length; o++) {
       var idx = order[o], m4 = mods[idx], dn4 = (m4.d + 1) / 2, isH = idx === hover;
-      var thisSpot = spotAmtByIdx[idx], isSpot = thisSpot > 0.01;
-      var rr = (3.2 + dn4 * 3) * m4.sc * (1 + thisSpot * 0.85);
-      if (isH) rr *= 1.55;
+      var thisSpot = spotAmtByIdx[idx], isSpot = thisSpot > 0.01, isSel = idx === activeTip;
+      var rr = (3.2 + dn4 * 2.4) * m4.sc * (1 + thisSpot * 0.3);
+      if (isH) rr *= 1.4;
       // soft halo (no shadowBlur) — brighter while spotlighted
-      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * (2.6 + thisSpot * 1.6), 0, 6.283);
-      ctx.fillStyle = 'rgba(0,212,255,' + ((0.05 + dn4 * 0.06 + thisSpot * 0.14) * ie).toFixed(3) + ')'; ctx.fill();
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * (2.4 + thisSpot * 1.1), 0, 6.283);
+      ctx.fillStyle = 'rgba(0,212,255,' + ((0.04 + dn4 * 0.04 + thisSpot * 0.09) * ie).toFixed(3) + ')'; ctx.fill();
       // node — glow on hover AND on the spotlighted module(s)
       ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr, 0, 6.283);
-      if (isH || isSpot) { ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 16 : 10 + thisSpot * 10; }
-      var baseAl = (0.55 + dn4 * 0.45 + thisSpot * 0.4) * ie;
+      if (isH || isSpot) { ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 16 : 7 + thisSpot * 7; }
+      var baseAl = (0.5 + dn4 * 0.35 + thisSpot * 0.25) * ie;
       ctx.fillStyle = isH ? '#ffffff' : (isSpot ? 'rgba(180,235,255,' + Math.min(1, baseAl) + ')' : 'rgba(0,212,255,' + Math.min(1, baseAl).toFixed(3) + ')');
       ctx.fill(); ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.3 + dn4 * 0.4 + thisSpot * 0.3) * ie).toFixed(3) + ')'; ctx.lineWidth = 1 + thisSpot; ctx.stroke();
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.25 + dn4 * 0.3 + thisSpot * 0.2) * ie).toFixed(3) + ')'; ctx.lineWidth = 1 + thisSpot * 0.5; ctx.stroke();
+
+      // Stellarium-style target-lock reticles — the clear, unmistakable pulsing cue
+      if (isH) drawReticle(m4.sx, m4.sy, rr + 9, 0.9 * ie, 'rgba(255,255,255,1)', 1.6);
+      if (isSpot) {
+        var retPulse = 0.55 + 0.45 * Math.sin(now * 0.0032 + idx * 1.7);
+        drawReticle(m4.sx, m4.sy, rr + 7 + retPulse * 5, thisSpot * (0.4 + retPulse * 0.5) * ie, 'rgba(0,212,255,1)', 1.4);
+      }
+      if (isSel && !isH) {
+        var selPulse = 0.55 + 0.45 * Math.sin(now * 0.0026);
+        drawReticle(m4.sx, m4.sy, rr + 12 + selPulse * 4, (0.55 + selPulse * 0.35) * ie, 'rgba(140,232,255,1)', 1.8);
+      }
       // label: front-facing modules, the hovered one, OR the spotlighted one(s) (always clearly readable)
-      if (isH || isSpot || dn4 > 0.5) {
-        var la = Math.max(isH ? 1 : 0, isSpot ? thisSpot : 0, dn4 > 0.5 ? (dn4 - 0.5) * 2 : 0) * ie;
+      if (isH || isSpot || isSel || dn4 > 0.5) {
+        var la = Math.max(isH ? 1 : 0, isSpot ? thisSpot : 0, isSel ? 1 : 0, dn4 > 0.5 ? (dn4 - 0.5) * 2 : 0) * ie;
         if (la > 0.04) {
-          var fsz = (isH ? 13 : isSpot ? 12.5 + thisSpot * 1.5 : 11.5);
+          var fsz = (isH ? 13 : (isSpot || isSel) ? 12.5 + thisSpot * 1.5 : 11.5);
           ctx.font = '700 ' + fsz + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
           ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,8,22,' + (0.85 * la).toFixed(2) + ')';
           ctx.strokeText(m4.label, m4.sx, m4.sy - rr - 8);
-          ctx.fillStyle = isSpot ? 'rgba(210,242,255,' + la.toFixed(2) + ')' : 'rgba(237,241,255,' + la.toFixed(2) + ')';
+          ctx.fillStyle = (isSpot || isSel) ? 'rgba(210,242,255,' + la.toFixed(2) + ')' : 'rgba(237,241,255,' + la.toFixed(2) + ')';
           ctx.fillText(m4.label, m4.sx, m4.sy - rr - 8);
         }
       }

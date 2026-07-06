@@ -36,7 +36,11 @@
     var rr = 0.5 + Math.random() * 0.48;
     return { x: p.x * rr, y: p.y * rr, z: p.z * rr, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7 };
   });
-  var mods = fib(MODS.length, 1.2).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
+  var mods = fib(MODS.length, 1.2).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i], ph: Math.random() * 6.283, ps: 0.7 + Math.random() * 0.6 }; });
+
+  // autonomous "spotlight" that cycles through modules even with no interaction —
+  // makes sure a different module is clearly visible (label + stronger pulse) over time
+  var spotlight = 0, spotlightAt = 0, SPOT_HOLD = 3200, SPOT_FADE = 550;
 
   var cloudEdges = [];
   cloud.forEach(function (a, i) {
@@ -120,6 +124,16 @@
     var dt = Math.min(2.2, (now - last) / 16.67); last = now;
     intro = Math.min(1, intro + (reduce ? 1 : 0.012 * dt));
     var ie = 1 - Math.pow(1 - intro, 3);
+    if (!spotlightAt) spotlightAt = now;
+    if (!reduce && now - spotlightAt > SPOT_HOLD) {
+      var next = (spotlight + 1 + ((Math.random() * (mods.length - 1)) | 0)) % mods.length;
+      spotlight = next === spotlight ? (spotlight + 1) % mods.length : next;
+      spotlightAt = now;
+    }
+    var spotAge = now - spotlightAt;
+    var spotIn = Math.min(1, spotAge / SPOT_FADE);
+    var spotOut = spotAge > SPOT_HOLD - SPOT_FADE ? Math.max(0, 1 - (spotAge - (SPOT_HOLD - SPOT_FADE)) / SPOT_FADE) : 1;
+    var spotAmt = reduce ? 0 : spotIn * spotOut;
     if (!dragging) { rotY += (reduce ? 0 : 0.0016) * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
     tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
     var ry = rotY + tiltY, rx = rotX + tiltX;
@@ -169,12 +183,12 @@
       ctx.fillText(fn.label, fn.sx, fn.sy - 11);
     }
 
-    // module -> core links (dim the rest when one is focused)
+    // module -> core links (dim the rest when one is focused or spotlighted)
     for (var mi = 0; mi < mods.length; mi++) {
-      var m = mods[mi], dep = (m.d + 1) / 2, hot = (hover === mi);
+      var m = mods[mi], dep = (m.d + 1) / 2, hot = (hover === mi), spotL = (mi === spotlight) ? spotAmt : 0;
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(m.sx, m.sy);
-      ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.8 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie * (hover >= 0 ? 0.45 : 1)) + ')';
-      ctx.lineWidth = hot ? 1.8 : 1; ctx.stroke();
+      ctx.strokeStyle = hot ? 'rgba(0,212,255,' + (0.8 * ie) + ')' : (spotL > 0.05 ? 'rgba(0,212,255,' + (spotL * 0.7 * ie) + ')' : 'rgba(79,125,255,' + ((0.1 + dep * 0.16) * ie * (hover >= 0 ? 0.45 : 1)) + ')');
+      ctx.lineWidth = hot ? 1.8 : (1 + spotL * 0.8); ctx.stroke();
     }
     // module <-> module (highlight the hovered module's links)
     for (var me = 0; me < modEdges.length; me++) {
@@ -197,28 +211,34 @@
       ctx.beginPath(); ctx.arc(px, py, 2, 0, 6.283); ctx.fillStyle = 'rgba(140,232,255,' + (0.95 * ie) + ')'; ctx.fill();
     }
 
-    // module nodes + labels (depth sorted)
+    // module nodes + labels (depth sorted) — always breathing, plus an autonomous
+    // "spotlight" that cycles between modules so one is always clearly called out
     var order = mods.map(function (_, i) { return i; }).sort(function (a, b) { return mods[a].d - mods[b].d; });
     for (var o = 0; o < order.length; o++) {
       var idx = order[o], m4 = mods[idx], dn4 = (m4.d + 1) / 2, isH = idx === hover;
-      var rr = (3.2 + dn4 * 3) * m4.sc; if (isH) rr *= 1.55;
-      // cheap soft halo (no shadowBlur)
-      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * 2.6, 0, 6.283);
-      ctx.fillStyle = 'rgba(0,212,255,' + ((0.05 + dn4 * 0.06) * ie).toFixed(3) + ')'; ctx.fill();
-      // node — glow only on the hovered one
+      var isSpot = idx === spotlight && spotAmt > 0.01;
+      var breathe = reduce ? 0 : 0.5 + 0.5 * Math.sin(now * 0.0018 * m4.ps + m4.ph);
+      var rr = (3.2 + dn4 * 3) * m4.sc * (1 + breathe * 0.22 + spotAmt * 0.85);
+      if (isH) rr *= 1.55;
+      // soft halo (no shadowBlur) — brighter while spotlighted
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr * (2.6 + spotAmt * 1.6), 0, 6.283);
+      ctx.fillStyle = 'rgba(0,212,255,' + ((0.05 + dn4 * 0.06 + spotAmt * 0.14) * ie).toFixed(3) + ')'; ctx.fill();
+      // node — glow on hover AND on the spotlighted module
       ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr, 0, 6.283);
-      if (isH) { ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 16; }
-      ctx.fillStyle = isH ? '#ffffff' : 'rgba(0,212,255,' + ((0.55 + dn4 * 0.45) * ie).toFixed(3) + ')';
+      if (isH || isSpot) { ctx.shadowColor = isH ? '#ffffff' : '#00D4FF'; ctx.shadowBlur = isH ? 16 : 10 + spotAmt * 10; }
+      var baseAl = (0.55 + dn4 * 0.45 + breathe * 0.25 + spotAmt * 0.4) * ie;
+      ctx.fillStyle = isH ? '#ffffff' : (isSpot ? 'rgba(180,235,255,' + Math.min(1, baseAl) + ')' : 'rgba(0,212,255,' + Math.min(1, baseAl).toFixed(3) + ')');
       ctx.fill(); ctx.shadowBlur = 0;
-      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.3 + dn4 * 0.4) * ie).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.stroke();
-      // label: only front-facing modules or the hovered one (declutter), crisp stroke for contrast
-      if (isH || dn4 > 0.5) {
-        var la = (isH ? 1 : (dn4 - 0.5) * 2) * ie;
+      ctx.beginPath(); ctx.arc(m4.sx, m4.sy, rr + 4, 0, 6.283); ctx.strokeStyle = 'rgba(0,212,255,' + ((0.3 + dn4 * 0.4 + spotAmt * 0.3) * ie).toFixed(3) + ')'; ctx.lineWidth = 1 + spotAmt; ctx.stroke();
+      // label: front-facing modules, the hovered one, OR the spotlighted one (always clearly readable)
+      if (isH || isSpot || dn4 > 0.5) {
+        var la = Math.max(isH ? 1 : 0, isSpot ? spotAmt : 0, dn4 > 0.5 ? (dn4 - 0.5) * 2 : 0) * ie;
         if (la > 0.04) {
-          ctx.font = '700 ' + (isH ? 13 : 11.5) + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
+          var fsz = (isH ? 13 : isSpot ? 12.5 + spotAmt * 1.5 : 11.5);
+          ctx.font = '700 ' + fsz + 'px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
           ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(5,8,22,' + (0.85 * la).toFixed(2) + ')';
           ctx.strokeText(m4.label, m4.sx, m4.sy - rr - 8);
-          ctx.fillStyle = 'rgba(237,241,255,' + la.toFixed(2) + ')';
+          ctx.fillStyle = isSpot ? 'rgba(210,242,255,' + la.toFixed(2) + ')' : 'rgba(237,241,255,' + la.toFixed(2) + ')';
           ctx.fillText(m4.label, m4.sx, m4.sy - rr - 8);
         }
       }

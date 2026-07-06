@@ -44,12 +44,24 @@
     var DPR = Math.min(window.devicePixelRatio || 1, mini ? 1.25 : (MOBILE ? 1.5 : 2));
     var W = 0, H = 0, RAD = 1;
 
+    // each particle keeps its own orbit radius/height (from the fibonacci shell) but
+    // carries an independent angle + spin so it drifts around the core at its own
+    // pace/direction, instead of only moving as one rigid rotating sphere
+    function orbitize(p, spinBase, spinRange) {
+      var r = Math.sqrt(p.x * p.x + p.z * p.z);
+      return { r: r, ang: Math.atan2(p.z, p.x), y: p.y, spin: (spinBase + Math.random() * spinRange) * (Math.random() < 0.5 ? 1 : -1) };
+    }
+
     var NF = mini ? 18 : (MOBILE ? 30 : 64);
     var cloud = fib(NF, 1).map(function (p, i) {
       var rr = 0.5 + Math.random() * 0.48;
-      return { x: p.x * rr, y: p.y * rr, z: p.z * rr, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7 };
+      var o = orbitize({ x: p.x * rr, y: p.y * rr, z: p.z * rr }, 0.0006, 0.0016);
+      return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7 };
     });
-    var mods = fib(MODS.length, 1.2).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
+    var mods = fib(MODS.length, 1.2).map(function (p, i) {
+      var o = orbitize(p, 0.0005, 0.0012);
+      return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] };
+    });
 
     var activeTip = -1, tipUntil = 0;
     function openTip(mi, dur) {
@@ -180,6 +192,10 @@
       var ry = rotY + tiltY, rx = rotX + tiltX;
       var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
       var cx = W / 2, cy = H / 2, fov = 3.4;
+      if (!reduce) {
+        for (var oi = 0; oi < cloud.length; oi++) { var oc = cloud[oi]; oc.ang += oc.spin * dt; oc.x = Math.cos(oc.ang) * oc.r; oc.z = Math.sin(oc.ang) * oc.r; }
+        for (var oj = 0; oj < mods.length; oj++) { var om = mods[oj]; om.ang += om.spin * dt; om.x = Math.cos(om.ang) * om.r; om.z = Math.sin(om.ang) * om.r; }
+      }
       proj(cloud, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
       proj(mods, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
 

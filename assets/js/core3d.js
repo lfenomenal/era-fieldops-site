@@ -25,9 +25,18 @@
     return p;
   }
 
-  // ambient "neural cloud" + labelled module nodes
-  var cloud = fib(MOBILE ? 48 : 120, 0.82).map(function (p) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, ox: 0, oy: 0, d: 0, sc: 1 }; });
-  var mods = fib(MODS.length, 1.12).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
+  // meaningful "feature" dots (real platform things) around the core + labelled modules
+  var FEATS = ['CCTV', 'Camere IP', 'Control acces', 'Alarme', 'Interfonie', 'Geofence', 'Obiectiv', 'Senzori',
+    'Detector fum', 'Antiefracție', 'Tehnician', 'Echipă', 'Vehicul', 'Rută', 'Sosire GPS', 'Poze din teren',
+    'Checklist', 'Semnătură', 'PV semnat', 'Programare', 'Lead', 'Ofertă', 'Deviz', 'Contract', 'e-Factura',
+    'ANAF', 'SEAP', 'Încasare', 'Stoc', 'Serie echipament', 'Mentenanță', 'SLA', 'Inspector AI', 'Alertă CCTV',
+    'Notificare', 'WhatsApp', 'Backup', 'GDPR', 'Raport', 'Foaie de parcurs'];
+  var NF = MOBILE ? 30 : 64;
+  var cloud = fib(NF, 1).map(function (p, i) {
+    var rr = 0.5 + Math.random() * 0.48;
+    return { x: p.x * rr, y: p.y * rr, z: p.z * rr, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7 };
+  });
+  var mods = fib(MODS.length, 1.2).map(function (p, i) { return { x: p.x, y: p.y, z: p.z, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] }; });
 
   var cloudEdges = [];
   cloud.forEach(function (a, i) {
@@ -51,7 +60,7 @@
 
   var rotY = 0.5, rotX = -0.22, velY = 0, velX = 0;
   var tiltX = 0, tiltY = 0, tTiltX = 0, tTiltY = 0;
-  var dragging = false, lastX = 0, lastY = 0, ptype = 'mouse', mx = -999, my = -999, hover = -1;
+  var dragging = false, lastX = 0, lastY = 0, ptype = 'mouse', mx = -999, my = -999, hover = -1, featHover = -1;
   var downX = 0, downY = 0, moved = false, rings = [];
   var vis = false, running = false, intro = 0, last = 0;
 
@@ -119,15 +128,6 @@
     proj(cloud, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
     proj(mods, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
 
-    // cursor repels the ambient cloud — the mesh parts around the pointer (interactive)
-    if (mx > -900 && !reduce) {
-      var RR = Math.min(W, H) * 0.22, RR2 = RR * RR, STR = RR * 0.5;
-      for (var rp = 0; rp < cloud.length; rp++) {
-        var cnn = cloud[rp], rdx = cnn.sx - mx, rdy = cnn.sy - my, r2 = rdx * rdx + rdy * rdy;
-        if (r2 < RR2 && r2 > 1) { var rd = Math.sqrt(r2), f = (1 - rd / RR) * STR; cnn.sx += rdx / rd * f; cnn.sy += rdy / rd * f; }
-      }
-    }
-
     hover = -1;
     if (mx > -900) { var best = 30 * 30; for (var h = 0; h < mods.length; h++) { var ddx = mods[h].sx - mx, ddy = mods[h].sy - my, dd = ddx * ddx + ddy * ddy; if (dd < best) { best = dd; hover = h; } } }
 
@@ -140,11 +140,33 @@
     g.addColorStop(1, 'rgba(5,8,22,0)');
     ctx.fillStyle = g; ctx.fillRect(cx - RAD * 1.5, cy - RAD * 1.5, RAD * 3, RAD * 3);
 
-    // ambient cloud
+    // feature links (faint)
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(79,125,255,' + (0.05 * ie) + ')'; ctx.beginPath();
     for (var c = 0; c < cloudEdges.length; c++) { var a = cloud[cloudEdges[c][0]], b = cloud[cloudEdges[c][1]]; ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); }
     ctx.stroke();
-    for (var cn = 0; cn < cloud.length; cn++) { var n2 = cloud[cn], dn2 = (n2.d + 1) / 2; ctx.beginPath(); ctx.arc(n2.sx, n2.sy, (0.6 + dn2 * 1.2) * n2.sc, 0, 6.283); ctx.fillStyle = 'rgba(120,160,255,' + ((0.12 + dn2 * 0.28) * ie) + ')'; ctx.fill(); }
+    // feature dots: occasional twinkle + grow/brighten near the cursor
+    var PR = Math.min(W, H) * 0.16, fhBest = 0; featHover = -1;
+    for (var cn = 0; cn < cloud.length; cn++) {
+      var n2 = cloud[cn], dn2 = (n2.d + 1) / 2;
+      var tw = Math.pow(0.5 + 0.5 * Math.sin(now * 0.001 * n2.ps + n2.ph), 6); // twinkle 0..1, spikes now and then
+      var prox = 0;
+      if (mx > -900) { var pdx = n2.sx - mx, pdy = n2.sy - my, pd = Math.sqrt(pdx * pdx + pdy * pdy); if (pd < PR) { prox = 1 - pd / PR; if (prox > fhBest) { fhBest = prox; featHover = cn; } } }
+      var rad = (0.9 + dn2 * 1.4) * n2.sc * (1 + tw * 1.1 + prox * 2.4);
+      var al = Math.min(1, (0.14 + dn2 * 0.3) * ie * (1 + tw * 1.1 + prox * 1.6));
+      ctx.beginPath(); ctx.arc(n2.sx, n2.sy, rad, 0, 6.283);
+      if (prox > 0.45) { ctx.shadowColor = '#00D4FF'; ctx.shadowBlur = 10 * prox; }
+      ctx.fillStyle = prox > 0.6 ? 'rgba(205,240,255,' + al + ')' : 'rgba(120,190,255,' + al + ')';
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+    // label the feature nearest the cursor (only when not focusing a module)
+    if (featHover >= 0 && fhBest > 0.35 && hover < 0) {
+      var fn = cloud[featHover];
+      ctx.font = '600 11.5px Satoshi, system-ui, sans-serif'; ctx.textAlign = 'center';
+      ctx.lineJoin = 'round'; ctx.lineWidth = 2.6; ctx.strokeStyle = 'rgba(5,8,22,0.85)';
+      ctx.strokeText(fn.label, fn.sx, fn.sy - 11);
+      ctx.fillStyle = 'rgba(215,238,255,0.96)';
+      ctx.fillText(fn.label, fn.sx, fn.sy - 11);
+    }
 
     // module -> core links (dim the rest when one is focused)
     for (var mi = 0; mi < mods.length; mi++) {

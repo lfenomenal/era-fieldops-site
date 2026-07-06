@@ -1,8 +1,6 @@
 /* ERA FieldOPS — 3D module core (real 3D projection on canvas, vanilla)
    Each node is a real platform module, all feeding one central ERA core,
-   with live data pulses flowing between modules and the core.
-   Reusable: boot() runs multiple independent instances (a mini one
-   embedded in the hero + the big dedicated showcase further down). */
+   with live data pulses flowing between modules and the core. */
 (function () {
   'use strict';
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -310,9 +308,6 @@
       requestAnimationFrame(loop);
     }
   }
-
-  var s1 = document.querySelector('.core3d-stage'), c1 = document.getElementById('core3d');
-  if (s1 && c1) boot(s1, c1, document.getElementById('core3dTip'), document.getElementById('core3dTipTitle'), document.getElementById('core3dTipDesc'), false);
 
   var s2 = document.querySelector('.hero-core'), c2 = document.getElementById('core3dHero');
   if (s2 && c2) boot(s2, c2, document.getElementById('core3dHeroTip'), document.getElementById('core3dHeroTipTitle'), document.getElementById('core3dHeroTipDesc'), false);

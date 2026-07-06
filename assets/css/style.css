@@ -399,26 +399,12 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 @keyframes dashMove { to { stroke-dashoffset: -12; } }
 @keyframes objPing { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 
-/* ---------- 3D module core (full-bleed, interactive) ---------- */
-.core3d-sec { padding-top: var(--space-5); }
-.core3d-stage {
-  position: relative;
-  width: 100vw; margin-left: calc(50% - 50vw);
-  height: clamp(480px, 78vh, 860px);
-  overflow: hidden;
-  background: radial-gradient(ellipse 55% 60% at 50% 45%, #0B1128, #050816 74%);
-  border-block: 1px solid var(--border);
-  box-shadow: inset 0 0 180px rgba(79,125,255,0.06);
-  cursor: grab; touch-action: pan-y;
-}
-.core3d-stage:active { cursor: grabbing; }
-#core3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* ---------- 3D module core (hero embed) ---------- */
 .core3d-hint {
   position: absolute; bottom: 16px; left: 0; right: 0; text-align: center;
   font-size: 0.78rem; font-weight: 600; color: var(--text-3);
   letter-spacing: 0.02em; pointer-events: none; z-index: 2;
 }
-@media (max-width: 768px) { .core3d-stage { height: clamp(400px, 64vh, 560px); } }
 
 /* small description card that appears when a module node is clicked */
 .core3d-tip {
@@ -441,25 +427,6 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 .core3d-tip b { display: block; font-size: 0.86rem; font-weight: 800; color: var(--ai); margin-bottom: 4px; }
 .core3d-tip p { font-size: 0.78rem; line-height: 1.4; color: var(--text-2); }
 @media (max-width: 480px) { .core3d-tip { width: 180px; } }
-
-/* dedicated entrance for the "Toate modulele. Un singur creier." heading */
-.core3d-head.reveal { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .core3d-head .eyebrow, .core3d-head h2, .core3d-head .lead { opacity: 0; }
-  .core3d-head .grad-text { display: inline-block; }
-  .core3d-head.in-view .eyebrow { animation: chEyebrow 0.6s var(--ease) both; }
-  .core3d-head.in-view h2 { animation: chLine 0.75s cubic-bezier(0.34, 1.5, 0.5, 1) 0.12s both; }
-  .core3d-head.in-view .grad-text { animation: chBrain 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.42s both, gradShift 6s ease-in-out 1.35s infinite alternate; }
-  .core3d-head.in-view .lead { animation: chLead 0.7s var(--ease) 0.58s both; }
-}
-@keyframes chEyebrow { 0% { opacity: 0; transform: translateY(-12px); letter-spacing: 0.34em; } 100% { opacity: 1; transform: none; letter-spacing: 0.14em; } }
-@keyframes chLine { 0% { opacity: 0; transform: translateY(28px); } 100% { opacity: 1; transform: none; } }
-@keyframes chBrain {
-  0% { opacity: 0; transform: scale(0.55); filter: blur(9px); }
-  55% { opacity: 1; transform: scale(1.09); filter: blur(0) drop-shadow(0 0 16px rgba(0,212,255,0.75)); }
-  100% { transform: scale(1); filter: none; }
-}
-@keyframes chLead { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: none; } }
 
 /* ---------- Trusted by ---------- */
 .trusted { padding: var(--space-5) 0; border-block: 1px solid var(--border); }

@@ -21,7 +21,7 @@
 
   <link rel="preload" href="assets/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/style.css">
-  <noscript><style>.reveal{opacity:1;transform:none}.wf-step{opacity:1;transform:none}.chart-bars i{transform:scaleY(1)}.bar-fill{width:var(--w,70%)}.spark path{stroke-dashoffset:0}#particles{display:none}.hero-copy>*{opacity:1!important;transform:none!important}.scroll-progress{display:none}</style></noscript>
+  <noscript><style>.reveal{opacity:1;transform:none}.wf-step{opacity:1;transform:none}.chart-bars i{transform:scaleY(1)}.bar-fill{width:var(--w,70%)}.spark path{stroke-dashoffset:0}#particles{display:none}.hero-copy>*,.hero-core{opacity:1!important;transform:none!important}.scroll-progress{display:none}</style></noscript>
 
   <script type="application/ld+json">
   {
@@ -157,6 +157,15 @@
         <div><svg aria-hidden="true"><use href="#i-check"/></svg> e-Factura &amp; ANAF integrate</div>
         <div><svg aria-hidden="true"><use href="#i-check"/></svg> Date găzduite în UE</div>
       </div>
+    </div>
+
+    <div class="hero-core" aria-hidden="true">
+      <canvas id="core3dHero" aria-hidden="true"></canvas>
+      <div class="core3d-tip" id="core3dHeroTip" role="status">
+        <b id="core3dHeroTipTitle"></b>
+        <p id="core3dHeroTipDesc"></p>
+      </div>
+      <div class="core3d-hint">trage pentru a roti · apasă pe un modul pentru detalii</div>
     </div>
   </div>
 </section>

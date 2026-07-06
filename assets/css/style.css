@@ -524,6 +524,28 @@ body.loaded .command-center { opacity: 1; transform: none; }
 }
 @media (max-width: 768px) { .core3d-stage { height: clamp(400px, 64vh, 560px); } }
 
+/* small description card that appears when a module node is clicked */
+.core3d-tip {
+  position: absolute; top: 0; left: 0; z-index: 3; pointer-events: none;
+  width: 220px; transform: translate(-50%, -100%) translateY(-14px);
+  padding: 12px 14px; border-radius: 14px;
+  background: rgba(11, 17, 40, 0.86);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0,212,255,0.08);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.core3d-tip.show { opacity: 1; visibility: visible; transform: translate(-50%, -100%) translateY(-20px); }
+.core3d-tip::after {
+  content: ''; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px;
+  transform: translateX(-50%) rotate(45deg);
+  background: rgba(11, 17, 40, 0.86); border-right: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong);
+}
+.core3d-tip b { display: block; font-size: 0.86rem; font-weight: 800; color: var(--ai); margin-bottom: 4px; }
+.core3d-tip p { font-size: 0.78rem; line-height: 1.4; color: var(--text-2); }
+@media (max-width: 480px) { .core3d-tip { width: 180px; } }
+
 /* dedicated entrance for the "Toate modulele. Un singur creier." heading */
 .core3d-head.reveal { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: no-preference) {

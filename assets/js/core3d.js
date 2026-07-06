@@ -15,6 +15,29 @@
   var MODS = ['Clienți & Vânzări', 'Dispecerat', 'GPS & Flotă', 'Lucrări în teren',
     'Facturare & ANAF', 'Inspector AI', 'Mentenanță', 'Inventar',
     'Automatizări', 'Rapoarte', 'Aplicație mobilă'];
+  var MOD_DESC = {
+    'Clienți & Vânzări': 'Oferte, contracte și istoricul fiecărui client, într-un singur loc.',
+    'Dispecerat': 'Vezi toate echipele pe hartă și aloci lucrările în câteva secunde.',
+    'GPS & Flotă': 'Urmărești vehiculele live și primești alerte când ies din zona obiectivului.',
+    'Lucrări în teren': 'Tehnicienii bifează pașii, urcă poze și iau semnătura direct din telefon.',
+    'Facturare & ANAF': 'Factura pleacă automat la ANAF imediat ce PV-ul e semnat.',
+    'Inspector AI': 'Verifică pozele montajelor și semnalează ce nu e conform, înainte să devină reclamație.',
+    'Mentenanță': 'Contractele recurente și scadențele sunt urmărite automat, fără să ții minte nimic.',
+    'Inventar': 'Stocuri și echipamente pe serii, sincronizate cu fiecare vehicul și obiectiv.',
+    'Automatizări': 'Construiești reguli „dacă X, atunci Y" care rulează firma fără intervenția ta.',
+    'Rapoarte': 'Profitul pe lucrare, echipă și client, calculat automat din datele reale.',
+    'Aplicație mobilă': 'Tot ce au nevoie tehnicienii, într-o aplicație care merge și fără semnal.'
+  };
+  var tipEl = document.getElementById('core3dTip'), tipTitle = document.getElementById('core3dTipTitle'), tipDesc = document.getElementById('core3dTipDesc');
+  var activeTip = -1, tipUntil = 0;
+  function openTip(mi) {
+    if (activeTip === mi) { closeTip(); return; }
+    activeTip = mi; tipUntil = performance.now() + 6000;
+    if (tipTitle) tipTitle.textContent = mods[mi].label;
+    if (tipDesc) tipDesc.textContent = MOD_DESC[mods[mi].label] || '';
+    if (tipEl) tipEl.classList.add('show');
+  }
+  function closeTip() { activeTip = -1; if (tipEl) tipEl.classList.remove('show'); }
 
   function fib(n, r) {
     var p = [], phi = Math.PI * (3 - Math.sqrt(5));
@@ -79,6 +102,7 @@
 
   function burst(mi) {
     rings.push({ mi: mi, start: performance.now() });
+    openTip(mi);
     var added = 0;
     for (var i = 0; i < pulses.length && added < 5; i++) { if (Math.random() < 0.5) { pulses[i].core = true; pulses[i].m = mi; pulses[i].t = 0; pulses[i].sp = 0.012; added++; } }
   }
@@ -98,7 +122,7 @@
     } else { tTiltY = ((mx / W) - 0.5) * 0.6; tTiltX = ((my / H) - 0.5) * -0.4; }
   });
   window.addEventListener('pointerup', function () {
-    if (dragging && !moved && hover >= 0) burst(hover);
+    if (dragging && !moved) { if (hover >= 0) burst(hover); else if (activeTip >= 0) closeTip(); }
     dragging = false;
   });
   stage.addEventListener('pointerleave', function () { if (!dragging) { mx = -999; my = -999; tTiltX = 0; tTiltY = 0; } });
@@ -151,6 +175,12 @@
     var cx = W / 2, cy = H / 2, fov = 3.4;
     proj(cloud, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
     proj(mods, cosY, sinY, cosX, sinX, cx, cy, fov, ie);
+
+    // keep the description card glued to its module as the core keeps rotating
+    if (activeTip >= 0) {
+      if (now > tipUntil) { closeTip(); }
+      else if (tipEl) { var tp = mods[activeTip]; tipEl.style.left = tp.sx + 'px'; tipEl.style.top = tp.sy + 'px'; }
+    }
 
     hover = -1;
     if (mx > -900) { var best = 30 * 30; for (var h = 0; h < mods.length; h++) { var ddx = mods[h].sx - mx, ddy = mods[h].sy - my, dd = ddx * ddx + ddy * ddy; if (dd < best) { best = dd; hover = h; } } }

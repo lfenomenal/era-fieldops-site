@@ -920,23 +920,44 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 .ph-per { font-size: 1.05rem; font-weight: 600; color: var(--text-2); }
 
 /* "arrived fast" whoosh — replays every time you switch to "Pe lună" */
-.ph-price.month .ph-amount { animation: priceWhooshIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.ph-monthview { position: relative; }
+.ph-price.month .ph-amount {
+  animation: priceWhooshIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  text-shadow: 0 0 24px rgba(0,212,255,0.5);
+}
 @keyframes priceWhooshIn {
-  0% { opacity: 0; transform: translateX(-26px); filter: blur(3px); }
-  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+  0%   { opacity: 0; transform: translateX(-110px) scale(0.8); filter: blur(10px); }
+  55%  { opacity: 1; filter: blur(0); }
+  78%  { transform: translateX(8px) scale(1.05); }
+  100% { transform: translateX(0) scale(1); }
 }
 .ph-price.month .ph-amount::before,
-.ph-price.month .ph-amount::after {
-  content: ''; position: absolute; left: -50px; height: 3px; border-radius: 2px;
+.ph-price.month .ph-amount::after,
+.ph-price.month .ph-monthview::before {
+  content: ''; position: absolute; left: -60px; height: 4px; border-radius: 2px;
   background: linear-gradient(90deg, transparent, var(--ai));
+  box-shadow: 0 0 10px rgba(0,212,255,0.7);
   opacity: 0; pointer-events: none;
 }
-.ph-price.month .ph-amount::before { top: 32%; width: 34px; animation: speedStreak 0.5s ease-out both; }
-.ph-price.month .ph-amount::after  { top: 66%; width: 24px; animation: speedStreak 0.5s ease-out 0.06s both; }
+.ph-price.month .ph-amount::before      { top: 22%; width: 54px; animation: speedStreak 0.62s ease-out both; }
+.ph-price.month .ph-amount::after       { top: 52%; width: 40px; animation: speedStreak 0.62s ease-out 0.05s both; }
+.ph-price.month .ph-monthview::before   { top: 78%; width: 30px; animation: speedStreak 0.62s ease-out 0.1s both; }
 @keyframes speedStreak {
-  0% { opacity: 0; transform: translateX(-10px) scaleX(0.4); }
-  35% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(90px) scaleX(1.5); }
+  0%   { opacity: 0; transform: translateX(-16px) scaleX(0.4); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(150px) scaleX(1.8); }
+}
+.ph-price.month .ph-monthview::after {
+  content: ''; position: absolute; left: 10%; top: 50%; width: 160px; height: 160px;
+  transform: translate(-50%, -50%) scale(0.3); border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,255,0.4), transparent 70%);
+  opacity: 0; pointer-events: none; z-index: -1;
+  animation: monthGlowBurst 0.65s ease-out both;
+}
+@keyframes monthGlowBurst {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.2); }
+  40%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.5); }
 }
 .ph-cta { margin-top: 4px; }
 
@@ -1116,6 +1137,7 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   .in-view .bar-fill, .bar-fill { transition: none; }
   .in-view .ph-bar i, .ph-bar i { transition: none; width: var(--w); }
   .ph-copy.in-view .ph-cup::before, .ph-copy.in-view .ph-cup::after { animation: none !important; }
-  .ph-price.month .ph-amount { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
-  .ph-price.month .ph-amount::before, .ph-price.month .ph-amount::after { animation: none !important; content: none !important; }
+  .ph-price.month .ph-amount { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; text-shadow: none !important; }
+  .ph-price.month .ph-amount::before, .ph-price.month .ph-amount::after,
+  .ph-price.month .ph-monthview::before, .ph-price.month .ph-monthview::after { animation: none !important; content: none !important; }
 }

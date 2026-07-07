@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTIP — statistici + problemă, 5 variante</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  body { overflow-x: hidden; }
+  .proto-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: #FFB547; color: #211500; font: 700 13px system-ui, sans-serif;
+    text-align: center; padding: 6px 0;
+  }
+  .variant-label {
+    max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px);
+    display: flex; align-items: center; gap: 12px;
+    font: 700 13px system-ui, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ai);
+  }
+  .variant-label::before { content: ""; width: 26px; height: 26px; border-radius: 8px; background: rgba(0,212,255,0.14); border: 1px solid rgba(0,212,255,0.3); display: grid; place-items: center; }
+  .variant-label span.n { color: var(--text-3); font-size: 12px; letter-spacing: 0; text-transform: none; font-weight: 500; }
+  .variant { border-top: 1px solid var(--border); padding: var(--space-5) 0; }
+  .variant:first-of-type { border-top: none; }
+
+  /* helpers shared by some variants */
+  .stat-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(20px, 4vw, 56px); }
+  .stat-strip .si { text-align: center; }
+  .stat-strip .si b { display: block; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; background: var(--grad-ai); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.02em; }
+  .stat-strip .si span { font-size: 0.74rem; color: var(--text-3); }
+  .stat-divider { display: flex; align-items: center; gap: 14px; max-width: 1200px; margin: var(--space-4) auto; padding: 0 clamp(20px,4vw,40px); }
+  .stat-divider .ln { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+  .stat-divider .tx { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+
+  .split-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+  .split-grid .stats-grid { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 860px) { .split-grid { grid-template-columns: 1fr; } }
+
+  .payoff-band { position: relative; border-radius: var(--radius); padding: clamp(28px, 4vw, 40px); background: linear-gradient(180deg, rgba(0,212,255,0.06), rgba(79,125,255,0.03)); border: 1px solid rgba(0,212,255,0.18); box-shadow: inset 0 0 80px rgba(0,212,255,0.05); }
+  .payoff-band .pb-eyebrow { text-align: center; color: var(--success); }
+
+  .woven-card .wv-stat { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; align-items: baseline; gap: 8px; }
+  .woven-card .wv-stat b { font-size: 1.4rem; font-weight: 800; color: var(--ai); letter-spacing: -0.02em; }
+  .woven-card .wv-stat span { font-size: 0.76rem; color: var(--text-3); }
+</style>
+</head>
+<body class="loaded">
+
+<div class="proto-banner">PROTOTIP — 5 variante de combinare (statistici + problemă). Nu e legat de site-ul live.</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  </defs>
+</svg>
+
+<main style="padding-top: 40px;">
+
+<!-- ============ VARIANTA 1 — stats deasupra (ca acum, dar cu o linie de legătură) ============ -->
+<div class="variant">
+  <div class="variant-label">Varianta 1 — Statistici sus, apoi problema <span class="n">· ca acum, dar cu o punte între ele</span></div>
+  <section class="section" style="padding-top: var(--space-3)">
+    <div class="container">
+      <div class="stats-grid" style="margin-bottom: var(--space-3)">
+        <div class="stat-card"><div class="stat-num">43%</div><div class="stat-label">mai puțin timp pierdut pe administrare</div></div>
+        <div class="stat-card"><div class="stat-num">2.8×</div><div class="stat-label">mai multe lucrări finalizate pe lună</div></div>
+        <div class="stat-card"><div class="stat-num">15 min</div><div class="stat-label">de la PV semnat la factura trimisă la ANAF</div></div>
+        <div class="stat-card"><div class="stat-num">99.98%</div><div class="stat-label">disponibilitate a platformei</div></div>
+      </div>
+    </div>
+    <div class="stat-divider"><span class="ln"></span><span class="tx">Cifrele astea nu vin din întâmplare</span><span class="ln"></span></div>
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">De ce ERA FieldOPS</span>
+        <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+        <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute — cu cât ai mai multe echipe, cu atât pierzi mai mult control.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
+        <div class="card tone-warning"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VARIANTA 2 — split: titlu stânga, stats dreapta ============ -->
+<div class="variant">
+  <div class="variant-label">Varianta 2 — Titlu în stânga, statistici în dreapta <span class="n">· problema dedesubt</span></div>
+  <section class="section" style="padding-top: var(--space-3)">
+    <div class="container split-grid">
+      <div>
+        <span class="eyebrow">De ce ERA FieldOPS</span>
+        <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+        <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute — cu cât ai mai multe echipe, cu atât pierzi mai mult control.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num">43%</div><div class="stat-label">mai puțin timp pe administrare</div></div>
+        <div class="stat-card"><div class="stat-num">2.8×</div><div class="stat-label">mai multe lucrări/lună</div></div>
+        <div class="stat-card"><div class="stat-num">15 min</div><div class="stat-label">de la PV la factura ANAF</div></div>
+        <div class="stat-card"><div class="stat-num">99.98%</div><div class="stat-label">disponibilitate</div></div>
+      </div>
+    </div>
+    <div class="container" style="margin-top: var(--space-5)">
+      <div class="grid-3">
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
+        <div class="card tone-warning"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VARIANTA 3 — bandă subțire de cifre sub titlu ============ -->
+<div class="variant">
+  <div class="variant-label">Varianta 3 — Bandă compactă de cifre sub titlu <span class="n">· cel mai discret, ocupă puțin</span></div>
+  <section class="section" style="padding-top: var(--space-3)">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">De ce ERA FieldOPS</span>
+        <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+        <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute — cu cât ai mai multe echipe, cu atât pierzi mai mult control.</p>
+      </div>
+      <div class="stat-strip" style="margin: 0 auto var(--space-5); max-width: 900px;">
+        <div class="si"><b>43%</b><span>mai puțin timp administrativ</span></div>
+        <div class="si"><b>2.8×</b><span>mai multe lucrări/lună</span></div>
+        <div class="si"><b>15 min</b><span>PV → factură ANAF</span></div>
+        <div class="si"><b>99.98%</b><span>disponibilitate</span></div>
+      </div>
+      <div class="grid-3">
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
+        <div class="card tone-warning"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VARIANTA 4 — problema sus (durerea), stats jos ca răsplată ============ -->
+<div class="variant">
+  <div class="variant-label">Varianta 4 — Întâi durerea, apoi cifrele ca răsplată <span class="n">· povestea „înainte → după"</span></div>
+  <section class="section" style="padding-top: var(--space-3)">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">De ce ERA FieldOPS</span>
+        <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+        <p class="lead">Excel, WhatsApp, hârtii și telefoane pierdute — cu cât ai mai multe echipe, cu atât pierzi mai mult control.</p>
+      </div>
+      <div class="grid-3" style="margin-bottom: var(--space-5)">
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în conversații de WhatsApp și agende de hârtie.</p></div>
+        <div class="card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul se face din telefon în telefon.</p></div>
+        <div class="card tone-warning"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu — iar contractele de mentenanță expiră neobservate.</p></div>
+      </div>
+      <div class="payoff-band">
+        <span class="eyebrow pb-eyebrow" style="justify-content:center; display:flex;">Cu ERA FieldOPS</span>
+        <div class="stats-grid" style="margin-top: 20px;">
+          <div class="stat-card"><div class="stat-num">43%</div><div class="stat-label">mai puțin timp pierdut pe administrare</div></div>
+          <div class="stat-card"><div class="stat-num">2.8×</div><div class="stat-label">mai multe lucrări finalizate pe lună</div></div>
+          <div class="stat-card"><div class="stat-num">15 min</div><div class="stat-label">de la PV semnat la factura ANAF</div></div>
+          <div class="stat-card"><div class="stat-num">99.98%</div><div class="stat-label">disponibilitate a platformei</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ VARIANTA 5 — o cifră în fiecare card de problemă ============ -->
+<div class="variant">
+  <div class="variant-label">Varianta 5 — Cifra țesută în fiecare card <span class="n">· problema + rezultatul, unul lângă altul</span></div>
+  <section class="section" style="padding-top: var(--space-3)">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">De ce ERA FieldOPS</span>
+        <h2>Firma ta crește.<br>Haosul crește mai repede.</h2>
+        <p class="lead">Fiecare problemă are un cost — și un rezultat măsurabil când o rezolvi.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card woven-card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-msg"/></svg></span><h3>Informații pierdute</h3><p>Ofertele, pozele și confirmările se îngroapă în WhatsApp și agende de hârtie.</p><div class="wv-stat"><b>43%</b><span>mai puțin timp administrativ</span></div></div>
+        <div class="card woven-card tone-error"><span class="card-icon"><svg aria-hidden="true"><use href="#i-users"/></svg></span><h3>Echipe necoordonate</h3><p>Nu știi cine unde e, ce lucrare face și dacă a terminat. Dispeceratul din telefon în telefon.</p><div class="wv-stat"><b>2.8×</b><span>mai multe lucrări pe lună</span></div></div>
+        <div class="card woven-card tone-warning"><span class="card-icon"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><h3>Facturi &amp; mentenanțe uitate</h3><p>PV-ul stă zile în mașină, factura pleacă târziu, contractele expiră neobservate.</p><div class="wv-stat"><b>15 min</b><span>de la PV la factura ANAF</span></div></div>
+      </div>
+      <div class="stat-strip" style="margin-top: var(--space-4);">
+        <div class="si"><b>99.98%</b><span>disponibilitate a platformei — mereu online</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+</body>
+</html>

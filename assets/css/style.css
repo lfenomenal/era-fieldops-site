@@ -1039,6 +1039,13 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   .hero, .trusted, .section, .cta-final {
     scroll-snap-align: start; scroll-snap-stop: always; min-height: 100vh;
   }
+  /* frame each slide's content as one centered block instead of pinned to the
+     top with empty space below — .hero already centers itself elsewhere.
+     Sections whose content is naturally taller than one screen just grow past
+     min-height, so centering has no free space to act on and is a no-op there. */
+  .trusted, .section, .cta-final {
+    display: flex; flex-direction: column; justify-content: center;
+  }
 }
 
 /* ---------- Reduced motion ---------- */

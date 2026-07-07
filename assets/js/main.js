@@ -361,7 +361,7 @@
     if (!desktop.matches || reduceMotion) return;
     var slides = Array.prototype.slice.call(document.querySelectorAll('.hero, .trusted, .section, .cta-final'));
     if (slides.length < 2) return;
-    var locked = false;
+    var locked = false, lastWheelAt = 0;
 
     function currentIndex() {
       var y = window.scrollY + window.innerHeight * 0.3;
@@ -373,13 +373,18 @@
       if (i < 0 || i >= slides.length) return;
       locked = true;
       slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(function () { locked = false; }, 900);
+      setTimeout(function () { locked = false; }, 700);
     }
     window.addEventListener('wheel', function (e) {
       if (!matchMedia('(min-width: 769px)').matches) return;
       if (Math.abs(e.deltaY) < 2) return;
       e.preventDefault();
-      if (locked) return;
+      var now = performance.now(), gap = now - lastWheelAt;
+      lastWheelAt = now;
+      // one physical gesture (a trackpad swipe, or momentum after it) fires many
+      // wheel events in a row — only the first one after a real pause should
+      // trigger a slide change, otherwise a single swipe skips 2+ slides
+      if (locked || gap < 220) return;
       goTo(currentIndex() + (e.deltaY > 0 ? 1 : -1));
     }, { passive: false });
   })();

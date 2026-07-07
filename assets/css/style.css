@@ -1033,12 +1033,20 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   h1 { font-size: clamp(2.1rem, 9vw, 2.6rem); }
 }
 
+/* ---------- Slide-style scroll snap (desktop only — mobile keeps free scroll) ---------- */
+@media (min-width: 769px) {
+  html { scroll-snap-type: y mandatory; }
+  .hero, .trusted, .section, .cta-final {
+    scroll-snap-align: start; scroll-snap-stop: always; min-height: 100vh;
+  }
+}
+
 /* ---------- Reduced motion ---------- */
 /* Reduced motion: keep the brand's ambient/looping animations, but calm the
    large-movement effects (smooth scroll + big scroll-reveal jumps + parallax).
    Ensures content is never hidden while still feeling alive on macOS "Reduce Motion". */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html { scroll-behavior: auto; scroll-snap-type: none; }
   /* content revealed on scroll must always be visible */
   .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .hero-copy > *, .hero-core { opacity: 1 !important; transform: none !important; transition: none !important; }

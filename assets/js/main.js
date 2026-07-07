@@ -353,4 +353,34 @@
       if (running) draw();
     });
   }
+
+  /* ---------- Slide-style scroll: one wheel/trackpad tick advances exactly
+     one section (desktop only — mobile keeps normal free scroll) ---------- */
+  (function () {
+    var desktop = matchMedia('(min-width: 769px)');
+    if (!desktop.matches || reduceMotion) return;
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.hero, .trusted, .section, .cta-final'));
+    if (slides.length < 2) return;
+    var locked = false;
+
+    function currentIndex() {
+      var y = window.scrollY + window.innerHeight * 0.3;
+      var idx = 0;
+      for (var i = 0; i < slides.length; i++) { if (slides[i].offsetTop <= y) idx = i; }
+      return idx;
+    }
+    function goTo(i) {
+      if (i < 0 || i >= slides.length) return;
+      locked = true;
+      slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () { locked = false; }, 900);
+    }
+    window.addEventListener('wheel', function (e) {
+      if (!matchMedia('(min-width: 769px)').matches) return;
+      if (Math.abs(e.deltaY) < 2) return;
+      e.preventDefault();
+      if (locked) return;
+      goTo(currentIndex() + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: false });
+  })();
 })();

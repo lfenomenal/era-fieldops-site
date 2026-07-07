@@ -69,11 +69,11 @@
     var NF = mini ? 18 : (MOBILE ? 30 : 64);
     var cloud = fib(NF, 1).map(function (p, i) {
       var rr = 0.5 + Math.random() * 0.48;
-      var o = orbitize({ x: p.x * rr, y: p.y * rr, z: p.z * rr }, 0.0013, 0.0032);
+      var o = orbitize({ x: p.x * rr, y: p.y * rr, z: p.z * rr }, 0.002, 0.0045);
       return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: FEATS[i % FEATS.length], ph: Math.random() * 6.283, ps: 0.6 + Math.random() * 0.7, flareAt: 0 };
     });
     var mods = fib(MODS.length, 1.2).map(function (p, i) {
-      var o = orbitize(p, 0.0011, 0.0024);
+      var o = orbitize(p, 0.0017, 0.0036);
       return { x: Math.cos(o.ang) * o.r, y: o.y, z: Math.sin(o.ang) * o.r, r: o.r, ang: o.ang, spin: o.spin, sx: 0, sy: 0, d: 0, sc: 1, label: MODS[i] };
     });
 
@@ -95,10 +95,10 @@
     }
     function closeTip() { activeTip = -1; if (tipEl) tipEl.classList.remove('show'); }
 
-    // autonomous cycle: every ~2-3s (when idle), settle on a random module and
-    // pop its detail card open for ~1-1.5s, then close and wait for the next one
+    // autonomous cycle: every ~1-1.7s (when idle), settle on a random module and
+    // pop its detail card open for ~1.3-2.2s, then close and wait for the next one
     var autoIdx = -1, autoOn = false, autoCloseAt = 0;
-    var autoOpenAt = performance.now() + 2000 + Math.random() * 1200;
+    var autoOpenAt = performance.now() + 900 + Math.random() * 700;
 
     // Stellarium-style selection reticle: 4 corner brackets locked onto a point
     function drawReticle(x, y, r, alpha, color, lw) {
@@ -199,17 +199,17 @@
 
       if (!reduce) {
         if (autoOn) {
-          if (activeTip !== autoIdx) { autoOn = false; autoOpenAt = now + 2000 + Math.random() * 1200; }
-          else if (now >= autoCloseAt) { closeTip(); autoOn = false; autoOpenAt = now + 2000 + Math.random() * 1200; }
+          if (activeTip !== autoIdx) { autoOn = false; autoOpenAt = now + 900 + Math.random() * 700; }
+          else if (now >= autoCloseAt) { closeTip(); autoOn = false; autoOpenAt = now + 900 + Math.random() * 700; }
         } else if (activeTip === -1 && !dragging && mx <= -900 && now >= autoOpenAt) {
           autoIdx = (Math.random() * mods.length) | 0;
-          var autoDur = 1200 + Math.random() * 800;
+          var autoDur = 1300 + Math.random() * 900;
           openTip(autoIdx, autoDur);
           rings.push({ mi: autoIdx, start: now });
           autoOn = true; autoCloseAt = now + autoDur;
         }
       }
-      if (!dragging) { var spin = (reduce || autoOn) ? 0 : 0.0006; rotY += spin * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
+      if (!dragging) { var spin = (reduce || autoOn) ? 0 : 0.001; rotY += spin * dt + velY; rotX += velX; velY *= 0.93; velX *= 0.93; }
       tiltX = lerp(tiltX, tTiltX, 0.06 * dt); tiltY = lerp(tiltY, tTiltY, 0.06 * dt);
       var ry = rotY + tiltY, rx = rotX + tiltX;
       var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
@@ -217,7 +217,7 @@
       if (!reduce) {
         for (var oi = 0; oi < cloud.length; oi++) {
           var oc = cloud[oi]; oc.ang += oc.spin * dt; oc.x = Math.cos(oc.ang) * oc.r; oc.z = Math.sin(oc.ang) * oc.r;
-          if (!oc.flareAt && Math.random() < 0.00035 * dt) oc.flareAt = now;
+          if (!oc.flareAt && Math.random() < 0.00055 * dt) oc.flareAt = now;
         }
         for (var oj = 0; oj < mods.length; oj++) { var om = mods[oj]; om.ang += om.spin * dt; om.x = Math.cos(om.ang) * om.r; om.z = Math.sin(om.ang) * om.r; }
       }

@@ -912,11 +912,32 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 }
 .ph-from { font-size: 1rem; font-weight: 600; color: var(--text-3); }
 .ph-amount {
+  position: relative;
   font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1;
   font-variant-numeric: tabular-nums;
   background: var(--grad-ai); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 .ph-per { font-size: 1.05rem; font-weight: 600; color: var(--text-2); }
+
+/* "arrived fast" whoosh — replays every time you switch to "Pe lună" */
+.ph-price.month .ph-amount { animation: priceWhooshIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes priceWhooshIn {
+  0% { opacity: 0; transform: translateX(-26px); filter: blur(3px); }
+  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+.ph-price.month .ph-amount::before,
+.ph-price.month .ph-amount::after {
+  content: ''; position: absolute; left: -50px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--ai));
+  opacity: 0; pointer-events: none;
+}
+.ph-price.month .ph-amount::before { top: 32%; width: 34px; animation: speedStreak 0.5s ease-out both; }
+.ph-price.month .ph-amount::after  { top: 66%; width: 24px; animation: speedStreak 0.5s ease-out 0.06s both; }
+@keyframes speedStreak {
+  0% { opacity: 0; transform: translateX(-10px) scaleX(0.4); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(90px) scaleX(1.5); }
+}
 .ph-cta { margin-top: 4px; }
 
 .ph-compare { padding: 22px; }
@@ -1095,4 +1116,6 @@ body.loaded .hero-core { opacity: 1; transform: none; }
   .in-view .bar-fill, .bar-fill { transition: none; }
   .in-view .ph-bar i, .ph-bar i { transition: none; width: var(--w); }
   .ph-copy.in-view .ph-cup::before, .ph-copy.in-view .ph-cup::after { animation: none !important; }
+  .ph-price.month .ph-amount { animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .ph-price.month .ph-amount::before, .ph-price.month .ph-amount::after { animation: none !important; content: none !important; }
 }

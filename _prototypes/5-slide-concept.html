@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTIP — 5 slide-uri (nu e linkuit din site)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+  /* prototype-only additions — dot nav + condensed-slide helpers */
+  .proto-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: #FFB547; color: #211500; font: 700 13px system-ui, sans-serif;
+    text-align: center; padding: 6px 0;
+  }
+  .dotnav {
+    position: fixed; top: 50%; right: 20px; transform: translateY(-50%); z-index: 150;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 20px;
+  }
+  .dotnav a { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+  .dotnav .lbl { font-size: 11.5px; font-weight: 600; color: var(--text-3); opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+  .dotnav .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); flex-shrink: 0; transition: all 0.2s; }
+  .dotnav a:hover .lbl, .dotnav a.active .lbl { opacity: 1; color: var(--text); }
+  .dotnav a.active .dot { width: 9px; height: 9px; background: var(--ai); box-shadow: 0 0 10px rgba(0,212,255,0.7); }
+  .proto-slide { padding-top: calc(var(--nav-h) + 32px); }
+  .tagcloud { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 760px; margin-inline: auto; }
+  .tagcloud .tag { font-size: 0.82rem; }
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: var(--space-4); }
+  .trio h4 { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 14px; text-align: center; }
+  .trio ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .trio li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text-2); }
+  .trio li svg { width: 16px; height: 16px; color: var(--ai); flex-shrink: 0; }
+  .mini-stats { display: flex; gap: clamp(20px, 4vw, 48px); justify-content: center; margin: var(--space-3) 0; flex-wrap: wrap; }
+  .mini-stats div { text-align: center; }
+  .mini-stats b { display: block; font-size: 1.4rem; font-weight: 800; }
+  .mini-stats span { font-size: 0.72rem; color: var(--text-3); }
+  @media (max-width: 900px) { .trio { grid-template-columns: 1fr; gap: 20px; } .dotnav .lbl { display: none; } }
+</style>
+</head>
+<body class="loaded">
+
+<div class="proto-banner">PROTOTIP — concept 5 slide-uri, nu e legat de site-ul live</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7v18L3 15v-4z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+    <symbol id="i-coffee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></symbol>
+  </defs>
+</svg>
+
+<nav class="nav scrolled" id="nav">
+  <div class="container nav-inner">
+    <a href="#s1" class="nav-logo"><span class="logo-mark"><svg aria-hidden="true"><use href="#i-shield"/></svg></span>ERA <b>FieldOPS</b></a>
+  </div>
+</nav>
+
+<div class="dotnav" id="dotnav">
+  <a href="#s1" data-i="0" class="active"><span class="lbl">Acasă</span><span class="dot"></span></a>
+  <a href="#s2" data-i="1"><span class="lbl">Preț &amp; Rezultate</span><span class="dot"></span></a>
+  <a href="#s3" data-i="2"><span class="lbl">Platformă</span><span class="dot"></span></a>
+  <a href="#s4" data-i="3"><span class="lbl">AI &amp; Securitate</span><span class="dot"></span></a>
+  <a href="#s5" data-i="4"><span class="lbl">Întrebări &amp; Start</span><span class="dot"></span></a>
+</div>
+
+<main>
+
+<!-- 1. ACASĂ -->
+<section class="hero proto-slide" id="s1">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="hero-badge"><i class="pulse-dot"></i> Sistemul de operare al firmelor de securitate</span>
+      <h1>Toată firma ta.<br>Un singur <span class="grad-text">centru de comandă</span>.</h1>
+      <p class="lead">De la primul contact la client fidel: vânzări, instalări, mentenanță, GPS, facturare și AI — toate într-o singură platformă construită pentru firmele care instalează sisteme de securitate.</p>
+      <div class="hero-actions">
+        <a href="#s5" class="btn btn-primary">Cere demonstrația <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="#s3" class="btn btn-ghost">Explorează platforma</a>
+      </div>
+      <div class="hero-meta">
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> Implementare sub 7 zile</div>
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> e-Factura &amp; ANAF integrate</div>
+        <div><svg aria-hidden="true"><use href="#i-check"/></svg> Date găzduite în UE</div>
+      </div>
+    </div>
+    <div class="hero-core" aria-hidden="true">
+      <canvas id="core3dHero" aria-hidden="true"></canvas>
+      <div class="core3d-tip" id="core3dHeroTip" role="status">
+        <div class="core3d-tip-head">
+          <span class="core3d-tip-icon"><svg aria-hidden="true"><use href="#i-cpu"/></svg></span>
+          <b id="core3dHeroTipTitle"></b>
+        </div>
+        <p id="core3dHeroTipDesc"></p>
+      </div>
+      <div class="core3d-hint">trage pentru a roti · apasă pe un modul pentru detalii</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. PREȚ & REZULTATE (condensat: trusted-by + statistici + preț — imediat după hero, ca în ordinea oficială) -->
+<section class="section price-sec proto-slide" id="s2">
+  <div class="container" style="text-align:center; margin-bottom:var(--space-3)">
+    <p style="font-size:0.8rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-3);">Ales de toate firmele din România</p>
+    <div class="mini-stats">
+      <div><b>43%</b><span>mai puțin timp pe administrare</span></div>
+      <div><b>2.8×</b><span>mai multe lucrări/lună</span></div>
+      <div><b>15 min</b><span>de la PV la factură</span></div>
+      <div><b>99.98%</b><span>disponibilitate</span></div>
+    </div>
+  </div>
+  <div class="container price-hook">
+    <div class="ph-copy">
+      <span class="eyebrow">Cât costă</span>
+      <h2>Îți conduci toată firma cu <span class="grad-text">mai puțin de o cafea pe zi</span>.</h2>
+      <p class="lead">Fără costuri ascunse, fără surprize. Un singur abonament simplu.</p>
+      <div class="ph-price" id="phPrice">
+        <span class="ph-cup" aria-hidden="true">
+          <svg viewBox="0 0 60 66" fill="none">
+            <defs><linearGradient id="cupLiquid" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F7DFF"/><stop offset="1" stop-color="#00D4FF"/></linearGradient></defs>
+            <path d="M15 26 H45 L43 48 Q43 54 37 54 H23 Q17 54 17 48 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+            <ellipse cx="30" cy="26" rx="15" ry="3.6" fill="url(#cupLiquid)"/>
+            <path d="M45 31 Q56 32 56 39 Q56 46 45 47" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2.5"/>
+            <ellipse cx="30" cy="60" rx="20" ry="3" fill="rgba(0,0,0,0.35)"/>
+          </svg>
+        </span>
+        <span class="ph-dayview">doar <span class="grad-text">o cafea</span> pe zi</span>
+      </div>
+      <a href="#s5" class="btn btn-primary ph-cta">Îl vreau acum <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- 3. PLATFORMĂ (condensat: problemă+soluție+workflow+module) -->
+<section class="section proto-slide" id="s3">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Sistemul de operare</span>
+      <h2>De la primul contact la client fidel.<br>Tot ce rulează firma ta, într-un singur loc.</h2>
+    </div>
+    <div class="workflow-wrap">
+      <ol class="workflow">
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-target"/></svg></span><span>Client nou</span></li>
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-file"/></svg></span><span>Ofertă &amp; Contract</span></li>
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span><span>Programare</span></li>
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-wrench"/></svg></span><span>Execuție teren</span></li>
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-receipt"/></svg></span><span>Facturare</span></li>
+        <li class="wf-step active"><span class="wf-node"><svg aria-hidden="true"><use href="#i-shield-check"/></svg></span><span>Client fidel</span></li>
+      </ol>
+    </div>
+    <div class="tagcloud" style="margin-top:var(--space-4)">
+      <span class="tag">Clienți &amp; Vânzări</span><span class="tag">Dispecerat</span><span class="tag">GPS &amp; Flotă</span>
+      <span class="tag">Lucrări în teren</span><span class="tag">Facturare &amp; ANAF</span><span class="tag">Inspector AI</span>
+      <span class="tag">Mentenanță</span><span class="tag">Inventar</span><span class="tag">Automatizări</span>
+      <span class="tag">Rapoarte</span><span class="tag">Aplicație mobilă</span>
+    </div>
+  </div>
+</section>
+
+<!-- 4. AI, INTEGRĂRI & SECURITATE (condensat: AI + integrări + platformă în detaliu + securitate) -->
+<section class="section proto-slide" id="s4">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Inteligență, integrări &amp; siguranță</span>
+      <h2>AI care lucrează pentru tine.<br>Conectat la tot ce contează.</h2>
+    </div>
+    <div class="trio">
+      <div>
+        <h4>Inteligență artificială</h4>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-cpu"/></svg>Inspector AI — verifică montajele</li>
+          <li><svg aria-hidden="true"><use href="#i-megaphone"/></svg>Marketing AI — scrie oferte</li>
+          <li><svg aria-hidden="true"><use href="#i-search"/></svg>Licitații AI — monitorizează SEAP</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Integrări native</h4>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-msg"/></svg>WhatsApp — notificări automate</li>
+          <li><svg aria-hidden="true"><use href="#i-database"/></svg>ANAF — verificare CUI instant</li>
+          <li><svg aria-hidden="true"><use href="#i-receipt"/></svg>e-Factura — transmitere automată</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Securitatea datelor</h4>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-lock"/></svg>Criptare end-to-end</li>
+          <li><svg aria-hidden="true"><use href="#i-shield-check"/></svg>Conform GDPR</li>
+          <li><svg aria-hidden="true"><use href="#i-globe"/></svg>Găzduire în UE</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. ÎNTREBĂRI & START (condensat: FAQ + CTA final) -->
+<section class="cta-final proto-slide" id="s5">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow" style="justify-content:center">Ultimul pas</span>
+      <h2>Răspunsuri directe.<br>Apoi, primul pas.</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Cât durează implementarea?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Sub o săptămână — importăm clienții, contractele și echipamentele existente.</div>
+      </details>
+      <details>
+        <summary>Funcționează pe telefon, în teren?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da, aplicație dedicată iOS/Android, inclusiv fără semnal la internet.</div>
+      </details>
+      <details>
+        <summary>Datele mele sunt în siguranță?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <div class="faq-a">Da — criptate, găzduite în UE, conform GDPR, cu jurnal complet de audit.</div>
+      </details>
+    </div>
+    <p class="lead" style="text-align:center; margin-top:var(--space-4)">30 de minute. Datele firmei tale, nu o prezentare generică.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@erafieldops.ro" class="btn btn-primary">Programează demo-ul <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="tel:+40700000000" class="btn btn-ghost">Sună-ne direct</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script src="../assets/js/core3d.js" defer></script>
+<script>
+(function () {
+  document.body.classList.add('loaded');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.proto-slide'));
+  var dots = Array.prototype.slice.call(document.querySelectorAll('#dotnav a'));
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setActive(i) {
+    dots.forEach(function (d, di) { d.classList.toggle('active', di === i); });
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        setActive(slides.indexOf(e.target));
+      }
+    });
+  }, { threshold: [0.5] });
+  slides.forEach(function (s) { io.observe(s); });
+
+  if (matchMedia('(min-width: 769px)').matches && !reduceMotion) {
+    var locked = false, lastWheelAt = 0;
+    function currentIndex() {
+      var y = window.scrollY + window.innerHeight * 0.3, idx = 0;
+      for (var i = 0; i < slides.length; i++) { if (slides[i].offsetTop <= y) idx = i; }
+      return idx;
+    }
+    function goTo(i) {
+      if (i < 0 || i >= slides.length) return;
+      locked = true;
+      slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () { locked = false; }, 700);
+    }
+    function scrollWithin(px) {
+      locked = true;
+      window.scrollBy({ top: px, behavior: 'smooth' });
+      setTimeout(function () { locked = false; }, 700);
+    }
+    window.addEventListener('wheel', function (e) {
+      if (!matchMedia('(min-width: 769px)').matches) return;
+      if (Math.abs(e.deltaY) < 2) return;
+      e.preventDefault();
+      var now = performance.now(), gap = now - lastWheelAt;
+      lastWheelAt = now;
+      if (locked || gap < 220) return;
+      var idx = currentIndex(), cur = slides[idx], r = cur.getBoundingClientRect();
+      if (e.deltaY > 0 && r.bottom > window.innerHeight + 4) { scrollWithin(Math.min(window.innerHeight * 0.9, r.bottom - window.innerHeight)); return; }
+      if (e.deltaY < 0 && r.top < -4) { scrollWithin(Math.max(-window.innerHeight * 0.9, r.top)); return; }
+      goTo(idx + (e.deltaY > 0 ? 1 : -1));
+    }, { passive: false });
+  }
+})();
+</script>
+</body>
+</html>

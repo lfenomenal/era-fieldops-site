@@ -340,6 +340,9 @@ body.loaded .nav-links li { opacity: 1; transform: none; }
   .hero-actions { margin-bottom: 12px; }
   .hero-actions .btn { min-height: 46px; }
   .hero-meta { gap: 8px 22px; }
+  /* every slide's own top/bottom padding shrinks too, so full-height content
+     (like the price slide's CTA button) doesn't get pushed past the fold */
+  :root { --space-6: 48px; }
 }
 .hero-grid {
   display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
@@ -1036,15 +1039,17 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 /* ---------- Slide-style scroll snap (desktop only — mobile keeps free scroll) ---------- */
 @media (min-width: 769px) {
   html { scroll-snap-type: y mandatory; }
-  .hero, .trusted, .section, .cta-final {
-    scroll-snap-align: start; scroll-snap-stop: always; min-height: 100vh;
-  }
+  .hero, .trusted, .section, .cta-final { scroll-snap-align: start; scroll-snap-stop: always; }
   /* frame each slide's content as one centered block instead of pinned to the
      top with empty space below — .hero already centers itself elsewhere.
-     Sections whose content is naturally taller than one screen just grow past
-     min-height, so centering has no free space to act on and is a no-op there. */
+     Height is 100vh minus the fixed nav's scroll-padding-top clearance: since
+     the snap lands each section's top just below the nav, giving it the full
+     100vh would push its bottom (e.g. the price slide's CTA button) off-screen.
+     Sections whose content is naturally taller than this just grow past it,
+     so centering has no free space to act on and is a no-op there. */
   .trusted, .section, .cta-final {
     display: flex; flex-direction: column; justify-content: center;
+    min-height: calc(100vh - var(--nav-h) - 16px);
   }
 }
 

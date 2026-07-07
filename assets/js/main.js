@@ -375,6 +375,11 @@
       slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
       setTimeout(function () { locked = false; }, 700);
     }
+    function scrollWithin(px) {
+      locked = true;
+      window.scrollBy({ top: px, behavior: 'smooth' });
+      setTimeout(function () { locked = false; }, 700);
+    }
     window.addEventListener('wheel', function (e) {
       if (!matchMedia('(min-width: 769px)').matches) return;
       if (Math.abs(e.deltaY) < 2) return;
@@ -385,7 +390,19 @@
       // wheel events in a row — only the first one after a real pause should
       // trigger a slide change, otherwise a single swipe skips 2+ slides
       if (locked || gap < 220) return;
-      goTo(currentIndex() + (e.deltaY > 0 ? 1 : -1));
+      var idx = currentIndex(), cur = slides[idx], r = cur.getBoundingClientRect();
+      // a slide taller than the screen (short viewport, or a naturally long
+      // section) must be scrolled through first — otherwise jumping straight
+      // to the next slide would skip whatever didn't fit on screen
+      if (e.deltaY > 0 && r.bottom > window.innerHeight + 4) {
+        scrollWithin(Math.min(window.innerHeight * 0.9, r.bottom - window.innerHeight));
+        return;
+      }
+      if (e.deltaY < 0 && r.top < -4) {
+        scrollWithin(Math.max(-window.innerHeight * 0.9, r.top));
+        return;
+      }
+      goTo(idx + (e.deltaY > 0 ? 1 : -1));
     }, { passive: false });
   })();
 })();

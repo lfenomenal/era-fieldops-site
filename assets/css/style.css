@@ -562,6 +562,32 @@ body.loaded .hero-core { opacity: 1; transform: none; }
 }
 .stat-label { margin-top: 10px; font-size: 0.9rem; color: var(--text-2); font-weight: 500; }
 
+/* ---------- Compact one-slide head + stat strip (stats folded into #platforma) ---------- */
+.os-head { text-align: center; margin-bottom: clamp(18px, 3vh, 30px); }
+.os-head h2 { font-size: clamp(1.7rem, 3.2vw, 2.7rem); line-height: 1.08; margin: 8px 0 10px; }
+.os-head .lead { max-width: 620px; margin: 0 auto; font-size: clamp(0.92rem, 1.2vw, 1.05rem); }
+.os-stats {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+  gap: clamp(10px, 1.6vw, 20px);
+  max-width: 940px; margin: 0 auto clamp(20px, 3.4vh, 36px);
+}
+.os-stat {
+  flex: 1 1 160px; min-width: 140px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: clamp(10px, 1.6vh, 16px) 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.os-stat b {
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em;
+  background: var(--grad-ai); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.os-stat span { font-size: 0.72rem; line-height: 1.25; color: var(--text-3); text-align: center; }
+.os-cards .card { padding: clamp(16px, 2vw, 24px); }
+.os-cards .card-icon { width: 40px; height: 40px; margin-bottom: 14px; }
+.os-cards .card h3 { font-size: 1.02rem; margin-bottom: 7px; }
+.os-cards .card p { font-size: 0.86rem; line-height: 1.5; }
+
 /* ---------- Cards / grids ---------- */
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .card {

@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PROTOTIP — ERA FieldOPS Apeluri (dialer cu numere mascate)</title>
+<title>PROTOTIP — ERA FieldOPS Apeluri (numere mascate + panou admin)</title>
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
   /* ============================================================
-     ERA FieldOPS — App "Apeluri": dialer cu numere mascate + QA/AI
+     ERA FieldOPS — Modul "Apeluri": dialer cu numere mascate,
+     apel primit, panou administrator cu analiză AI.
      Prototip standalone (nu e linkuit din site)
      ============================================================ */
   .proto-banner {
@@ -16,42 +17,50 @@
     text-align: center; padding: 6px 12px;
   }
   body { display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-         padding: 72px 16px 48px; gap: 28px; }
+         padding: 72px 16px 48px; gap: 24px; }
 
-  .intro { max-width: 760px; text-align: center; }
+  .intro { max-width: 820px; text-align: center; }
   .intro .eyebrow { justify-content: center; }
   .intro p { color: var(--text-2); font-size: 0.98rem; }
 
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .ctrl-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text);
+    font-size: 13.5px; font-weight: 600; transition: background .2s, transform .15s var(--ease);
+  }
+  .ctrl-btn:hover { background: rgba(79,125,255,0.16); transform: translateY(-1px); }
+  .ctrl-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .ctrl-btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+  .stage { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start;
+           width: 100%; max-width: 1180px; }
+
   /* ---------- Phone frame ---------- */
   .phone {
-    position: relative; width: 384px; max-width: 100%; height: 812px;
+    position: relative; width: 384px; max-width: 100%; height: min(812px, calc(100vh - 120px)); min-height: 660px;
     background: linear-gradient(180deg, #080D22, #05060F);
     border: 1px solid var(--border-strong); border-radius: 44px;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.6), inset 0 0 0 6px #02030A,
-                0 0 0 1px rgba(79,125,255,0.15);
-    overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.6), inset 0 0 0 6px #02030A, 0 0 0 1px rgba(79,125,255,0.15);
+    overflow: hidden; display: flex; flex-direction: column; flex-shrink: 0;
   }
-  .phone::before { /* notch */
+  .phone::before {
     content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
     width: 128px; height: 26px; background: #02030A; border-radius: 0 0 16px 16px; z-index: 40;
   }
-  .statusbar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 26px 6px; font-size: 13px; font-weight: 600; color: var(--text-2); z-index: 20;
-  }
+  .statusbar { display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 26px 6px; font-size: 13px; font-weight: 600; color: var(--text-2); }
   .statusbar .right { display: flex; gap: 6px; align-items: center; }
 
-  /* ---------- App header ---------- */
-  .appbar {
-    display: flex; align-items: center; gap: 10px; padding: 8px 20px 14px;
-  }
+  .appbar { display: flex; align-items: center; gap: 10px; padding: 8px 20px 12px; }
   .appbar .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--grad-ai);
     display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #fff; }
-  .appbar .ttl { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+  .appbar .ttl { flex: 1; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
   .appbar .ttl small { display: block; font-size: 10.5px; font-weight: 500; color: var(--text-3);
     letter-spacing: 0.04em; text-transform: uppercase; }
+  .appbar .who { font-size: 11px; color: var(--text-3); text-align: right; line-height: 1.3; }
+  .appbar .who b { display: block; color: var(--text-2); font-size: 12px; }
 
-  /* ---------- Screens ---------- */
   .screens { flex: 1; position: relative; overflow: hidden; }
   .screen { position: absolute; inset: 0; display: flex; flex-direction: column;
     opacity: 0; pointer-events: none; transform: translateX(16px);
@@ -60,350 +69,596 @@
   .scroll { flex: 1; overflow-y: auto; padding: 4px 16px 16px; }
   .scroll::-webkit-scrollbar { width: 0; }
 
-  .shield-note {
+  .note {
     display: flex; gap: 10px; align-items: flex-start; margin: 2px 4px 14px;
-    padding: 11px 13px; border-radius: 14px;
-    background: rgba(33,208,122,0.08); border: 1px solid rgba(33,208,122,0.22);
-    font-size: 11.5px; color: #9ff0c5; line-height: 1.45;
+    padding: 11px 13px; border-radius: 14px; font-size: 11.5px; line-height: 1.45;
+    background: rgba(33,208,122,0.08); border: 1px solid rgba(33,208,122,0.22); color: #9ff0c5;
   }
-  .shield-note svg { flex-shrink: 0; margin-top: 1px; }
+  .note svg { flex-shrink: 0; margin-top: 1px; }
+  .note.info { background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.22); color: #a9e9ff; }
 
-  /* ---------- Contact list ---------- */
-  .search {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+  .search { display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px;
-    padding: 10px 13px; color: var(--text-3); font-size: 13.5px;
-  }
-  .contact {
-    display: flex; align-items: center; gap: 13px; padding: 11px 6px;
-    border-bottom: 1px solid var(--border);
-  }
-  .avatar {
-    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
-    display: grid; place-items: center; font-weight: 700; font-size: 16px; color: #fff;
-  }
-  .contact .meta { flex: 1; min-width: 0; }
-  .contact .name { font-weight: 600; font-size: 15px; }
-  .contact .num {
-    display: flex; align-items: center; gap: 5px; margin-top: 2px;
-    font-size: 12px; color: var(--text-3); letter-spacing: 0.08em;
-  }
-  .contact .num .lock { color: var(--warning); }
-  .contact .tag { font-size: 10.5px; color: var(--text-3); }
-  .call-btn {
-    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; border: none;
+    padding: 0 13px; color: var(--text-3); }
+  .search input { flex: 1; background: none; border: none; outline: none; color: var(--text);
+    font: inherit; font-size: 13.5px; padding: 11px 0; }
+  .search input::placeholder { color: var(--text-3); }
+  .empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 28px 0; }
+
+  .contact { display: flex; align-items: center; gap: 13px; padding: 11px 6px; border-bottom: 1px solid var(--border); }
+  .avatar { width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+    display: grid; place-items: center; font-weight: 700; font-size: 16px; color: #fff; }
+  .avatar.sm { width: 40px; height: 40px; border-radius: 12px; font-size: 14px; }
+  .contact .meta, .log-item .meta { flex: 1; min-width: 0; }
+  .contact .name, .log-item .name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .masked { display: flex; align-items: center; gap: 5px; margin-top: 2px; font-size: 12px; color: var(--text-3); }
+  .masked .dots { letter-spacing: 0.1em; white-space: nowrap; flex-shrink: 0; }
+  .masked .lock { color: var(--warning); flex-shrink: 0; }
+  .masked .ctag { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .call-btn { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; border: none;
     background: rgba(33,208,122,0.14); color: var(--success);
-    display: grid; place-items: center; transition: transform .15s var(--ease), background .2s;
-  }
+    display: grid; place-items: center; transition: transform .15s var(--ease), background .2s; }
   .call-btn:hover { transform: scale(1.08); background: rgba(33,208,122,0.24); }
 
-  /* ---------- Tabs ---------- */
-  .tabbar {
-    display: flex; border-top: 1px solid var(--border); background: rgba(5,6,15,0.85);
-    backdrop-filter: blur(12px);
-  }
-  .tab {
-    flex: 1; background: none; border: none; color: var(--text-3);
+  .tabbar { display: flex; border-top: 1px solid var(--border); background: rgba(5,6,15,0.85); backdrop-filter: blur(12px); }
+  .tab { flex: 1; background: none; border: none; color: var(--text-3);
     padding: 11px 0 20px; display: flex; flex-direction: column; align-items: center; gap: 4px;
-    font-size: 10.5px; font-weight: 600; transition: color .2s;
-  }
+    font-size: 10.5px; font-weight: 600; transition: color .2s; }
   .tab.active { color: var(--primary); }
+  .tab:disabled { opacity: .4; cursor: not-allowed; }
   .tab svg { width: 22px; height: 22px; }
 
-  /* ---------- Call screen ---------- */
+  /* ---------- Call + incoming screens ---------- */
   .callscreen { background: radial-gradient(ellipse 90% 55% at 50% 0%, rgba(79,125,255,0.16), transparent 60%), #05060F;
-    align-items: center; justify-content: space-between; padding: 30px 24px 34px; text-align: center; }
-  .rec-pill {
-    display: inline-flex; align-items: center; gap: 7px; margin-top: 8px;
-    padding: 6px 13px; border-radius: 999px; font-size: 11.5px; font-weight: 600;
-    background: rgba(255,90,90,0.12); border: 1px solid rgba(255,90,90,0.3); color: #ffb0b0;
-  }
-  .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error);
-    animation: recpulse 1.4s ease-in-out infinite; }
+    align-items: center; justify-content: space-between; padding: 26px 24px 34px; text-align: center; }
+  .rec-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; background: rgba(255,90,90,0.12); border: 1px solid rgba(255,90,90,0.3); color: #ffb0b0; }
+  .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--error); animation: recpulse 1.4s ease-in-out infinite; }
   @keyframes recpulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,90,90,.5)} 50%{opacity:.4;box-shadow:0 0 0 7px rgba(255,90,90,0)} }
-  .ai-chip { display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:11px; color:var(--ai); }
-
+  .sub-chip { display: block; margin-top: 10px; font-size: 11px; color: var(--text-3); }
   .call-center { display: flex; flex-direction: column; align-items: center; }
   .call-avatar { width: 112px; height: 112px; border-radius: 34px; display: grid; place-items: center;
-    font-weight: 800; font-size: 40px; color: #fff; margin-bottom: 20px;
-    box-shadow: 0 20px 60px rgba(79,125,255,0.3); }
+    font-weight: 800; font-size: 40px; color: #fff; margin-bottom: 20px; box-shadow: 0 20px 60px rgba(79,125,255,0.3); }
+  .ringing .call-avatar { animation: ring 1.6s var(--ease) infinite; }
+  @keyframes ring { 0%{box-shadow:0 0 0 0 rgba(33,208,122,.45)} 70%{box-shadow:0 0 0 26px rgba(33,208,122,0)} 100%{box-shadow:0 0 0 0 rgba(33,208,122,0)} }
   .call-name { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
-  .call-sub { display:flex; align-items:center; justify-content:center; gap:6px;
-    color: var(--text-3); font-size: 13px; margin-top: 6px; letter-spacing: 0.14em; }
+  .call-sub { display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--text-3); font-size: 12.5px; margin-top: 6px; letter-spacing: 0.12em; text-transform: uppercase; }
   .call-timer { font-variant-numeric: tabular-nums; color: var(--text-2); font-size: 15px; margin-top: 14px; }
-
   .call-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px 26px; width: 100%; max-width: 260px; }
-  .pad-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-2);
-    font-size: 11px; background: none; border: none; }
-  .pad-icon { width: 58px; height: 58px; border-radius: 50%; background: var(--surface-2);
-    border: 1px solid var(--border); display: grid; place-items: center; color: var(--text); }
+  .pad-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-2); font-size: 11px; background: none; border: none; }
+  .pad-icon { width: 58px; height: 58px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border);
+    display: grid; place-items: center; color: var(--text); }
   .pad-btn.active .pad-icon { background: rgba(79,125,255,0.2); border-color: rgba(79,125,255,0.4); color: var(--primary); }
-  .end-btn { width: 68px; height: 68px; border-radius: 50%; border: none; background: var(--error);
-    display: grid; place-items: center; color: #fff; box-shadow: 0 12px 32px rgba(255,90,90,0.4);
-    transition: transform .15s; }
-  .end-btn:hover { transform: scale(1.06); }
+  .round-btn { width: 68px; height: 68px; border-radius: 50%; border: none; display: grid; place-items: center; color: #fff; transition: transform .15s; }
+  .round-btn:hover { transform: scale(1.06); }
+  .round-btn.end { background: var(--error); box-shadow: 0 12px 32px rgba(255,90,90,0.4); }
+  .round-btn.accept { background: var(--success); box-shadow: 0 12px 32px rgba(33,208,122,0.4); }
+  .answer-row { display: flex; gap: 72px; }
+  .answer-row label { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
 
-  /* ---------- History + AI ---------- */
+  /* ---------- Employee history ---------- */
   .log-item { display: flex; align-items: center; gap: 13px; padding: 12px 6px; border-bottom: 1px solid var(--border); }
-  .log-item .meta { flex: 1; }
-  .log-item .name { font-weight: 600; font-size: 14.5px; }
   .log-item .when { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
-  .ai-card { margin: 4px 2px 16px; padding: 15px; border-radius: 16px;
-    background: linear-gradient(160deg, rgba(79,125,255,0.08), rgba(0,212,255,0.04));
-    border: 1px solid rgba(0,212,255,0.2); }
-  .ai-card h4 { display:flex; align-items:center; gap:7px; font-size: 12px; font-weight:700; color: var(--ai);
-    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
-  .ai-card p { font-size: 13px; color: var(--text-2); line-height: 1.55; }
-  .ai-tags { display:flex; flex-wrap:wrap; gap:6px; margin: 11px 0; }
-  .ai-tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2);
-    border: 1px solid var(--border); color: var(--text-2); }
-  .ai-metrics { display:flex; gap:10px; margin-top: 12px; }
-  .ai-metric { flex:1; text-align:center; padding: 9px 6px; border-radius: 11px; background: var(--surface); border: 1px solid var(--border); }
-  .ai-metric b { display:block; font-size: 16px; }
-  .ai-metric span { font-size: 9.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
-  .ai-todo { list-style:none; margin-top: 10px; display:flex; flex-direction:column; gap:7px; }
-  .ai-todo li { display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color: var(--text-2); }
-  .ai-todo li::before { content:'→'; color: var(--primary); }
+  .dir { width: 18px; height: 18px; flex-shrink: 0; }
 
   /* ---------- Consent modal ---------- */
-  .modal-wrap { position:absolute; inset:0; z-index:60; display:none; align-items:flex-end;
+  .modal-wrap { position: absolute; inset: 0; z-index: 60; display: none; align-items: flex-end;
     background: rgba(2,3,10,0.72); backdrop-filter: blur(4px); }
-  .modal-wrap.open { display:flex; }
-  .modal { width:100%; background: var(--bg-2); border-top: 1px solid var(--border-strong);
-    border-radius: 26px 26px 0 0; padding: 24px 22px calc(22px + env(safe-area-inset-bottom)); text-align:center;
-    animation: slideup .34s var(--ease); }
+  .modal-wrap.open { display: flex; }
+  .modal { width: 100%; background: var(--bg-2); border-top: 1px solid var(--border-strong);
+    border-radius: 26px 26px 0 0; padding: 24px 22px 26px; text-align: center; animation: slideup .34s var(--ease); }
   @keyframes slideup { from { transform: translateY(100%); } }
-  .modal .icon { width:56px;height:56px;border-radius:18px;margin:0 auto 14px;display:grid;place-items:center;
-    background: rgba(255,90,90,0.12); border:1px solid rgba(255,90,90,0.3); }
+  .modal .icon { width: 56px; height: 56px; border-radius: 18px; margin: 0 auto 14px; display: grid; place-items: center;
+    background: rgba(255,90,90,0.12); border: 1px solid rgba(255,90,90,0.3); }
   .modal h3 { font-size: 1.2rem; margin-bottom: 8px; }
   .modal p { font-size: 13px; color: var(--text-2); line-height: 1.55; margin-bottom: 8px; }
   .modal .fine { font-size: 11px; color: var(--text-3); margin-bottom: 18px; }
-  .modal .btns { display:flex; flex-direction:column; gap:10px; }
-  .btn-primary { width:100%; padding: 14px; border:none; border-radius: 14px; background: var(--grad);
-    color:#fff; font-weight:700; font-size:14px; }
-  .btn-ghost { width:100%; padding: 12px; border:1px solid var(--border); border-radius: 14px;
-    background:none; color: var(--text-2); font-weight:600; font-size:13px; }
+  .modal .btns { display: flex; flex-direction: column; gap: 10px; }
+  .btn-primary { padding: 13px 16px; border: none; border-radius: 14px; background: var(--grad); color: #fff; font-weight: 700; font-size: 14px; }
+  .btn-ghost { padding: 12px 16px; border: 1px solid var(--border); border-radius: 14px; background: none; color: var(--text-2); font-weight: 600; font-size: 13px; }
 
-  .legend { max-width: 760px; width: 100%; display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 14px; }
+  /* ---------- Admin panel ---------- */
+  .admin { flex: 1 1 440px; max-width: 640px; min-width: 0; background: rgba(11,17,40,0.7);
+    border: 1px solid var(--border-strong); border-radius: 24px; padding: 22px; backdrop-filter: blur(10px); }
+  .admin-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .admin-head h3 { font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+  .admin-head p { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+  .role-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+    background: rgba(109,91,255,0.16); border: 1px solid rgba(109,91,255,0.35); color: #c4bbff; }
+  .admin-tabs { display: flex; gap: 6px; padding: 4px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 16px; }
+  .admin-tab { flex: 1; padding: 9px 10px; border: none; border-radius: 9px; background: none; color: var(--text-3); font-size: 13px; font-weight: 600; }
+  .admin-tab.active { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--border-strong); }
+  .admin-tab .count { display: inline-block; min-width: 18px; margin-left: 6px; padding: 0 5px; border-radius: 999px;
+    background: rgba(79,125,255,0.22); color: #bcd0ff; font-size: 11px; }
+  .admin-view { display: none; }
+  .admin-view.active { display: block; }
+
+  .a-row { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-bottom: 1px solid var(--border); }
+  .a-row .meta { flex: 1; min-width: 0; }
+  .a-row .name { font-weight: 600; font-size: 14px; }
+  .a-row .ctag { font-size: 12px; color: var(--text-3); }
+  .a-phone { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border); padding: 4px 8px; border-radius: 8px; white-space: nowrap; }
+
+  .add-form { margin-top: 16px; padding: 14px; border-radius: 16px; background: var(--surface); border: 1px dashed var(--border-strong); }
+  .add-form h4 { font-size: 13px; margin-bottom: 10px; }
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .add-grid input { width: 100%; min-width: 0; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 11px; color: var(--text); font: inherit; font-size: 13px; outline: none; }
+  .add-grid input:focus { border-color: rgba(79,125,255,0.6); }
+  .add-grid .full { grid-column: 1 / -1; }
+  .add-grid .btn-primary { grid-column: 1 / -1; }
+  .form-msg { font-size: 12px; margin-top: 8px; min-height: 1em; color: var(--text-3); }
+  .form-msg.ok { color: #9ff0c5; } .form-msg.err { color: #ffb0b0; }
+  @media (max-width: 480px) { .add-grid { grid-template-columns: 1fr; } }
+
+  .call-card { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 12px; }
+  .call-card .top { display: flex; align-items: center; gap: 12px; }
+  .call-card .top .meta { flex: 1; min-width: 0; }
+  .call-card .line1 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+  .call-card .line2 { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+  .status { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .status.analyzing { background: rgba(0,212,255,0.1); color: var(--ai); border: 1px solid rgba(0,212,255,0.3); }
+  .status.missed { background: rgba(255,90,90,0.1); color: #ffb0b0; border: 1px solid rgba(255,90,90,0.3); }
+  .status.done { background: rgba(33,208,122,0.1); color: #9ff0c5; border: 1px solid rgba(33,208,122,0.3); }
+  .ai-box { margin-top: 12px; padding: 13px; border-radius: 13px;
+    background: linear-gradient(160deg, rgba(79,125,255,0.08), rgba(0,212,255,0.04)); border: 1px solid rgba(0,212,255,0.2); }
+  .ai-box h5 { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; color: var(--ai);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .ai-box p { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+  .chip.outcome { background: rgba(79,125,255,0.14); border-color: rgba(79,125,255,0.35); color: #bcd0ff; }
+  .chip.flag { background: rgba(255,181,71,0.12); border-color: rgba(255,181,71,0.35); color: #ffd699; }
+  .todo { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .todo li { display: flex; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+  .todo li::before { content: '→'; color: var(--primary); }
+  .shimmer { height: 10px; border-radius: 6px; margin-top: 8px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(0,212,255,0.14), rgba(255,255,255,0.04));
+    background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+  .shimmer.short { width: 60%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .call-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    margin-top: 12px; font-size: 11.5px; color: var(--text-3); }
+  .listen-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 10px;
+    background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text); font-size: 12px; font-weight: 600; }
+  .listen-btn:hover { background: rgba(79,125,255,0.16); }
+  .audit { margin-top: 8px; font-size: 11px; color: var(--text-3); }
+  .audit div::before { content: '● '; color: var(--secondary); }
+
+  .legend { max-width: 1180px; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
   .legend .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
-  .legend .card b { display:flex; align-items:center; gap:8px; font-size: 13.5px; margin-bottom: 6px; }
+  .legend .card b { display: flex; align-items: center; gap: 8px; font-size: 13.5px; margin-bottom: 6px; }
   .legend .card p { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
-  .legend .card .n { width:24px;height:24px;border-radius:7px;background:var(--grad);display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff; }
+  .legend .card .n { width: 24px; height: 24px; border-radius: 7px; background: var(--grad); display: grid; place-items: center;
+    font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
 </style>
 </head>
 <body>
-<div class="proto-banner">PROTOTIP · ERA FieldOPS „Apeluri" — demo de interfață, nu e linkuit din site</div>
+<div class="proto-banner">PROTOTIP · ERA FieldOPS „Apeluri” — demo de interfață cu date fictive, nu e linkuit din site</div>
 
 <div class="intro">
   <span class="eyebrow">ERA FieldOPS · Modul Apeluri</span>
   <h2 class="grad-text" style="font-size:clamp(1.6rem,4vw,2.4rem)">Angajatul sună clientul. Nu-i vede niciodată numărul.</h2>
-  <p>Contactele apar doar cu numele salvat de tine („Ion Strasen", „Ilie Electro"). Apelul trece prin ERA, nu prin agenda telefonului — tehnicianul poate suna și răspunde, dar numărul real rămâne mascat pe server. Fiecare apel e înregistrat <b>cu acordul anunțat</b> și rezumat de AI pentru calitate.</p>
+  <p>În stânga, telefonul tehnicianului: vede doar numele salvate de tine. În dreapta, panoul tău: numerele reale, contactele noi și rezumatul AI al fiecărui apel. Încearcă să suni un contact, să simulezi un apel primit sau să adaugi un contact nou.</p>
 </div>
 
-<div class="phone" id="phone">
-  <div class="statusbar">
-    <span>9:41</span>
-    <span class="right">
-      <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4" y="5" width="3" height="6" rx="1"/><rect x="8" y="3" width="3" height="8" rx="1"/><rect x="12" y="0" width="3" height="11" rx="1"/></svg>
-      <svg width="18" height="11" viewBox="0 0 18 11" fill="none" stroke="currentColor"><rect x="1" y="1" width="14" height="9" rx="2.5"/><rect x="2.5" y="2.5" width="9" height="6" rx="1" fill="currentColor" stroke="none"/><rect x="16" y="4" width="1.5" height="3" rx="0.7" fill="currentColor"/></svg>
-    </span>
-  </div>
+<div class="controls">
+  <button class="ctrl-btn" id="sim-incoming"><span class="dot"></span> Simulează apel primit de la Ilie Electro</button>
+</div>
 
-  <div class="appbar">
-    <div class="logo">E</div>
-    <div class="ttl">Apeluri <small>ERA FieldOPS</small></div>
-  </div>
+<div class="stage">
+  <!-- ======================= PHONE (angajat) ======================= -->
+  <div class="phone" id="phone">
+    <div class="statusbar">
+      <span id="clock">9:41</span>
+      <span class="right">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4" y="5" width="3" height="6" rx="1"/><rect x="8" y="3" width="3" height="8" rx="1"/><rect x="12" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="none" stroke="currentColor"><rect x="1" y="1" width="14" height="9" rx="2.5"/><rect x="2.5" y="2.5" width="9" height="6" rx="1" fill="currentColor" stroke="none"/><rect x="16" y="4" width="1.5" height="3" rx="0.7" fill="currentColor"/></svg>
+      </span>
+    </div>
 
-  <div class="screens">
-    <!-- ===== Contacts ===== -->
-    <section class="screen active" id="s-contacts">
-      <div class="scroll">
-        <div class="shield-note">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#21D07A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-          <span>Numerele sunt ascunse. Poți suna și răspunde, dar nu poți copia, exporta sau vedea numărul real al contactelor firmei.</span>
-        </div>
-        <div class="search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-          Caută contact…
-        </div>
-        <div id="contact-list"></div>
-      </div>
-    </section>
+    <div class="appbar">
+      <div class="logo">E</div>
+      <div class="ttl">Apeluri <small>ERA FieldOPS</small></div>
+      <div class="who"><b>Andrei M.</b>Tehnician</div>
+    </div>
 
-    <!-- ===== Call ===== -->
-    <section class="screen callscreen" id="s-call">
-      <div>
-        <div class="rec-pill"><span class="rec-dot"></span> Se înregistrează</div>
-        <div class="ai-chip">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19"/></svg>
-          Transcriere + analiză AI activă
+    <div class="screens">
+      <!-- Contacte -->
+      <section class="screen active" id="s-contacts">
+        <div class="scroll">
+          <div class="note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#21D07A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span>Numerele contactelor firmei sunt ascunse. Poți suna și răspunde, dar nu poți vedea, copia sau exporta numărul real.</span>
+          </div>
+          <label class="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input id="search" type="search" placeholder="Caută după nume sau etichetă" autocomplete="off">
+          </label>
+          <div id="contact-list"></div>
         </div>
-      </div>
-      <div class="call-center">
-        <div class="call-avatar" id="call-avatar">IS</div>
-        <div class="call-name" id="call-name">Ion Strasen</div>
-        <div class="call-sub">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          NUMĂR ASCUNS
-        </div>
-        <div class="call-timer" id="call-timer">00:00</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:26px;align-items:center;width:100%">
-        <div class="call-pad">
-          <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.7"/><path d="M17 16.95A7 7 0 0 1 5 12v-2M12 19v4"/></svg></span>Mut</button>
-          <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="9" width="4" height="6"/><path d="M8 9l6-5v16l-6-5M17 9a3 3 0 0 1 0 6"/></svg></span>Speaker</button>
-          <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/></svg></span>Taste</button>
-        </div>
-        <button class="end-btn" id="end-call"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.46l-5.27-.61-2.52 2.52a15.05 15.05 0 0 1-6.59-6.59l2.53-2.53L8.54 3H3.03C2.45 13.18 10.82 21.55 21 20.97v-5.51z" transform="rotate(135 12 12)"/></svg></button>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===== History ===== -->
-    <section class="screen" id="s-history">
-      <div class="scroll">
-        <div class="shield-note" style="background:rgba(0,212,255,0.07);border-color:rgba(0,212,255,0.22);color:#a9e9ff">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
-          <span>Fiecare apel e transcris și rezumat de AI: sentiment, subiecte, pași de urmat. Tu, ca administrator, vezi analiza — nu înregistrarea brută pleacă nicăieri fără acordul tău.</span>
+      <!-- Apel primit -->
+      <section class="screen callscreen ringing" id="s-incoming">
+        <div>
+          <div class="call-sub" style="margin-top:0">Apel primit prin ERA</div>
+          <span class="sub-chip">Apelantul a auzit deja anunțul de înregistrare</span>
         </div>
-        <div id="history-list"></div>
-      </div>
-    </section>
-  </div>
+        <div class="call-center">
+          <div class="call-avatar" id="in-avatar">IE</div>
+          <div class="call-name" id="in-name">Ilie Electro</div>
+          <div class="call-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Număr ascuns
+          </div>
+          <div class="call-timer" id="in-tag">Subcontractor electric</div>
+        </div>
+        <div class="answer-row">
+          <label><button class="round-btn end" id="decline" aria-label="Respinge"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.46l-5.27-.61-2.52 2.52a15.05 15.05 0 0 1-6.59-6.59l2.53-2.53L8.54 3H3.03C2.45 13.18 10.82 21.55 21 20.97v-5.51z" transform="rotate(135 12 12)"/></svg></button>Respinge</label>
+          <label><button class="round-btn accept" id="accept" aria-label="Răspunde"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6a1 1 0 0 0-1 .2l-2.2 2.2a15 15 0 0 1-6.6-6.6l2.2-2.2a1 1 0 0 0 .2-1C8.7 6.4 8.5 5.2 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 17 17 0 0 0 17 17 1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg></button>Răspunde</label>
+        </div>
+      </section>
 
-  <!-- ===== Consent modal ===== -->
-  <div class="modal-wrap" id="consent">
-    <div class="modal">
-      <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF5A5A" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg></div>
-      <h3>Apel înregistrat</h3>
-      <p>Acest apel va fi <b>înregistrat și analizat de AI</b> pentru calitatea serviciului.</p>
-      <p class="fine">Prin „Continuă" confirmi că vei informa interlocutorul că apelul este înregistrat, conform legii (GDPR). Angajatul este deja informat prin acest ecran.</p>
-      <div class="btns">
-        <button class="btn-primary" id="consent-ok">Continuă și sună</button>
-        <button class="btn-ghost" id="consent-cancel">Anulează</button>
+      <!-- Apel în curs -->
+      <section class="screen callscreen" id="s-call">
+        <div>
+          <div class="rec-pill"><span class="rec-dot"></span> Se înregistrează</div>
+          <span class="sub-chip">Rezumatul AI ajunge la administrator</span>
+        </div>
+        <div class="call-center">
+          <div class="call-avatar" id="call-avatar">IS</div>
+          <div class="call-name" id="call-name">Ion Strasen</div>
+          <div class="call-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Număr ascuns
+          </div>
+          <div class="call-timer" id="call-timer">00:00</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:26px;align-items:center;width:100%">
+          <div class="call-pad">
+            <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.7"/><path d="M17 16.95A7 7 0 0 1 5 12v-2M12 19v4"/></svg></span>Mut</button>
+            <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="9" width="4" height="6"/><path d="M8 9l6-5v16l-6-5M17 9a3 3 0 0 1 0 6"/></svg></span>Difuzor</button>
+            <button class="pad-btn" data-toggle><span class="pad-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/></svg></span>Taste</button>
+          </div>
+          <button class="round-btn end" id="end-call" aria-label="Închide apelul"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15.46l-5.27-.61-2.52 2.52a15.05 15.05 0 0 1-6.59-6.59l2.53-2.53L8.54 3H3.03C2.45 13.18 10.82 21.55 21 20.97v-5.51z" transform="rotate(135 12 12)"/></svg></button>
+        </div>
+      </section>
+
+      <!-- Istoric angajat -->
+      <section class="screen" id="s-history">
+        <div class="scroll">
+          <div class="note info">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+            <span>Istoricul tău arată doar numele, durata și tipul apelului. Înregistrările și rezumatele le vede administratorul.</span>
+          </div>
+          <div id="history-list"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Informare înregistrare (o singură dată) -->
+    <div class="modal-wrap" id="consent">
+      <div class="modal">
+        <div class="icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF5A5A" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg></div>
+        <h3>Apelurile de serviciu sunt înregistrate</h3>
+        <p>Fiecare apel din aplicație este înregistrat și rezumat de AI pentru calitatea serviciului, conform regulamentului intern pe care l-ai semnat.</p>
+        <p class="fine">Persoana cu care vorbești aude automat anunțul de înregistrare. Înregistrările se șterg automat după 30 de zile.</p>
+        <div class="btns">
+          <button class="btn-primary" id="consent-ok">Am înțeles, continuă</button>
+          <button class="btn-ghost" id="consent-cancel">Înapoi</button>
+        </div>
       </div>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab active" data-screen="s-contacts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M17 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Contacte
+      </button>
+      <button class="tab" data-screen="s-history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+        Istoric
+      </button>
     </div>
   </div>
 
-  <div class="tabbar">
-    <button class="tab active" data-screen="s-contacts">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M21 21v-2a4 4 0 0 0-3-3.87M17 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Contacte
-    </button>
-    <button class="tab" data-screen="s-history">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
-      Istoric
-    </button>
-  </div>
+  <!-- ======================= ADMIN PANEL ======================= -->
+  <section class="admin" aria-label="Panou administrator">
+    <div class="admin-head">
+      <div>
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6D5BFF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Panou administrator
+        </h3>
+        <p>Vizibil doar pentru tine · numerele de mai jos sunt fictive</p>
+      </div>
+      <span class="role-pill">Administrator</span>
+    </div>
+
+    <div class="admin-tabs" role="tablist">
+      <button class="admin-tab active" data-view="v-contacts">Contacte <span class="count" id="count-contacts">0</span></button>
+      <button class="admin-tab" data-view="v-calls">Apeluri și analiză AI <span class="count" id="count-calls">0</span></button>
+    </div>
+
+    <div class="admin-view active" id="v-contacts">
+      <div id="admin-contacts"></div>
+      <form class="add-form" id="add-form" autocomplete="off">
+        <h4>Adaugă un contact</h4>
+        <div class="add-grid">
+          <input id="f-name" placeholder="Nume afișat (ex. Ion Strasen)" maxlength="40">
+          <input id="f-tag" placeholder="Etichetă (ex. Instalator)" maxlength="40">
+          <input id="f-phone" class="full" placeholder="Număr real (ex. +40 700 000 199)" maxlength="20" inputmode="tel">
+          <button class="btn-primary" type="submit">Salvează contactul</button>
+        </div>
+        <div class="form-msg" id="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="admin-view" id="v-calls">
+      <div id="admin-calls"></div>
+    </div>
+  </section>
 </div>
 
 <div class="legend">
-  <div class="card"><b><span class="n">1</span> Mascare la sursă</b><p>Numerele reale stau criptate pe serverul ERA. Aplicația angajatului primește doar numele și un buton „Sună" — niciodată cifrele.</p></div>
-  <div class="card"><b><span class="n">2</span> Apel prin VoIP</b><p>Apelul trece printr-un număr-proxy (ex. Twilio). Cele două părți nu-și văd numărul reciproc; conexiunea se face pe server.</p></div>
-  <div class="card"><b><span class="n">3</span> Înregistrare cu acord</b><p>Ecran de consimțământ + anunț vocal „apel înregistrat". Legal și transparent, nu ascuns.</p></div>
-  <div class="card"><b><span class="n">4</span> Analiză AI</b><p>Transcriere → rezumat, sentiment, subiecte și pași de urmat, vizibile în panoul de administrare.</p></div>
+  <div class="card"><b><span class="n">1</span> Mascare la sursă</b><p>Numerele stau criptate pe serverul ERA. Aplicația angajatului primește doar numele și butonul „Sună”, niciodată cifrele.</p></div>
+  <div class="card"><b><span class="n">2</span> Apel prin VoIP</b><p>Clientul vede numărul firmei. Pe telefonul angajatului nu rămâne nimic în agendă sau în istoricul de apeluri.</p></div>
+  <div class="card"><b><span class="n">3</span> Înregistrare anunțată</b><p>Persoana sunată aude automat anunțul. Înregistrarea stă în UE și se șterge după 30 de zile.</p></div>
+  <div class="card"><b><span class="n">4</span> Analiză AI pe text</b><p>Rezumat, rezultat, pași de urmat și semnale de verificat, vizibile doar administratorului.</p></div>
 </div>
 
 <script>
-const CONTACTS = [
-  { ini:'IS', name:'Ion Strasen',  tag:'Instalator · Zona Nord', c:'#4F7DFF' },
-  { ini:'IE', name:'Ilie Electro', tag:'Subcontractor electric', c:'#6D5BFF' },
-  { ini:'MC', name:'Mihai Client', tag:'Client · Contract mentenanță', c:'#00D4FF' },
-  { ini:'AD', name:'Ana Dispecer', tag:'Dispecerat · Tura zi', c:'#21D07A' },
-  { ini:'VP', name:'Vali Pază',    tag:'Agent teren', c:'#FFB547' },
-];
-const AI_SUMMARIES = [
-  { txt:'Clientul confirmă programarea montajului pe vineri. A cerut și o ofertă pentru 2 camere suplimentare.',
-    tags:['Programare','Ofertă nouă','Pozitiv'], senti:'Pozitiv', dur:'4:12',
-    todo:['Trimite ofertă 2 camere IP','Confirmă echipa pentru vineri 09:00'] },
-  { txt:'Discuție despre o defecțiune la senzorul de la intrare. Tehnicianul a promis vizită în 48h.',
-    tags:['Sesizare','Mentenanță','Neutru'], senti:'Neutru', dur:'2:48',
-    todo:['Planifică intervenție senzor (48h)','Verifică stoc senzori PIR'] },
-];
-
-const phone = document.getElementById('phone');
-let activePending = null, timer = null, seconds = 0, consentGiven = false;
-
-/* ---- render contacts ---- */
-const list = document.getElementById('contact-list');
-list.innerHTML = CONTACTS.map((c,i)=>`
-  <div class="contact">
-    <div class="avatar" style="background:linear-gradient(135deg, ${c.c}, ${c.c}99)">${c.ini}</div>
-    <div class="meta">
-      <div class="name">${c.name}</div>
-      <div class="num"><span class="lock">🔒</span> •••• •• •• <span class="tag">· ${c.tag}</span></div>
-    </div>
-    <button class="call-btn" data-call="${i}" aria-label="Sună ${c.name}">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6a1 1 0 0 0-1 .2l-2.2 2.2a15 15 0 0 1-6.6-6.6l2.2-2.2a1 1 0 0 0 .2-1C8.7 6.4 8.5 5.2 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 17 17 0 0 0 17 17 1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>
-    </button>
-  </div>`).join('');
-
-/* ---- navigation ---- */
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===id));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===id));
-}
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{ if(timer) return; show(t.dataset.screen); });
-
-/* ---- start call flow (with consent gate) ---- */
-list.addEventListener('click', e=>{
-  const btn = e.target.closest('[data-call]'); if(!btn) return;
-  activePending = CONTACTS[+btn.dataset.call];
-  if(consentGiven){ beginCall(); } else { document.getElementById('consent').classList.add('open'); }
-});
-document.getElementById('consent-cancel').onclick = ()=> document.getElementById('consent').classList.remove('open');
-document.getElementById('consent-ok').onclick = ()=>{ consentGiven = true; document.getElementById('consent').classList.remove('open'); beginCall(); };
-
-function beginCall(){
-  const c = activePending;
-  document.getElementById('call-avatar').textContent = c.ini;
-  document.getElementById('call-avatar').style.background = `linear-gradient(135deg, ${c.c}, ${c.c}99)`;
-  document.getElementById('call-name').textContent = c.name;
-  seconds = 0; document.getElementById('call-timer').textContent = '00:00';
-  show('s-call');
-  timer = setInterval(()=>{
-    seconds++;
-    const m=String(Math.floor(seconds/60)).padStart(2,'0'), s=String(seconds%60).padStart(2,'0');
-    document.getElementById('call-timer').textContent = `${m}:${s}`;
-  },1000);
-}
-
-/* ---- toggle pad buttons ---- */
-document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>b.classList.toggle('active'));
-
-/* ---- end call -> generate AI summary in history ---- */
-document.getElementById('end-call').onclick = ()=>{
-  clearInterval(timer); timer = null;
-  const c = activePending;
-  const ai = AI_SUMMARIES[Math.floor(Math.random()*AI_SUMMARIES.length)];
-  const m=String(Math.floor(seconds/60)).padStart(2,'0'), s=String(seconds%60).padStart(2,'0');
-  prependHistory(c, `${m}:${s}`, ai);
-  document.querySelectorAll('.pad-btn').forEach(b=>b.classList.remove('active'));
-  show('s-history');
+/* ---------- date demo (numere fictive) ---------- */
+const COLORS = ['#4F7DFF', '#6D5BFF', '#00D4FF', '#21D07A', '#FFB547', '#FF7AB6'];
+const state = {
+  contacts: [
+    { id: 'is', name: 'Ion Strasen',  tag: 'Instalator · Zona Nord',       phone: '+40 700 000 101', c: COLORS[0] },
+    { id: 'ie', name: 'Ilie Electro', tag: 'Subcontractor electric',       phone: '+40 700 000 102', c: COLORS[1] },
+    { id: 'mc', name: 'Mihai Client', tag: 'Client · Contract mentenanță', phone: '+40 700 000 103', c: COLORS[2] },
+    { id: 'ad', name: 'Ana Dispecer', tag: 'Dispecerat · Tura de zi',      phone: '+40 700 000 104', c: COLORS[3] },
+    { id: 'vp', name: 'Vali Pază',    tag: 'Agent teren',                  phone: '+40 700 000 105', c: COLORS[4] },
+  ],
+  calls: [],
+  acknowledged: false,
+  active: null, direction: null, timer: null, seconds: 0, aiIndex: 0, nextId: 1,
 };
 
-const hist = document.getElementById('history-list');
-function prependHistory(c, dur, ai){
-  const sentiColor = ai.senti==='Pozitiv' ? 'var(--success)' : ai.senti==='Neutru' ? 'var(--warning)' : 'var(--error)';
-  const el = document.createElement('div');
-  el.innerHTML = `
-    <div class="log-item">
-      <div class="avatar" style="width:40px;height:40px;font-size:14px;background:linear-gradient(135deg, ${c.c}, ${c.c}99)">${c.ini}</div>
-      <div class="meta"><div class="name">${c.name}</div><div class="when">Acum · durată ${dur} · 🔒 număr ascuns</div></div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M23 7l-9.5 9.5L9 12"/></svg>
-    </div>
-    <div class="ai-card">
-      <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19"/></svg> Rezumat AI al apelului</h4>
-      <p>${ai.txt}</p>
-      <div class="ai-tags">${ai.tags.map(t=>`<span class="ai-tag">${t}</span>`).join('')}</div>
-      <div class="ai-metrics">
-        <div class="ai-metric"><b style="color:${sentiColor}">${ai.senti}</b><span>Sentiment</span></div>
-        <div class="ai-metric"><b>${dur}</b><span>Durată</span></div>
-        <div class="ai-metric"><b>${ai.tags.length}</b><span>Subiecte</span></div>
+const AI_SUMMARIES = [
+  { summary: 'Clientul confirmă montajul pentru vineri, ora 09:00. A cerut și o ofertă pentru două camere IP suplimentare.',
+    outcome: 'Programare', actions: ['Trimite oferta pentru 2 camere IP', 'Confirmă echipa pentru vineri, 09:00'], flags: [] },
+  { summary: 'Sesizare: senzorul PIR de la intrare declanșează alarme false. Tehnicianul a promis o intervenție în 48 de ore.',
+    outcome: 'Sesizare', actions: ['Programează intervenția în 48 h', 'Verifică stocul de senzori PIR'], flags: ['Termen promis: 48 h'] },
+  { summary: 'Subcontractorul cere avans pentru lucrarea de la depozit. Angajatul a promis 20% fără aprobarea administratorului.',
+    outcome: 'Altul', actions: ['Decide asupra avansului', 'Răspunde subcontractorului până mâine'], flags: ['Plată promisă fără aprobare'] },
+];
+
+/* ---------- utilitare ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const fold = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const initials = name => name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+const mmss = secs => `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+const hhmm = d => d.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+const dayLabel = d => (new Date().toDateString() === d.toDateString()) ? `azi, ${hhmm(d)}` : `${d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short' })}, ${hhmm(d)}`;
+const deleteDate = d => new Date(d.getTime() + 30 * 864e5).toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
+const grad = c => `linear-gradient(135deg, ${c}, ${c}99)`;
+const findContact = id => state.contacts.find(c => c.id === id);
+
+const ICON_PHONE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6a1 1 0 0 0-1 .2l-2.2 2.2a15 15 0 0 1-6.6-6.6l2.2-2.2a1 1 0 0 0 .2-1C8.7 6.4 8.5 5.2 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 17 17 0 0 0 17 17 1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>';
+const ICON_LOCK = '<svg class="lock" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const ICON_DIR = {
+  out:    '<svg class="dir" viewBox="0 0 24 24" fill="none" stroke="#21D07A" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg>',
+  in:     '<svg class="dir" viewBox="0 0 24 24" fill="none" stroke="#4F7DFF" stroke-width="2"><path d="M17 7L7 17M15 17H7V9"/></svg>',
+  missed: '<svg class="dir" viewBox="0 0 24 24" fill="none" stroke="#FF5A5A" stroke-width="2"><path d="M17 7L7 17M15 17H7V9"/></svg>',
+};
+const DIR_LABEL = { out: 'efectuat', in: 'primit', missed: 'respins' };
+
+/* ---------- telefon: contacte ---------- */
+function renderContacts() {
+  const q = fold($('search').value.trim());
+  const list = state.contacts.filter(c => !q || fold(c.name).includes(q) || fold(c.tag).includes(q));
+  $('contact-list').innerHTML = list.length ? list.map(c => `
+    <div class="contact">
+      <div class="avatar" style="background:${grad(c.c)}">${esc(initials(c.name))}</div>
+      <div class="meta">
+        <div class="name">${esc(c.name)}</div>
+        <div class="masked">${ICON_LOCK}<span class="dots">•••• •• ••</span><span class="ctag">· ${esc(c.tag)}</span></div>
       </div>
-      <ul class="ai-todo">${ai.todo.map(t=>`<li>${t}</li>`).join('')}</ul>
-    </div>`;
-  hist.prepend(el);
+      <button class="call-btn" data-call="${c.id}" aria-label="Sună ${esc(c.name)}">${ICON_PHONE}</button>
+    </div>`).join('') : '<div class="empty">Niciun contact găsit.</div>';
 }
+
+/* ---------- telefon: istoric angajat (fără AI, fără numere) ---------- */
+function renderHistory() {
+  $('history-list').innerHTML = state.calls.length ? state.calls.map(call => {
+    const c = findContact(call.contactId);
+    return `
+    <div class="log-item">
+      <div class="avatar sm" style="background:${grad(c.c)}">${esc(initials(c.name))}</div>
+      <div class="meta">
+        <div class="name">${esc(c.name)}</div>
+        <div class="when">${dayLabel(call.at)} · ${DIR_LABEL[call.dir]}${call.dir === 'missed' ? '' : ' · ' + mmss(call.secs)}</div>
+      </div>
+      ${ICON_DIR[call.dir]}
+    </div>`;
+  }).join('') : '<div class="empty">Niciun apel încă.</div>';
+}
+
+/* ---------- admin: contacte cu numere reale ---------- */
+function renderAdminContacts() {
+  $('count-contacts').textContent = state.contacts.length;
+  $('admin-contacts').innerHTML = state.contacts.map(c => `
+    <div class="a-row">
+      <div class="avatar sm" style="background:${grad(c.c)}">${esc(initials(c.name))}</div>
+      <div class="meta"><div class="name">${esc(c.name)}</div><div class="ctag">${esc(c.tag)}</div></div>
+      <span class="a-phone">${esc(c.phone)}</span>
+    </div>`).join('');
+}
+
+/* ---------- admin: apeluri + analiză AI ---------- */
+function renderAdminCalls() {
+  $('count-calls').textContent = state.calls.length;
+  $('admin-calls').innerHTML = state.calls.length ? state.calls.map(call => {
+    const c = findContact(call.contactId);
+    const status = call.dir === 'missed' ? '<span class="status missed">Respins</span>'
+      : call.ai ? '<span class="status done">Analizat</span>' : '<span class="status analyzing">Analiză AI în curs…</span>';
+    const ai = call.dir === 'missed' ? '' : call.ai ? `
+      <div class="ai-box">
+        <h5>Rezumat AI</h5>
+        <p>${esc(call.ai.summary)}</p>
+        <div class="chips">
+          <span class="chip outcome">Rezultat: ${esc(call.ai.outcome)}</span>
+          ${call.ai.flags.map(f => `<span class="chip flag">De verificat: ${esc(f)}</span>`).join('')}
+        </div>
+        <ul class="todo">${call.ai.actions.map(a => `<li>${esc(a)}</li>`).join('')}</ul>
+      </div>` : '<div class="ai-box"><h5>Transcriere și analiză</h5><div class="shimmer"></div><div class="shimmer short"></div></div>';
+    const foot = call.dir === 'missed' ? '' : `
+      <div class="call-foot">
+        <button class="listen-btn" data-listen="${call.id}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Ascultă înregistrarea
+        </button>
+        <span>Se șterge automat pe ${deleteDate(call.at)}</span>
+      </div>
+      ${call.audits.length ? `<div class="audit">${call.audits.map(t => `<div>Jurnal de audit: ascultată de Administrator la ${t}</div>`).join('')}</div>` : ''}`;
+    return `
+    <div class="call-card">
+      <div class="top">
+        <div class="avatar sm" style="background:${grad(c.c)}">${esc(initials(c.name))}</div>
+        <div class="meta">
+          <div class="line1">${esc(c.name)} ${status}</div>
+          <div class="line2">${esc(c.phone)} · Andrei M. · ${DIR_LABEL[call.dir]} · ${dayLabel(call.at)}${call.dir === 'missed' ? '' : ' · ' + mmss(call.secs)}</div>
+        </div>
+        ${ICON_DIR[call.dir]}
+      </div>
+      ${ai}${foot}
+    </div>`;
+  }).join('') : '<div class="empty">Apelurile angajaților apar aici, cu rezumatul AI.</div>';
+}
+
+function renderAll() { renderContacts(); renderHistory(); renderAdminContacts(); renderAdminCalls(); }
+
+/* ---------- navigare ---------- */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.screen === id));
+}
+function setBusy(busy) {
+  document.querySelectorAll('.tab').forEach(t => t.disabled = busy);
+  $('sim-incoming').disabled = busy;
+}
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(t.dataset.screen));
+function showAdmin(view) {
+  document.querySelectorAll('.admin-view').forEach(v => v.classList.toggle('active', v.id === view));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+}
+document.querySelectorAll('.admin-tab').forEach(t => t.onclick = () => showAdmin(t.dataset.view));
+
+/* ---------- informare înregistrare (o singură dată) ---------- */
+let afterAck = null;
+function requireAck(fn) {
+  if (state.acknowledged) return fn();
+  afterAck = fn;
+  $('consent').classList.add('open');
+}
+$('consent-ok').onclick = () => {
+  state.acknowledged = true;
+  $('consent').classList.remove('open');
+  if (afterAck) { const fn = afterAck; afterAck = null; fn(); }
+};
+$('consent-cancel').onclick = () => { afterAck = null; $('consent').classList.remove('open'); };
+
+/* ---------- apel efectuat ---------- */
+$('contact-list').addEventListener('click', e => {
+  const btn = e.target.closest('[data-call]');
+  if (!btn || state.timer) return;
+  const c = findContact(btn.dataset.call);
+  requireAck(() => startCall(c, 'out'));
+});
+$('search').addEventListener('input', renderContacts);
+
+function startCall(c, dir) {
+  state.active = c; state.direction = dir; state.seconds = 0;
+  $('call-avatar').textContent = initials(c.name);
+  $('call-avatar').style.background = grad(c.c);
+  $('call-name').textContent = c.name;
+  $('call-timer').textContent = '00:00';
+  show('s-call'); setBusy(true);
+  state.timer = setInterval(() => { state.seconds++; $('call-timer').textContent = mmss(state.seconds); }, 1000);
+}
+
+$('end-call').onclick = () => {
+  clearInterval(state.timer); state.timer = null;
+  document.querySelectorAll('.pad-btn').forEach(b => b.classList.remove('active'));
+  logCall(state.active, state.direction, state.seconds);
+  setBusy(false); show('s-history'); showAdmin('v-calls');
+};
+document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => b.classList.toggle('active'));
+
+/* ---------- apel primit (simulat) ---------- */
+$('sim-incoming').onclick = () => {
+  if (state.timer) return;
+  const c = findContact('ie');
+  state.active = c;
+  $('in-avatar').textContent = initials(c.name);
+  $('in-avatar').style.background = grad(c.c);
+  $('in-name').textContent = c.name;
+  $('in-tag').textContent = c.tag;
+  setBusy(true); show('s-incoming');
+};
+$('accept').onclick = () => requireAck(() => startCall(state.active, 'in'));
+$('decline').onclick = () => {
+  logCall(state.active, 'missed', 0);
+  setBusy(false); show('s-contacts');
+};
+
+/* ---------- jurnal apeluri + analiză AI simulată ---------- */
+function logCall(c, dir, secs, at = new Date(), ai = null) {
+  const call = { id: state.nextId++, contactId: c.id, dir, secs, at, ai, audits: [] };
+  state.calls.unshift(call);
+  renderHistory(); renderAdminCalls();
+  if (dir !== 'missed' && !ai) {
+    setTimeout(() => {
+      call.ai = AI_SUMMARIES[state.aiIndex++ % AI_SUMMARIES.length];
+      renderAdminCalls();
+    }, 1800);
+  }
+  return call;
+}
+
+$('admin-calls').addEventListener('click', e => {
+  const btn = e.target.closest('[data-listen]');
+  if (!btn) return;
+  const call = state.calls.find(x => x.id === Number(btn.dataset.listen));
+  call.audits.push(hhmm(new Date()));
+  renderAdminCalls();
+});
+
+/* ---------- admin: adaugă contact ---------- */
+$('add-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('f-name').value.trim(), tag = $('f-tag').value.trim(), phone = $('f-phone').value.trim();
+  const msg = $('form-msg');
+  if (!name || !phone) { msg.className = 'form-msg err'; msg.textContent = 'Completează numele afișat și numărul.'; return; }
+  if (!/^\+?[0-9 ()-]{6,20}$/.test(phone)) { msg.className = 'form-msg err'; msg.textContent = 'Numărul poate conține doar cifre, spații și +.'; return; }
+  state.contacts.push({ id: 'n' + state.nextId++, name, tag: tag || 'Fără etichetă', phone, c: COLORS[state.contacts.length % COLORS.length] });
+  e.target.reset();
+  msg.className = 'form-msg ok';
+  msg.textContent = `Salvat. Angajatul îl vede ca „${name}”, cu numărul ascuns.`;
+  renderContacts(); renderAdminContacts();
+});
+
+/* ---------- start ---------- */
+$('clock').textContent = hhmm(new Date());
+const yesterday = new Date(Date.now() - 864e5); yesterday.setHours(16, 20, 0, 0);
+logCall(findContact('mc'), 'out', 185, yesterday, {
+  summary: 'Clientul întreabă de reînnoirea contractului de mentenanță. Angajatul a explicat pachetele disponibile.',
+  outcome: 'Informare', actions: ['Trimite oferta de reînnoire'], flags: [],
+});
+renderAll();
 </script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+name: Sync videos
+
+# Runs whenever videos/links.txt changes: fetches title, channel, duration,
+# description, thumbnail and (when YouTube allows it) a transcript for each
+# link, and commits the result to videos/catalog.json, videos/thumbs/ and
+# videos/transcripts/.
+on:
+  push:
+    paths:
+      - videos/links.txt
+      - tools/videos_sync.py
+  workflow_dispatch:
+    inputs:
+      refresh:
+        description: Re-fetch every video, not only new ones
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: videos-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install youtube-transcript-api==1.2.4
+      - name: Fetch video info
+        run: python3 tools/videos_sync.py ${{ inputs.refresh && '--refresh' || '' }}
+      - name: Commit catalog
+        run: |
+          git add -A videos/
+          if git diff --cached --quiet; then echo "Nothing changed"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update video catalog"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

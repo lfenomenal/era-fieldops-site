@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Multi-cameră live</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07090f">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #07090f;
+    --panel: #10141e;
+    --panel-2: #1a2030;
+    --line: rgba(255, 255, 255, 0.09);
+    --line-2: rgba(255, 255, 255, 0.18);
+    --text: #eef1f7;
+    --text-2: #9aa3b5;
+    --accent: #4f7dff;
+    --audio: #2fd38a;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body { background: var(--bg); color: var(--text); }
+  body { font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100dvh; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  svg { display: block; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .top {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+    padding: 10px max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left));
+    background: rgba(7, 9, 15, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .title { flex: 1 1 180px; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+  .title h1 { font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .title span { font-size: 0.82rem; color: var(--text-2); white-space: nowrap; }
+  .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+  .seg button { border: 0; background: none; padding: 5px 12px; border-radius: 7px; color: var(--text-2); font-weight: 600; font-size: 0.86rem; }
+  .seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--text); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px;
+    border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
+    font-size: 0.86rem; font-weight: 600;
+  }
+  .btn:hover { border-color: var(--line-2); }
+  .btn svg { width: 16px; height: 16px; }
+  .btn.icon { width: 34px; padding: 0; justify-content: center; }
+  .btn.on { color: var(--audio); border-color: rgba(47, 211, 138, 0.4); }
+  .actions { display: flex; gap: 6px; }
+  .chips { flex: 1 1 100%; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; display: inline-flex; align-items: center; gap: 7px;
+    padding: 4px 12px 4px 4px; border-radius: 999px;
+    border: 1px solid var(--line); background: none; color: var(--text-2); font-size: 0.85rem;
+  }
+  .chip .n {
+    width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--panel-2); font-size: 0.72rem; font-weight: 700;
+  }
+  .chip[aria-pressed="true"] { color: var(--text); background: var(--panel); border-color: var(--line-2); }
+  .chip[aria-pressed="true"] .n { background: var(--accent); color: #fff; }
+  .chip svg { width: 14px; height: 14px; color: var(--audio); }
+
+  /* ---------- stage ---------- */
+  .stage { position: relative; margin: 8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)); }
+  .tile {
+    position: absolute; left: 0; top: 0;
+    display: flex; flex-direction: column;
+    border-radius: 10px; overflow: hidden; background: #000;
+    border: 1px solid var(--line);
+    transition: transform 0.3s var(--ease), width 0.3s var(--ease), height 0.3s var(--ease), border-color 0.2s;
+  }
+  .tile.instant, .stage.instant .tile { transition: none; }
+  .tile.is-audio { border-color: var(--audio); box-shadow: 0 0 0 1px var(--audio); }
+  .tile.dragging { transition: none; z-index: 20; opacity: 0.9; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7); }
+  .tile.drop-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .tbar {
+    flex: none; height: 34px; display: flex; align-items: center; gap: 2px; padding: 0 3px 0 6px;
+    background: var(--panel); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  }
+  .dragging .tbar { cursor: grabbing; }
+  .tbar .num {
+    flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--panel-2); font-size: 0.7rem; font-weight: 700; color: var(--text-2); margin-right: 4px;
+  }
+  .tbar .name { flex: 1; min-width: 0; font-size: 0.86rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbar button {
+    flex: none; width: 30px; height: 28px; border: 0; border-radius: 7px; background: none; color: var(--text-2);
+    display: grid; place-items: center;
+  }
+  .tbar button:hover { background: var(--panel-2); color: var(--text); }
+  .tbar button svg { width: 16px; height: 16px; }
+  .tbar button[data-act="audio"][aria-pressed="true"] { color: var(--audio); }
+  .compact .tbar { padding-left: 8px; }
+  .compact .tbar .num { display: none; }
+  .compact .tbar button { width: 26px; }
+  .frame { position: relative; flex: 1; }
+  .frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  body.is-dragging iframe { pointer-events: none; }
+  body.is-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+
+  .hint {
+    position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); translate: -50% 0; z-index: 60;
+    max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 12px;
+    background: var(--panel-2); border: 1px solid var(--line-2); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    font-size: 0.88rem; text-align: center;
+    opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  }
+  .hint.show { opacity: 1; }
+
+  /* ---------- setup ---------- */
+  .setup { max-width: 680px; margin: 0 auto; padding: 48px 16px 64px; }
+  .setup h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -0.02em; line-height: 1.15; }
+  .setup .sub { color: var(--text-2); margin-top: 10px; font-size: 1rem; }
+  .setup form { margin-top: 28px; display: grid; gap: 18px; }
+  .setup label { display: grid; gap: 6px; font-weight: 600; font-size: 0.92rem; }
+  .setup label small { font-weight: 400; color: var(--text-2); }
+  .setup input, .setup textarea {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line-2);
+    background: var(--panel); color: var(--text); font: 0.95rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .setup input { font-family: inherit; }
+  .setup textarea { resize: vertical; min-height: 190px; }
+  .status { font-size: 0.88rem; color: var(--text-2); min-height: 1.4em; }
+  .status ul { margin: 6px 0 0 18px; color: #ffb547; }
+  .status li { overflow-wrap: anywhere; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .primary { height: 44px; padding: 0 22px; border-radius: 12px; border: 0; background: var(--accent); color: #fff; font-weight: 700; }
+  .primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .ghost { height: 44px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--line-2); background: none; font-weight: 600; }
+  .tips { margin-top: 36px; padding: 18px 20px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+  .tips h2 { font-size: 0.95rem; margin-bottom: 10px; }
+  .tips ol { margin-left: 20px; display: grid; gap: 8px; color: var(--text-2); font-size: 0.9rem; }
+  .tips b { color: var(--text); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .btn .lbl { display: none; }
+    .btn:not(.icon) { width: 34px; padding: 0; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="top" id="top" hidden>
+  <div class="title"><h1 id="evTitle"></h1><span id="evCount"></span></div>
+  <div class="seg" role="group" aria-label="Aranjare">
+    <button type="button" data-layout="grid" title="Toate camerele egale (G)">Grilă</button>
+    <button type="button" data-layout="focus" title="Una mare, restul mici (F)">Focus</button>
+    <button type="button" data-layout="single" title="Doar o cameră (U)">Una</button>
+  </div>
+  <div class="actions">
+    <button type="button" class="btn" id="muteAll" title="Oprește sunetul (M)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      <span class="lbl">Fără sunet</span>
+    </button>
+    <button type="button" class="btn" id="share">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span class="lbl">Distribuie</span>
+    </button>
+    <button type="button" class="btn icon" id="edit" title="Schimbă linkurile" aria-label="Schimbă linkurile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+    </button>
+    <button type="button" class="btn icon" id="fullscreen" title="Ecran complet" aria-label="Ecran complet">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Camere"></div>
+</header>
+
+<main class="stage" id="stage" hidden></main>
+
+<section class="setup" id="setup" hidden>
+  <h1>Multi-cameră live</h1>
+  <p class="sub">Pui linkurile live-urilor de pe YouTube și primești un singur link pentru spectatori.
+    Fiecare vede toate camerele odată și și le aranjează cum vrea: una mare, doar cele care îl interesează, sunetul de la camera aleasă.</p>
+  <form id="form" novalidate>
+    <label><span>Titlu <small>(opțional)</small></span>
+      <input id="fTitle" maxlength="120" placeholder="Demonstrație gimnastică — Sala Polivalentă">
+    </label>
+    <label><span>Linkuri <small>— câte unul pe rând, cu numele camerei după link</small></span>
+      <textarea id="fLinks" spellcheck="false" placeholder="https://youtube.com/live/AAAAAAAAAAA  Sol
+https://youtube.com/live/BBBBBBBBBBB  Bârnă
+https://youtube.com/live/CCCCCCCCCCC  Paralele
+https://youtube.com/live/DDDDDDDDDDD  Sărituri
+https://youtube.com/live/EEEEEEEEEEE  Tribună
+https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
+    </label>
+    <div class="status" id="fStatus" aria-live="polite"></div>
+    <div class="row">
+      <button type="submit" class="primary" id="fGo" disabled>Creează linkul</button>
+      <button type="button" class="ghost" id="fCancel" hidden>Renunță</button>
+    </div>
+  </form>
+  <div class="tips">
+    <h2>Cum pregătești live-urile</h2>
+    <ol>
+      <li><b>Un live pentru fiecare cameră.</b> Un canal YouTube poate avea mai multe live-uri în paralel — fiecare cameră (sau fiecare scenă din OBS) trimite pe cheia ei de stream.</li>
+      <li><b>Programează-le din timp</b> în YouTube Studio: fiecare primește linkul lui de la început, așa că poți trimite linkul multi-cameră înainte de eveniment. Până pornesc, camerele arată „începe în…”.</li>
+      <li><b>Lasă bifat „Permite încorporarea”</b> (Allow embedding) la fiecare live. Vizibilitatea poate fi Public sau Nelistat; Privat nu merge.</li>
+      <li>După eveniment, același link arată reluările.</li>
+      <li>Spectatorii cu internet slab pot alege „Una” sau pot ascunde camere — o cameră ascunsă nu mai consumă date.</li>
+    </ol>
+  </div>
+</section>
+
+<div class="hint" id="hint" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+  var ID_RE = /^[A-Za-z0-9_-]{11}$/;
+  var BAR = 34, GAP = 8, MAX_CAMS = 12;
+  var ICONS = {
+    audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
+    muted: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>',
+    focus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+    hide: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+  };
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- links ----------
+
+  // Any YouTube link form (watch?v=, youtu.be/, /live/, /shorts/, /embed/) or a bare 11-char ID.
+  function parseLink(raw) {
+    raw = raw.trim().replace(/[)\].,;>"']+$/, '').replace(/^[(<"']+/, '');
+    if (ID_RE.test(raw)) return raw;
+    var u;
+    try { u = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://' + raw); } catch (e) { return null; }
+    var host = u.hostname.toLowerCase();
+    if (!/(^|\.)(youtube\.com|youtube-nocookie\.com|youtu\.be)$/.test(host)) return null;
+    var parts = u.pathname.split('/').filter(Boolean), id = null;
+    if (/(^|\.)youtu\.be$/.test(host)) id = parts[0];
+    else if (u.searchParams.get('v')) id = u.searchParams.get('v');
+    else if (parts.length >= 2 && ['live', 'shorts', 'embed', 'v', 'e'].indexOf(parts[0]) >= 0) id = parts[1];
+    return id && ID_RE.test(id) ? id : null;
+  }
+
+  // "link  Name", "Name: link", "Name - link" — whatever is not the link becomes the camera name.
+  function parseLines(text) {
+    var cams = [], bad = [];
+    text.split('\n').forEach(function (line) {
+      var raw = line.trim();
+      if (!raw) return;
+      var tokens = raw.split(/\s+/), id = null, tok = null;
+      for (var i = 0; i < tokens.length && !id; i++) { id = parseLink(tokens[i]); tok = tokens[i]; }
+      if (!id) { bad.push(raw); return; }
+      var name = raw.replace(tok, ' ').replace(/\s+/g, ' ').replace(/^[\s\-–—:|,;]+|[\s\-–—:|,;]+$/g, '');
+      if (!cams.some(function (c) { return c.id === id; })) cams.push({ id: id, name: name.slice(0, 40) });
+    });
+    return { cams: cams, bad: bad };
+  }
+
+  function eventUrl(title, cams) {
+    var p = new URLSearchParams();
+    if (title) p.set('t', title);
+    cams.forEach(function (c) { p.append('c', c.id + (c.name ? '~' + c.name : '')); });
+    return location.pathname + '?' + p.toString();
+  }
+
+  var params = new URLSearchParams(location.search);
+  var title = (params.get('t') || '').trim();
+  var cams = [];
+  params.getAll('c').forEach(function (v) {
+    var k = v.indexOf('~'), id = k < 0 ? v : v.slice(0, k), name = k < 0 ? '' : v.slice(k + 1).trim();
+    if (ID_RE.test(id) && cams.length < MAX_CAMS && !cams.some(function (c) { return c.id === id; })) {
+      cams.push({ id: id, name: name, label: name || 'Camera ' + (cams.length + 1), n: cams.length + 1 });
+    }
+  });
+
+  // ---------- setup ----------
+
+  function showSetup(canCancel) {
+    $('top').hidden = true; $('stage').hidden = true; $('setup').hidden = false;
+    $('fCancel').hidden = !canCancel;
+    $('fTitle').value = title;
+    $('fLinks').value = cams.map(function (c) { return 'https://youtube.com/live/' + c.id + (c.name ? '  ' + c.name : ''); }).join('\n');
+    checkForm();
+  }
+
+  function checkForm() {
+    var r = parseLines($('fLinks').value), st = $('fStatus');
+    st.textContent = '';
+    if (r.cams.length) {
+      st.appendChild(document.createTextNode(r.cams.length === 1 ? '1 cameră recunoscută.' : r.cams.length + ' camere recunoscute.'));
+      if (r.cams.length > MAX_CAMS) st.appendChild(document.createTextNode(' Se folosesc primele ' + MAX_CAMS + '.'));
+      else if (r.cams.length > 9) st.appendChild(document.createTextNode(' Peste 9 camere devine greu de urmărit pe telefon.'));
+    }
+    if (r.bad.length) {
+      st.appendChild(document.createTextNode(' Rânduri fără link YouTube valid:'));
+      var ul = document.createElement('ul');
+      r.bad.slice(0, 5).forEach(function (b) { var li = document.createElement('li'); li.textContent = b; ul.appendChild(li); });
+      st.appendChild(ul);
+    }
+    $('fGo').disabled = !r.cams.length;
+    return r;
+  }
+
+  $('fLinks').addEventListener('input', checkForm);
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var r = checkForm();
+    if (r.cams.length) location.href = eventUrl($('fTitle').value.trim(), r.cams.slice(0, MAX_CAMS));
+  });
+  $('fCancel').addEventListener('click', function () {
+    $('setup').hidden = true; $('top').hidden = false; $('stage').hidden = false; relayout();
+  });
+
+  if (!cams.length) { showSetup(false); return; }
+
+  // ---------- viewer state (remembered per event, per browser) ----------
+
+  var ids = cams.map(function (c) { return c.id; });
+  var KEY = 'multicam:' + ids.join(',');
+  var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0] };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved) {
+      var order = (saved.order || []).filter(function (id) { return ids.indexOf(id) >= 0; });
+      ids.forEach(function (id) { if (order.indexOf(id) < 0) order.push(id); });
+      state.order = order;
+      state.hidden = (saved.hidden || []).filter(function (id) { return ids.indexOf(id) >= 0; });
+      if (state.hidden.length >= ids.length) state.hidden = [];
+      if (['grid', 'focus', 'single'].indexOf(saved.layout) >= 0) state.layout = saved.layout;
+      if (ids.indexOf(saved.focus) >= 0) state.focus = saved.focus;
+    }
+  } catch (e) { /* private mode or corrupt value: start fresh */ }
+  var audio = null;   // never restored: browsers block sound until the viewer taps
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  // ---------- tiles ----------
+
+  var stage = $('stage'), tiles = {};
+  cams.forEach(function (c) {
+    var el = document.createElement('div');
+    el.className = 'tile'; el.hidden = true; el.dataset.id = c.id;
+    el.innerHTML = '<div class="tbar"><span class="num"></span><span class="name"></span>' +
+      '<button type="button" data-act="audio"></button>' +
+      '<button type="button" data-act="focus">' + ICONS.focus + '</button>' +
+      '<button type="button" data-act="hide">' + ICONS.hide + '</button></div><div class="frame"></div>';
+    el.querySelector('.num').textContent = c.n;
+    el.querySelector('.name').textContent = c.label;
+    el.querySelector('[data-act="hide"]').setAttribute('aria-label', 'Ascunde ' + c.label);
+    el.querySelector('[data-act="hide"]').title = 'Ascunde';
+    stage.appendChild(el);
+    tiles[c.id] = { id: c.id, cam: c, el: el, frame: el.querySelector('.frame'), iframe: null };
+  });
+
+  function mount(t) {
+    if (t.iframe) return;
+    var f = document.createElement('iframe');
+    // muted autoplay is the only autoplay browsers allow; sound comes from the viewer's tap
+    f.src = 'https://www.youtube.com/embed/' + t.id + '?autoplay=1&mute=1&playsinline=1&rel=0&enablejsapi=1' +
+      (location.origin && location.origin !== 'null' ? '&origin=' + encodeURIComponent(location.origin) : '');
+    f.title = t.cam.label;
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    // YouTube refuses embeds that arrive without a referrer
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    t.frame.appendChild(f);
+    t.iframe = f;
+  }
+
+  // a hidden camera is torn down, not just hidden, so it stops using bandwidth
+  function unmount(t) {
+    if (!t.iframe) return;
+    t.iframe.remove();
+    t.iframe = null;
+    if (audio === t.id) audio = null;
+  }
+
+  function player(t, func, args) {
+    if (!t.iframe || !t.iframe.contentWindow) return;
+    t.iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: args || [] }), 'https://www.youtube.com');
+  }
+
+  function setAudio(id) {
+    audio = id;
+    ids.forEach(function (x) {
+      var t = tiles[x];
+      if (x === id) { player(t, 'unMute'); player(t, 'setVolume', [100]); player(t, 'playVideo'); }
+      else player(t, 'mute');
+    });
+    paint();
+  }
+
+  // ---------- layout ----------
+
+  function visible() {
+    return state.layout === 'single' ? [state.focus] : state.order.filter(function (id) { return state.hidden.indexOf(id) < 0; });
+  }
+
+  function tileH(w) { return Math.round(w * 9 / 16) + BAR; }
+
+  // largest 16:9 tile size that fits n tiles in W x H
+  function fitGrid(n, W, H) {
+    var best = { cols: 1, w: 0 };
+    for (var cols = 1; cols <= n; cols++) {
+      var rows = Math.ceil(n / cols);
+      var w = Math.min((W - GAP * (cols - 1)) / cols, ((H - GAP * (rows - 1)) / rows - BAR) * 16 / 9);
+      if (w > best.w + 0.5) best = { cols: cols, w: w };
+    }
+    return best;
+  }
+
+  function gridRects(list, x0, y0, W, H, out) {
+    var n = list.length, f = fitGrid(n, W, H), cols = f.cols, w = Math.max(80, Math.floor(f.w)), h = tileH(w);
+    var rows = Math.ceil(n / cols), total = rows * h + (rows - 1) * GAP;
+    var oy = y0 + Math.max(0, (H - total) / 2);
+    list.forEach(function (id, i) {
+      var r = Math.floor(i / cols), c = i % cols;
+      var inRow = Math.min(cols, n - r * cols), rowW = inRow * w + (inRow - 1) * GAP;
+      out[id] = { x: x0 + (W - rowW) / 2 + c * (w + GAP), y: oy + r * (h + GAP), w: w, h: h };
+    });
+    return oy + total;
+  }
+
+  // flowing columns that scroll — for phones, where fitting everything on one screen makes tiles too small
+  function flowRects(list, x0, y0, W, cols, out) {
+    var w = Math.floor((W - GAP * (cols - 1)) / cols), h = tileH(w), y = y0;
+    list.forEach(function (id, i) {
+      var c = i % cols;
+      y = y0 + Math.floor(i / cols) * (h + GAP);
+      out[id] = { x: x0 + c * (w + GAP), y: y, w: w, h: h };
+    });
+    return list.length ? y + h : y0;
+  }
+
+  function compute(vis, W, H) {
+    var rects = {}, bottom;
+    if (state.layout === 'focus' && vis.length > 1) {
+      var others = vis.filter(function (id) { return id !== state.focus; });
+      if (W >= 760) {
+        // thumbnails fitted into a side column; the big camera gets every pixel they don't use
+        var side = Math.round(Math.min(Math.max(W * 0.26, 220), 440));
+        var used = function (sw) { var f = fitGrid(others.length, sw, H), w = Math.max(80, Math.floor(f.w)); return f.cols * w + (f.cols - 1) * GAP; };
+        var mw = Math.floor(Math.min(W - used(side) - GAP, (H - BAR) * 16 / 9));
+        var sw = used(W - mw - GAP);
+        var x0 = Math.max(0, (W - mw - GAP - sw) / 2), mh = tileH(mw);
+        rects[state.focus] = { x: x0, y: Math.max(0, (H - mh) / 2), w: mw, h: mh };
+        bottom = Math.max(mh, gridRects(others, x0 + mw + GAP, 0, sw, H, rects));
+      } else {
+        rects[state.focus] = { x: 0, y: 0, w: W, h: tileH(W) };
+        bottom = flowRects(others, 0, tileH(W) + GAP, W, 2, rects);
+      }
+    } else {
+      bottom = gridRects(vis, 0, 0, W, H, rects);
+    }
+    return { rects: rects, height: Math.max(H, Math.ceil(bottom)) };
+  }
+
+  function relayout() {
+    var vis = visible();
+    var W = stage.clientWidth;
+    var H = Math.max(220, window.innerHeight - $('top').offsetHeight - 16);
+    var res = compute(vis, W, H);
+    stage.style.height = res.height + 'px';
+    vis.forEach(function (id) {
+      var r = res.rects[id], el = tiles[id].el;
+      if (!r) return;
+      el.style.transform = 'translate(' + Math.round(r.x) + 'px,' + Math.round(r.y) + 'px)';
+      el.style.width = Math.round(r.w) + 'px';
+      el.style.height = Math.round(r.h) + 'px';
+      el.classList.toggle('compact', r.w < 240);
+    });
+  }
+
+  function render() {
+    var vis = visible();
+    if (state.layout !== 'single' && vis.indexOf(state.focus) < 0) state.focus = vis[0];
+    ids.forEach(function (id) {
+      var t = tiles[id], on = vis.indexOf(id) >= 0;
+      if (on && t.el.hidden) {
+        // appear in place instead of sliding in from wherever it was last
+        t.el.classList.add('instant');
+        requestAnimationFrame(function () { requestAnimationFrame(function () { t.el.classList.remove('instant'); }); });
+      }
+      t.el.hidden = !on;
+      if (on) mount(t); else unmount(t);
+    });
+    relayout();
+    paint();
+    save();
+  }
+
+  function paint() {
+    var vis = visible();
+    document.querySelectorAll('.seg button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.layout === state.layout));
+    });
+    var chips = $('chips');
+    var focused = document.activeElement && document.activeElement.closest && document.activeElement.closest('.chip');
+    var refocus = focused ? focused.dataset.id : null;
+    chips.textContent = '';
+    cams.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.dataset.id = c.id;
+      var on = state.layout === 'single' ? c.id === state.focus : state.hidden.indexOf(c.id) < 0;
+      b.setAttribute('aria-pressed', String(on));
+      b.title = state.layout === 'single' ? 'Arată ' + c.label : (on ? 'Ascunde ' : 'Arată ') + c.label;
+      var n = document.createElement('span'); n.className = 'n'; n.textContent = c.n;
+      b.appendChild(n);
+      b.appendChild(document.createTextNode(c.label));
+      if (audio === c.id) b.insertAdjacentHTML('beforeend', ICONS.audio);
+      chips.appendChild(b);
+      if (c.id === refocus) b.focus();
+    });
+    ids.forEach(function (id) {
+      var t = tiles[id], el = t.el;
+      el.classList.toggle('is-audio', audio === id);
+      var a = el.querySelector('[data-act="audio"]');
+      a.innerHTML = audio === id ? ICONS.audio : ICONS.muted;
+      a.setAttribute('aria-pressed', String(audio === id));
+      a.title = audio === id ? 'Oprește sunetul' : 'Ascultă camera asta';
+      a.setAttribute('aria-label', a.title + ': ' + t.cam.label);
+      var isMain = state.layout !== 'grid' && id === state.focus;
+      var f = el.querySelector('[data-act="focus"]');
+      f.hidden = state.layout === 'single' || isMain || vis.length < 2;
+      f.title = 'Fă-o mare'; f.setAttribute('aria-label', 'Fă-o mare: ' + t.cam.label);
+      el.querySelector('[data-act="hide"]').hidden = state.layout === 'single' || vis.length < 2;
+    });
+    $('muteAll').classList.toggle('on', !!audio);
+    $('muteAll').disabled = !audio;
+  }
+
+  // ---------- actions ----------
+
+  function focusOn(id) {
+    state.hidden = state.hidden.filter(function (x) { return x !== id; });
+    state.focus = id;
+    if (state.layout === 'grid') state.layout = 'focus';
+    render();
+  }
+
+  function hide(id) {
+    if (visible().length < 2) return;
+    state.hidden.push(id);
+    render();
+  }
+
+  // drop a onto b: they trade places; in Focus that includes trading the big spot
+  function swap(a, b) {
+    var o = state.order, i = o.indexOf(a), j = o.indexOf(b);
+    o[i] = b; o[j] = a;
+    if (state.focus === a) state.focus = b;
+    else if (state.focus === b) state.focus = a;
+    render();
+  }
+
+  document.querySelector('.seg').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) { state.layout = b.dataset.layout; render(); }
+  });
+
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    var id = b.dataset.id;
+    if (state.layout === 'single') { state.focus = id; render(); return; }
+    var k = state.hidden.indexOf(id);
+    if (k >= 0) { state.hidden.splice(k, 1); render(); }
+    else if (visible().length > 1) hide(id);
+    else flash('Măcar o cameră rămâne vizibilă.');
+  });
+
+  stage.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]');
+    if (!b) return;
+    var id = b.closest('.tile').dataset.id;
+    if (b.dataset.act === 'audio') setAudio(audio === id ? null : id);
+    else if (b.dataset.act === 'focus') focusOn(id);
+    else if (b.dataset.act === 'hide') hide(id);
+  });
+
+  stage.addEventListener('dblclick', function (e) {
+    var bar = e.target.closest('.tbar');
+    if (!bar || e.target.closest('button')) return;
+    var id = bar.parentNode.dataset.id;
+    if (state.layout === 'focus' && state.focus === id) { state.layout = 'grid'; render(); }
+    else focusOn(id);
+  });
+
+  $('muteAll').addEventListener('click', function () { setAudio(null); });
+
+  $('share').addEventListener('click', function () {
+    var url = location.origin + eventUrl(title, cams);
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+      navigator.share({ title: title || 'Multi-cameră live', url: url }).catch(function () {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function () { flash('Link copiat. Trimite-l spectatorilor.'); },
+        function () { prompt('Copiază linkul:', url); });
+    } else prompt('Copiază linkul:', url);
+  });
+
+  $('edit').addEventListener('click', function () { setAudio(null); showSetup(true); });
+
+  var fs = $('fullscreen');
+  if (!document.fullscreenEnabled) fs.hidden = true;
+  fs.addEventListener('click', function () {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen().catch(function () {});
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea') || e.metaKey || e.ctrlKey || e.altKey || !$('setup').hidden) return;
+    var n = parseInt(e.key, 10), k = e.key.toLowerCase();
+    if (n >= 1 && n <= cams.length) {
+      var id = cams[n - 1].id;
+      if (state.layout === 'single') { state.focus = id; render(); } else focusOn(id);
+    }
+    else if (k === 'g' || k === 'f' || k === 'u') { state.layout = { g: 'grid', f: 'focus', u: 'single' }[k]; render(); }
+    else if (k === 'm') setAudio(null);
+  });
+
+  var raf = 0;
+  function onResize() { cancelAnimationFrame(raf); raf = requestAnimationFrame(relayout); }
+  window.addEventListener('resize', onResize);
+  document.addEventListener('fullscreenchange', onResize);
+
+  // ---------- drag a tile by its bar onto another to swap them ----------
+
+  var drag = null;
+  stage.addEventListener('pointerdown', function (e) {
+    var bar = e.target.closest('.tbar');
+    if (!bar || e.target.closest('button') || e.button !== 0 || visible().length < 2) return;
+    var el = bar.parentNode, m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(el.style.transform) || [0, 0, 0];
+    drag = { el: el, id: el.dataset.id, x0: +m[1], y0: +m[2], sx: e.clientX, sy: e.clientY, on: false, target: null };
+    bar.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (!drag.on) {
+      if (Math.abs(dx) + Math.abs(dy) < 8) return;
+      drag.on = true;
+      drag.el.classList.add('dragging');
+      document.body.classList.add('is-dragging');
+    }
+    drag.el.style.transform = 'translate(' + (drag.x0 + dx) + 'px,' + (drag.y0 + dy) + 'px)';
+    var over = null;
+    visible().forEach(function (id) {
+      if (id === drag.id) return;
+      var r = tiles[id].el.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) over = id;
+    });
+    if (over !== drag.target) {
+      if (drag.target) tiles[drag.target].el.classList.remove('drop-target');
+      if (over) tiles[over].el.classList.add('drop-target');
+      drag.target = over;
+    }
+  });
+
+  function endDrag() {
+    if (!drag) return;
+    var d = drag;
+    drag = null;
+    if (!d.on) return;
+    d.el.classList.remove('dragging');
+    document.body.classList.remove('is-dragging');
+    if (d.target) { tiles[d.target].el.classList.remove('drop-target'); swap(d.id, d.target); }
+    else relayout();
+  }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  // ---------- start ----------
+
+  var flashTimer = 0;
+  function flash(msg) {
+    var h = $('hint');
+    h.textContent = msg; h.classList.add('show');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { h.classList.remove('show'); }, 2600);
+  }
+
+  document.title = (title ? title + ' — ' : '') + 'Multi-cameră live';
+  $('evTitle').textContent = title || 'Multi-cameră live';
+  $('evCount').textContent = cams.length === 1 ? '1 cameră' : cams.length + ' camere';
+  $('top').hidden = false;
+  stage.hidden = false;
+  stage.classList.add('instant');
+  render();
+  requestAnimationFrame(function () { requestAnimationFrame(function () { stage.classList.remove('instant'); }); });
+  if (cams.length > 1) setTimeout(function () { flash('Apasă 🔊 pe camera pe care vrei s-o auzi. Trage de bara unei camere ca s-o muți.'); }, 1200);
+})();
+</script>
+</body>
+</html>

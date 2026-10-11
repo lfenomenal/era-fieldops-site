@@ -1,6 +1,0 @@
-# Lipește aici linkurile YouTube — câte unul pe rând.
-# Merge orice format: youtube.com/watch?v=…, youtu.be/…, /shorts/…, cu sau fără ?t=90.
-# Poți scrie o notă după link, pe același rând — Claude o citește când aranjează:
-#   https://youtu.be/XXXXXXXXXXX  demo aplicație tehnician, de pus primul
-# Rândurile care încep cu # sunt ignorate.
-

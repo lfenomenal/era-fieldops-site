@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ERA Live</title>
-<meta name="description" content="Toate camerele unui eveniment într-un singur link. Fiecare spectator își aranjează camerele și poate derula toate camerele deodată.">
+<meta name="description" content="Toate aparatele unui concurs, într-un singur link: câte o cameră la fiecare aparat, iar fiecare spectator vede tot concursul, mărește aparatul care îl interesează și poate da înapoi transmisiunea.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0b0b0c">
 <meta property="og:title" content="ERA Live">
-<meta property="og:description" content="Toate camerele unui eveniment, într-un singur link.">
+<meta property="og:description" content="Toate aparatele, într-un singur link.">
 <link rel="icon" type="image/svg+xml" href="logo/era-live-icon.svg">
 <link rel="apple-touch-icon" href="logo/era-live-icon-180.png">
 <meta property="og:image" content="https://lfenomenal.github.io/era-fieldops-site/live/logo/era-live-og.jpg">
@@ -236,27 +236,31 @@
   .tag i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2); }
   .lhero h1 { margin-top: 22px; font-size: clamp(48px, 7.6vw, 108px); font-weight: 700; line-height: 0.94; letter-spacing: -0.05em; }
   .lhero h1 span { color: #77777d; }
-  .lhero .sub { max-width: 600px; margin: 24px auto 0; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.5; color: var(--text-2); }
+  .lhero .sub { max-width: 600px; margin: 24px auto 0; text-wrap: balance; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.5; color: var(--text-2); }
   .cta-row { margin-top: 32px; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
   .cta-note { font-size: 13px; color: var(--text-3); }
 
-  /* the example camera wall: the product itself, directing between four angles */
+  /* the example camera wall: the product itself, one camera per apparatus, directing between them */
   .lwall-wrap { width: min(1240px, calc(100vw - 32px)); margin: 56px auto 0; }
   .lwall {
-    position: relative; display: grid; gap: 4px; aspect-ratio: 2.37;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr));
+    position: relative; display: grid; gap: 4px; aspect-ratio: 16 / 9;
+    grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr));
     border-radius: 14px; overflow: hidden; background: #000;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 80px 140px -60px rgba(0, 0, 0, 1);
   }
   .lw-cam { position: relative; overflow: hidden; border-radius: 3px; background: #0a0a0a; transform-origin: 0 0; cursor: pointer; }
-  .lw-cam[data-slot="0"] { grid-area: 1 / 1 / 4 / 2; cursor: default; }
-  .lw-cam[data-slot="1"] { grid-area: 1 / 2 / 2 / 3; }
-  .lw-cam[data-slot="2"] { grid-area: 2 / 2 / 3 / 3; }
-  .lw-cam[data-slot="3"] { grid-area: 3 / 2 / 4 / 3; }
+  .lw-cam[data-slot="0"] { grid-area: 1 / 1 / 3 / 3; cursor: default; }
+  .lw-cam[data-slot="1"] { grid-area: 1 / 3 / 2 / 4; }
+  .lw-cam[data-slot="2"] { grid-area: 2 / 3 / 3 / 4; }
+  .lw-cam[data-slot="3"] { grid-area: 3 / 1 / 4 / 2; }
+  .lw-cam[data-slot="4"] { grid-area: 3 / 2 / 4 / 3; }
+  .lw-cam[data-slot="5"] { grid-area: 3 / 3 / 4 / 4; }
   .lw-cam img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: drift 24s ease-in-out infinite alternate; transition: filter 0.3s; }
   .lw-cam:nth-child(2) img { animation-delay: -8s; transform-origin: 40% 30%; }
   .lw-cam:nth-child(3) img { animation-delay: -15s; transform-origin: 60% 60%; }
   .lw-cam:nth-child(4) img { animation-delay: -4s; transform-origin: 50% 40%; }
+  .lw-cam:nth-child(5) img { animation-delay: -11s; transform-origin: 45% 55%; }
+  .lw-cam:nth-child(6) img { animation-delay: -19s; transform-origin: 55% 35%; }
   .lw-cam:not([data-slot="0"]):hover img { filter: brightness(1.18); }
   .lw-cam::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow 0.4s; pointer-events: none; }
   .lw-cam[data-slot="0"]::after { box-shadow: inset 0 0 0 2px var(--live); }
@@ -268,7 +272,7 @@
   .lw-label span { font: 500 10px/1 var(--mono); color: rgba(255, 255, 255, 0.6); letter-spacing: 0; }
   .lw-cam[data-slot="0"] .lw-label { left: 16px; bottom: 14px; padding: 6px 10px; font-size: 12px; }
   .lw-dust { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; }
-  .lw-hud { position: absolute; z-index: 4; top: 14px; left: 16px; right: calc(25% + 16px); display: flex; align-items: center; gap: 10px; pointer-events: none; }
+  .lw-hud { position: absolute; z-index: 4; top: 14px; left: 16px; right: calc(33.333% + 16px); display: flex; align-items: center; gap: 10px; pointer-events: none; }
   .lw-live { padding: 4px 7px; border-radius: 3px; background: var(--live); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; line-height: 1; }
   .lw-event, .lw-tc { padding: 5px 8px; border-radius: 3px; background: rgba(0, 0, 0, 0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); line-height: 1; }
   .lw-event { font-size: 12px; font-weight: 600; }
@@ -359,12 +363,14 @@
     .wrap { padding: 0 20px; }
     .lhero { padding-top: 116px; }
     .lwall-wrap { width: calc(100vw - 24px); margin-top: 52px; }
-    .lwall { aspect-ratio: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; border-radius: 10px; }
+    .lwall { aspect-ratio: auto; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: auto auto; gap: 3px; border-radius: 10px; }
     .lw-cam { aspect-ratio: 16 / 9; }
-    .lw-cam[data-slot="0"] { grid-area: 1 / 1 / 2 / 4; }
+    .lw-cam[data-slot="0"] { grid-area: 1 / 1 / 2 / 6; }
     .lw-cam[data-slot="1"] { grid-area: 2 / 1 / 3 / 2; }
     .lw-cam[data-slot="2"] { grid-area: 2 / 2 / 3 / 3; }
     .lw-cam[data-slot="3"] { grid-area: 2 / 3 / 3 / 4; }
+    .lw-cam[data-slot="4"] { grid-area: 2 / 4 / 3 / 5; }
+    .lw-cam[data-slot="5"] { grid-area: 2 / 5 / 3 / 6; }
     .lw-cam:not([data-slot="0"]) .lw-label { left: 4px; bottom: 4px; padding: 3px 4px; font-size: 0; gap: 0; }
     .lw-cam:not([data-slot="0"]) .lw-label span { font-size: 9px; }
     .lw-cam[data-slot="0"] .lw-label { left: 10px; bottom: 10px; }
@@ -486,8 +492,8 @@
   <header class="lhero">
     <div class="wrap">
       <span class="tag"><i></i>Multi-cameră pentru YouTube Live</span>
-      <h1 class="display">Toate camerele.<br><span>Un singur link.</span></h1>
-      <p class="sub">Spectatorii văd fiecare unghi al evenimentului, își aleg camera și pot da înapoi transmisiunea, direct din browser.</p>
+      <h1 class="display">Toate aparatele.<br><span>Un singur link.</span></h1>
+      <p class="sub">O cameră la fiecare aparat. Spectatorii văd tot concursul deodată, măresc aparatul care îi interesează și pot da înapoi, direct din browser.</p>
       <div class="cta-row">
         <a class="btn-light" href="#creeaza" data-go>Creează transmisiunea
           <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -496,39 +502,41 @@
       </div>
     </div>
     <div class="lwall-wrap">
-      <div class="lwall" id="lw" role="group" aria-label="Exemplu: patru camere ale aceluiași eveniment">
-        <button type="button" class="lw-cam" data-slot="0" aria-label="Camera 01, lateral"><img src="media/cam1.webp" srcset="media/cam1-960.webp 960w, media/cam1.webp 1920w" sizes="(min-width: 700px) 75vw, 100vw" alt="" fetchpriority="high"><span class="lw-label"><span>01</span>Lateral</span></button>
-        <button type="button" class="lw-cam" data-slot="1" aria-label="Camera 02, din spate"><img src="media/cam2.webp" srcset="media/cam2-960.webp 960w, media/cam2.webp 1920w" sizes="(min-width: 700px) 75vw, 100vw" alt=""><span class="lw-label"><span>02</span>Din spate</span></button>
-        <button type="button" class="lw-cam" data-slot="2" aria-label="Camera 03, contralumină"><img src="media/cam3.webp" srcset="media/cam3-960.webp 960w, media/cam3.webp 1920w" sizes="(min-width: 700px) 75vw, 100vw" alt=""><span class="lw-label"><span>03</span>Contralumină</span></button>
-        <button type="button" class="lw-cam" data-slot="3" aria-label="Camera 04, de sus"><img src="media/cam4.webp" srcset="media/cam4-960.webp 960w, media/cam4.webp 1920w" sizes="(min-width: 700px) 75vw, 100vw" alt=""><span class="lw-label"><span>04</span>De sus</span></button>
+      <div class="lwall" id="lw" role="group" aria-label="Exemplu: câte o cameră la fiecare aparat al aceluiași concurs">
+        <button type="button" class="lw-cam" data-slot="0" aria-label="Camera 01, bârnă"><img src="media/beam.webp" srcset="media/beam-960.webp 960w, media/beam.webp 1920w" sizes="(min-width: 700px) 66vw, 100vw" alt="" fetchpriority="high"><span class="lw-label"><span>01</span>Bârnă</span></button>
+        <button type="button" class="lw-cam" data-slot="1" aria-label="Camera 02, sol"><img src="media/floor.webp" srcset="media/floor-960.webp 960w, media/floor.webp 1920w" sizes="(min-width: 700px) 66vw, 100vw" alt=""><span class="lw-label"><span>02</span>Sol</span></button>
+        <button type="button" class="lw-cam" data-slot="2" aria-label="Camera 03, paralele inegale"><img src="media/bars.webp" srcset="media/bars-960.webp 960w, media/bars.webp 1536w" sizes="(min-width: 700px) 66vw, 100vw" alt=""><span class="lw-label"><span>03</span>Paralele inegale</span></button>
+        <button type="button" class="lw-cam" data-slot="3" aria-label="Camera 04, sărituri"><img src="media/vault.webp" srcset="media/vault-960.webp 960w, media/vault.webp 1536w" sizes="(min-width: 700px) 66vw, 100vw" alt=""><span class="lw-label"><span>04</span>Sărituri</span></button>
+        <button type="button" class="lw-cam" data-slot="4" aria-label="Camera 05, inele"><img src="media/rings.webp" srcset="media/rings-960.webp 960w, media/rings.webp 1536w" sizes="(min-width: 700px) 66vw, 100vw" alt=""><span class="lw-label"><span>05</span>Inele</span></button>
+        <button type="button" class="lw-cam" data-slot="5" aria-label="Camera 06, cal cu mânere"><img src="media/pommel.webp" srcset="media/pommel-960.webp 960w, media/pommel.webp 1536w" sizes="(min-width: 700px) 66vw, 100vw" alt=""><span class="lw-label"><span>06</span>Cal cu mânere</span></button>
         <canvas class="lw-dust" id="lwDust" aria-hidden="true"></canvas>
-        <div class="lw-hud" aria-hidden="true"><span class="lw-live">LIVE</span><span class="lw-event">Demonstrație gimnastică</span><span class="lw-tc" id="lwTc">00:41:12:00</span></div>
+        <div class="lw-hud" aria-hidden="true"><span class="lw-live">LIVE</span><span class="lw-event">Concurs de gimnastică</span><span class="lw-tc" id="lwTc">00:41:12:00</span></div>
       </div>
-      <div class="lw-cap"><span>Atinge o cameră ca s-o vezi mare.</span><span>Imagini ilustrative</span></div>
+      <div class="lw-cap"><span>Atinge un aparat ca să-l vezi mare.</span><span>Imagini ilustrative</span></div>
     </div>
   </header>
 
   <section class="band" aria-label="Cum funcționează">
-    <div class="band-media"><img src="media/arena.webp" srcset="media/arena-1200.webp 1200w, media/arena.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+    <div class="band-media"><img src="media/arena.webp" srcset="media/arena-1200.webp 1200w, media/arena.webp 1792w" sizes="100vw" alt="" loading="lazy"></div>
     <div class="wrap">
-      <h2 class="display">Tu pui camerele.<br><span>Ei aleg unghiul.</span></h2>
-      <p>Câte un live pe YouTube pentru fiecare cameră. ERA Live le adună pe un singur ecran, pe care fiecare spectator și-l aranjează cum vrea.</p>
+      <h2 class="display">O cameră la fiecare aparat.<br><span>Nimeni nu mai ratează nimic.</span></h2>
+      <p>Când se concurează la mai multe aparate deodată, publicul nu mai trebuie să aleagă unde să se uite. ERA Live adună toate camerele pe un singur ecran.</p>
     </div>
   </section>
 
   <section class="wrap points">
-    <div class="point"><span class="n">01</span><h3 class="display">Fiecare își face regia</h3><p>Toate camerele egale, una mare sau doar una. Camerele se mută și se măresc cu degetul.</p></div>
-    <div class="point"><span class="n">02</span><h3 class="display">Nimic nu se pierde</h3><p>Dai înapoi 10 sau 30 de secunde pe toate camerele deodată, sincronizate. Un clic și ești iar la LIVE.</p></div>
-    <div class="point"><span class="n">03</span><h3 class="display">Un singur link</h3><p>Îl trimiți pe mesaj sau pui codul QR în sală. Merge pe telefon, tabletă și laptop.</p></div>
+    <div class="point"><span class="n">01</span><h3 class="display">Tot concursul, pe un ecran</h3><p>Bârnă, sol, paralele, sărituri: toate aparatele se văd în același timp, fără să schimbi nimic.</p></div>
+    <div class="point"><span class="n">02</span><h3 class="display">Aparatul tău, cel mai mare</h3><p>Părinții și antrenorii măresc aparatul care îi interesează. Celelalte rămân la vedere, mai mici.</p></div>
+    <div class="point"><span class="n">03</span><h3 class="display">Nimic nu se pierde</h3><p>Dai înapoi 10 sau 30 de secunde pe toate aparatele deodată, sincronizate. Un clic și ești iar la LIVE.</p></div>
   </section>
 
   <section class="create" id="creeaza">
     <div class="wrap create-grid">
       <div>
         <h2 class="display">Creează<br>transmisiunea.</h2>
-        <p class="lead">Adaugă linkul live-ului de YouTube pentru fiecare cameră. Primești un link pentru spectatori și un cod QR pentru sală.</p>
+        <p class="lead">Adaugă linkul live-ului de YouTube pentru fiecare aparat. Primești un link pentru spectatori și un cod QR pentru sală.</p>
         <ul class="check">
-          <li><span><b>Un live pentru fiecare cameră</b>, pe același canal sau pe canale diferite.</span></li>
+          <li><span><b>Un live pentru fiecare aparat</b>, pe același canal sau pe canale diferite.</span></li>
           <li><span><b>„Permite încorporarea” bifat</b> și <b>DVR activ</b>, ca spectatorii să poată da înapoi.</span></li>
           <li><span><b>Public sau Nelistat.</b> Live-urile programate au link de la început, deci îl poți trimite din timp.</span></li>
         </ul>
@@ -536,7 +544,7 @@
       <form class="form" id="form" novalidate>
         <div class="fs">
           <label class="fl" for="fTitle">Numele evenimentului</label>
-          <input class="in" id="fTitle" maxlength="120" placeholder="Demonstrație gimnastică, Sala Polivalentă" autocomplete="off">
+          <input class="in" id="fTitle" maxlength="120" placeholder="Concurs de gimnastică, Sala Polivalentă" autocomplete="off">
         </div>
         <div class="fs">
           <div class="fs-head"><span class="fl">Camere</span><span class="fh">Poți lipi o listă de linkuri într-un singur câmp.</span></div>
@@ -656,6 +664,7 @@
   // ================= setup =================
 
   var rowsEl = $('rows');
+  var APPARATUS = ['Bârnă', 'Sol', 'Paralele inegale', 'Sărituri', 'Inele', 'Cal cu mânere', 'Paralele', 'Bară fixă'];
   function rows() { return Array.prototype.slice.call(rowsEl.querySelectorAll('.cam-row')); }
 
   function addRow(link, name, focus) {
@@ -678,7 +687,7 @@
     rows().forEach(function (r, i) {
       var idx = r.querySelector('.cam-idx');
       idx.textContent = pad2(i + 1);
-      r.querySelector('.name').placeholder = 'Camera ' + (i + 1);
+      r.querySelector('.name').placeholder = APPARATUS[i] ? 'ex. ' + APPARATUS[i] : 'Camera ' + (i + 1);
     });
     $('addRow').hidden = rows().length >= MAX_CAMS;
   }

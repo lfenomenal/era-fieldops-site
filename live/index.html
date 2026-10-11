@@ -79,6 +79,26 @@
   .tile.instant, .stage.instant .tile { transition: none; }
   .tile.is-audio { border-color: var(--audio); box-shadow: 0 0 0 1px var(--audio); }
   .tile.dragging { transition: none; z-index: 20; opacity: 0.9; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7); }
+  .tile.resizing { transition: none; z-index: 15; border-color: var(--accent); }
+  .grip {
+    position: absolute; right: 0; bottom: 0; z-index: 2; width: 26px; height: 26px;
+    cursor: nwse-resize; touch-action: none; opacity: 0; transition: opacity 0.2s;
+  }
+  .grip::after {
+    content: ''; position: absolute; right: 5px; bottom: 5px; width: 11px; height: 11px;
+    border-right: 2px solid #fff; border-bottom: 2px solid #fff; border-bottom-right-radius: 3px;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  }
+  .tile:hover .grip, .tile.resizing .grip { opacity: 1; }
+  @media (hover: none) { .grip { opacity: 0.85; } }
+  .stage[data-layout="single"] .grip { display: none; }
+  .size-tag {
+    position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 3;
+    padding: 4px 10px; border-radius: 8px; background: rgba(7, 9, 15, 0.85);
+    font-size: 0.85rem; font-weight: 700; pointer-events: none;
+  }
+  body.is-resizing { cursor: nwse-resize; user-select: none; -webkit-user-select: none; }
+  body.is-resizing iframe { pointer-events: none; }
   .tile.drop-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
   .tbar {
     flex: none; height: 34px; display: flex; align-items: center; gap: 2px; padding: 0 3px 0 6px;
@@ -140,6 +160,8 @@
   .tips b { color: var(--text); font-weight: 600; }
 
   @media (max-width: 560px) {
+    .seg button { padding: 5px 8px; }
+    .actions { gap: 4px; }
     .btn .lbl { display: none; }
     .btn:not(.icon) { width: 34px; padding: 0; justify-content: center; }
   }
@@ -154,6 +176,7 @@
     <button type="button" data-layout="grid" title="Toate camerele egale (G)">Grilă</button>
     <button type="button" data-layout="focus" title="Una mare, restul mici (F)">Focus</button>
     <button type="button" data-layout="single" title="Doar o cameră (U)">Una</button>
+    <button type="button" data-layout="free" title="Fiecare cameră cu mărimea ei — trage de colțul unei camere (L)">Liber</button>
   </div>
   <div class="actions">
     <button type="button" class="btn" id="muteAll" title="Oprește sunetul (M)">
@@ -179,7 +202,7 @@
 <section class="setup" id="setup" hidden>
   <h1>Multi-cameră live</h1>
   <p class="sub">Pui linkurile live-urilor de pe YouTube și primești un singur link pentru spectatori.
-    Fiecare vede toate camerele odată și și le aranjează cum vrea: una mare, doar cele care îl interesează, sunetul de la camera aleasă.</p>
+    Fiecare vede toate camerele odată și și le aranjează cum vrea: le mută, le mărește sau le micșorează, ascunde ce nu-l interesează și alege de la ce cameră aude sunetul.</p>
   <form id="form" novalidate>
     <label><span>Titlu <small>(opțional)</small></span>
       <input id="fTitle" maxlength="120" placeholder="Demonstrație gimnastică — Sala Polivalentă">
@@ -216,7 +239,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
 (function () {
   'use strict';
   var ID_RE = /^[A-Za-z0-9_-]{11}$/;
-  var BAR = 34, GAP = 8, MAX_CAMS = 12;
+  var BAR = 34, GAP = 8, MAX_CAMS = 12, MIN_W = 150;
   var ICONS = {
     audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>',
     muted: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>',
@@ -318,7 +341,8 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
 
   var ids = cams.map(function (c) { return c.id; });
   var KEY = 'multicam:' + ids.join(',');
-  var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0] };
+  // sizes: per camera, the share of the stage width it takes in the Liber layout
+  var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0], sizes: {} };
   try {
     var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (saved) {
@@ -327,8 +351,12 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
       state.order = order;
       state.hidden = (saved.hidden || []).filter(function (id) { return ids.indexOf(id) >= 0; });
       if (state.hidden.length >= ids.length) state.hidden = [];
-      if (['grid', 'focus', 'single'].indexOf(saved.layout) >= 0) state.layout = saved.layout;
+      if (['grid', 'focus', 'single', 'free'].indexOf(saved.layout) >= 0) state.layout = saved.layout;
       if (ids.indexOf(saved.focus) >= 0) state.focus = saved.focus;
+      ids.forEach(function (id) {
+        var f = saved.sizes && saved.sizes[id];
+        if (typeof f === 'number' && f > 0 && f <= 1) state.sizes[id] = f;
+      });
     }
   } catch (e) { /* private mode or corrupt value: start fresh */ }
   var audio = null;   // never restored: browsers block sound until the viewer taps
@@ -346,7 +374,8 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
     el.innerHTML = '<div class="tbar"><span class="num"></span><span class="name"></span>' +
       '<button type="button" data-act="audio"></button>' +
       '<button type="button" data-act="focus">' + ICONS.focus + '</button>' +
-      '<button type="button" data-act="hide">' + ICONS.hide + '</button></div><div class="frame"></div>';
+      '<button type="button" data-act="hide">' + ICONS.hide + '</button></div><div class="frame"></div>' +
+      '<span class="grip" title="Trage ca să schimbi mărimea"></span>';
     el.querySelector('.num').textContent = c.n;
     el.querySelector('.name').textContent = c.label;
     el.querySelector('[data-act="hide"]').setAttribute('aria-label', 'Ascunde ' + c.label);
@@ -435,9 +464,65 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
     return list.length ? y + h : y0;
   }
 
+  function widthOf(id, W) {
+    var f = state.sizes[id] || 1 / 3;
+    return Math.max(Math.min(MIN_W, W), Math.min(W, Math.round(f * (W + GAP) - GAP)));
+  }
+
+  // Liber: each camera keeps its own width and is dropped, in order, into the highest spot it
+  // fits (skyline packing), so small cameras tuck in beside and under big ones without overlapping.
+  function freeRects(list, W, out) {
+    var sky = [{ x: 0, w: W + GAP, y: 0 }], bottom = 0;
+    list.forEach(function (id) {
+      var w = widthOf(id, W), ww = w + GAP, h = tileH(w), best = null;
+      var xs = [];
+      sky.forEach(function (s) { xs.push(s.x, s.x + s.w - ww); });
+      xs.forEach(function (x) {
+        if (x < -0.5 || x + ww > W + GAP + 1.5) return;
+        x = Math.max(0, x);
+        var y = 0;
+        sky.forEach(function (s) { if (s.x < x + ww - 0.5 && s.x + s.w > x + 0.5) y = Math.max(y, s.y); });
+        if (!best || y < best.y - 0.5 || (Math.abs(y - best.y) <= 0.5 && x < best.x)) best = { x: x, y: y };
+      });
+      out[id] = { x: best.x, y: best.y, w: Math.min(w, W - best.x), h: h };
+      var x0 = best.x, x1 = best.x + ww, next = [];
+      sky.forEach(function (s) {
+        var a = s.x, b = s.x + s.w;
+        if (b <= x0 || a >= x1) { next.push(s); return; }
+        if (a < x0) next.push({ x: a, w: x0 - a, y: s.y });
+        if (b > x1) next.push({ x: x1, w: b - x1, y: s.y });
+      });
+      next.push({ x: x0, w: ww, y: best.y + h + GAP });
+      next.sort(function (a, b) { return a.x - b.x; });
+      sky = [];
+      next.forEach(function (s) {
+        var l = sky[sky.length - 1];
+        if (l && Math.abs(l.y - s.y) < 0.5) l.w = s.x + s.w - l.x;
+        else sky.push({ x: s.x, w: s.w, y: s.y });
+      });
+      bottom = Math.max(bottom, best.y + h);
+    });
+    return bottom;
+  }
+
+  // start Liber from whatever is on screen now, so the first resize changes only the camera being resized
+  function seedFree() {
+    var W = stage.clientWidth;
+    if (state.layout === 'focus') {
+      state.order = [state.focus].concat(state.order.filter(function (id) { return id !== state.focus; }));
+    }
+    visible().forEach(function (id) {
+      var w = parseFloat(tiles[id].el.style.width);
+      if (w) state.sizes[id] = Math.min(1, (w + GAP) / (W + GAP));
+    });
+    state.layout = 'free';
+  }
+
   function compute(vis, W, H) {
     var rects = {}, bottom;
-    if (state.layout === 'focus' && vis.length > 1) {
+    if (state.layout === 'free') {
+      bottom = freeRects(vis, W, rects);
+    } else if (state.layout === 'focus' && vis.length > 1) {
       var others = vis.filter(function (id) { return id !== state.focus; });
       if (W >= 760) {
         // thumbnails fitted into a side column; the big camera gets every pixel they don't use
@@ -487,6 +572,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
       t.el.hidden = !on;
       if (on) mount(t); else unmount(t);
     });
+    stage.dataset.layout = state.layout;
     relayout();
     paint();
     save();
@@ -522,7 +608,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
       a.setAttribute('aria-pressed', String(audio === id));
       a.title = audio === id ? 'Oprește sunetul' : 'Ascultă camera asta';
       a.setAttribute('aria-label', a.title + ': ' + t.cam.label);
-      var isMain = state.layout !== 'grid' && id === state.focus;
+      var isMain = state.layout === 'focus' && id === state.focus;
       var f = el.querySelector('[data-act="focus"]');
       f.hidden = state.layout === 'single' || isMain || vis.length < 2;
       f.title = 'Fă-o mare'; f.setAttribute('aria-label', 'Fă-o mare: ' + t.cam.label);
@@ -537,7 +623,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
   function focusOn(id) {
     state.hidden = state.hidden.filter(function (x) { return x !== id; });
     state.focus = id;
-    if (state.layout === 'grid') state.layout = 'focus';
+    if (state.layout !== 'single') state.layout = 'focus';
     render();
   }
 
@@ -558,7 +644,11 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
 
   document.querySelector('.seg').addEventListener('click', function (e) {
     var b = e.target.closest('button');
-    if (b) { state.layout = b.dataset.layout; render(); }
+    if (!b) return;
+    if (b.dataset.layout === 'free' && state.layout !== 'free' &&
+        !visible().every(function (id) { return state.sizes[id]; })) seedFree();
+    state.layout = b.dataset.layout;
+    render();
   });
 
   $('chips').addEventListener('click', function (e) {
@@ -617,7 +707,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
       var id = cams[n - 1].id;
       if (state.layout === 'single') { state.focus = id; render(); } else focusOn(id);
     }
-    else if (k === 'g' || k === 'f' || k === 'u') { state.layout = { g: 'grid', f: 'focus', u: 'single' }[k]; render(); }
+    else if ({ g: 1, f: 1, u: 1, l: 1 }[k]) document.querySelector('.seg [data-layout="' + { g: 'grid', f: 'focus', u: 'single', l: 'free' }[k] + '"]').click();
     else if (k === 'm') setAudio(null);
   });
 
@@ -627,6 +717,51 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
   document.addEventListener('fullscreenchange', onResize);
 
   // ---------- drag a tile by its bar onto another to swap them ----------
+
+  // ---------- drag a camera's corner to resize it ----------
+
+  // widths worth snapping to: full, ¾, ⅔, ½, ⅓, ¼ of the stage
+  var SNAPS = [[1, '1/1'], [3 / 4, '3/4'], [2 / 3, '2/3'], [1 / 2, '1/2'], [1 / 3, '1/3'], [1 / 4, '1/4']];
+  var rz = null, rzRaf = 0;
+  stage.addEventListener('pointerdown', function (e) {
+    var grip = e.target.closest('.grip');
+    if (!grip || e.button !== 0 || state.layout === 'single') return;
+    e.preventDefault();
+    if (state.layout !== 'free') { seedFree(); render(); }
+    var el = grip.parentNode;
+    rz = { id: el.dataset.id, el: el, w0: parseFloat(el.style.width), sx: e.clientX, sy: e.clientY, tag: document.createElement('span') };
+    rz.tag.className = 'size-tag';
+    el.appendChild(rz.tag);
+    el.classList.add('resizing');
+    document.body.classList.add('is-resizing');
+    grip.setPointerCapture(e.pointerId);
+  });
+
+  function resizeMove(e) {
+    var W = stage.clientWidth, dx = e.clientX - rz.sx, dy = (e.clientY - rz.sy) * 16 / 9;
+    // follow whichever direction the pointer moved more, so diagonal drags feel natural
+    var w = Math.max(Math.min(MIN_W, W), Math.min(W, rz.w0 + (Math.abs(dx) >= Math.abs(dy) ? dx : dy)));
+    var label = Math.round((w + GAP) / (W + GAP) * 100) + '%';
+    SNAPS.forEach(function (s) {
+      var sw = s[0] * (W + GAP) - GAP;
+      if (Math.abs(w - sw) < 14) { w = sw; label = s[1]; }
+    });
+    state.sizes[rz.id] = (w + GAP) / (W + GAP);
+    rz.tag.textContent = label;
+    cancelAnimationFrame(rzRaf);
+    rzRaf = requestAnimationFrame(relayout);
+  }
+
+  function endResize() {
+    if (!rz) return;
+    rz.tag.remove();
+    rz.el.classList.remove('resizing');
+    document.body.classList.remove('is-resizing');
+    rz = null;
+    render();
+  }
+  stage.addEventListener('pointerup', endResize);
+  stage.addEventListener('pointercancel', endResize);
 
   var drag = null;
   stage.addEventListener('pointerdown', function (e) {
@@ -638,6 +773,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
   });
 
   stage.addEventListener('pointermove', function (e) {
+    if (rz) { resizeMove(e); return; }
     if (!drag) return;
     var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
     if (!drag.on) {
@@ -691,7 +827,7 @@ https://youtube.com/live/FFFFFFFFFFF  Juriu"></textarea>
   stage.classList.add('instant');
   render();
   requestAnimationFrame(function () { requestAnimationFrame(function () { stage.classList.remove('instant'); }); });
-  if (cams.length > 1) setTimeout(function () { flash('Apasă 🔊 pe camera pe care vrei s-o auzi. Trage de bara unei camere ca s-o muți.'); }, 1200);
+  if (cams.length > 1) setTimeout(function () { flash('Apasă 🔊 pe camera pe care vrei s-o auzi. Trage de bara unei camere ca s-o muți, de colțul ei ca s-o mărești.'); }, 1200);
 })();
 </script>
 </body>

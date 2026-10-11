@@ -794,7 +794,7 @@
     t.player = new YT.Player(t.iframe, {
       events: {
         onReady: function () { t.ready = true; playerReady(t); },
-        onStateChange: function () { tick(); }
+        onStateChange: function (e) { onState(t, e.data); }
       }
     });
   }
@@ -805,6 +805,7 @@
     if (t.player) { try { t.player.destroy(); } catch (e) { /* already gone */ } }
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
+    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0;
     if (audio === t.id) audio = null;
   }
 
@@ -831,6 +832,35 @@
     return list.filter(function (t) { return t.id === state.focus; })[0] || list[0] || null;
   }
 
+  // On a live, getDuration() only counts the time since this player loaded, so it can't say where the
+  // live edge is (using it sent "back 10 s" to the start of the stream). getCurrentTime() and seekTo()
+  // do share the stream's own timeline, so each camera's live edge is learned from where YouTube starts
+  // playing it, then moved forward with the clock.
+  function nowS() { return performance.now() / 1000; }
+
+  function edgeOf(t) {
+    if (t.edge0 == null) return null;
+    var e = t.edge0 + (nowS() - t.edgeT), c = get(t, 'getCurrentTime');
+    // playback can never be ahead of the live edge; if it is, the estimate was low
+    if (c && c > e) { t.edge0 = c; t.edgeT = nowS(); e = c; }
+    return e;
+  }
+
+  function onState(t, s) {
+    if (s === 1) {
+      var c = get(t, 'getCurrentTime');
+      // the first time a camera plays, YouTube has put it at the live edge; after LIVE was pressed, likewise
+      if (c && (t.edge0 == null || nowS() < (t.recalibUntil || 0))) { t.edge0 = c; t.edgeT = nowS(); t.recalibUntil = 0; }
+      // a camera that appeared while everyone was rewound joins them now that its edge is known
+      if (t.pendingBehind != null && t.edge0 != null) {
+        var b = t.pendingBehind;
+        t.pendingBehind = null;
+        cmd(t, 'seekTo', [Math.max(0, edgeOf(t) - b), true]);
+      }
+    }
+    tick();
+  }
+
   function isLive(t) {
     var d = get(t, 'getVideoData');
     if (d && typeof d.isLive === 'boolean') return d.isLive;
@@ -841,9 +871,9 @@
     if (audio === t.id) { cmd(t, 'unMute'); cmd(t, 'setVolume', [100]); } else cmd(t, 'mute');
     // a camera that appears while everyone is rewound joins them instead of starting at the live edge
     if (tl.mode === 'live' && tl.behind > LIVE_TOL) {
-      var d = get(t, 'getDuration');
-      if (d) cmd(t, 'seekTo', [Math.max(0, d - tl.behind), true]);
-    } else if (tl.mode === 'vod') {
+      t.pendingBehind = tl.behind;
+    } else if (tl.mode === 'vod' && tl.shifted) {
+      // only once the viewer has moved through the replay; before that every camera simply starts with the others
       var r = refTile(t), c = r && get(r, 'getCurrentTime');
       if (c != null) cmd(t, 'seekTo', [c, true]);
     }
@@ -864,7 +894,7 @@
 
   // ================= shared timeline: every camera moves together =================
 
-  var tl = { mode: 'none', behind: 0, window: 0, paused: false, dragging: false };
+  var tl = { mode: 'none', behind: 0, window: 0, paused: false, dragging: false, shifted: false };
   var slider = $('tl');
 
   function setFill() {
@@ -904,8 +934,22 @@
     var cur = get(r, 'getCurrentTime') || 0, dur = get(r, 'getDuration') || 0;
     if (ready.some(isLive)) {
       tl.mode = 'live';
-      tl.window = Math.min(dur, DVR_MAX);
-      if (!tl.dragging) tl.behind = Math.min(Math.max(0, dur - cur), tl.window);
+      // follow a camera whose live edge is already known
+      var lr = edgeOf(r) != null ? r : ready.filter(function (t) { return edgeOf(t) != null; })[0];
+      if (!lr) {
+        tl.window = 0;
+        slider.disabled = true;
+        ['back30', 'back10', 'fwd10'].forEach(function (id) { $(id).disabled = true; });
+        $('tlLeft').textContent = 'LIVE'; $('tlLeft').className = 'tl-time is-live'; $('tlRight').textContent = '';
+        $('goLive').hidden = true;
+        setStatus('', 'SE CONECTEAZĂ');
+        return;
+      }
+      var edge = edgeOf(lr);
+      cur = get(lr, 'getCurrentTime') || 0;
+      // YouTube keeps at most 12 h of a live seekable, counted back from the edge
+      tl.window = Math.min(edge, DVR_MAX);
+      if (!tl.dragging) tl.behind = Math.min(Math.max(0, edge - cur), tl.window);
       slider.disabled = tl.window < 5;
       slider.min = -Math.round(tl.window); slider.max = 0;
       if (!tl.dragging) slider.value = -Math.round(tl.behind);
@@ -946,8 +990,16 @@
     b = Math.max(0, Math.min(b, tl.window || 0));
     tl.behind = b;
     readyTiles().forEach(function (t) {
-      var d = get(t, 'getDuration');
-      if (d) cmd(t, 'seekTo', [Math.max(0, d - b), true]);
+      var e = edgeOf(t);
+      if (e == null) { t.pendingBehind = b || null; return; }
+      if (b === 0) {
+        // aim a little past the estimate (YouTube stops at the real edge), then re-learn the edge from there
+        t.recalibUntil = nowS() + 5;
+        cmd(t, 'seekTo', [e + 5, true]);
+      } else {
+        t.recalibUntil = 0;
+        cmd(t, 'seekTo', [Math.max(0, e - b), true]);
+      }
     });
     if (!tl.paused) eachMounted(function (t) { cmd(t, 'playVideo'); });
     tick();
@@ -955,6 +1007,7 @@
 
   // Replay: shift every camera by the same amount, keeping their offsets.
   function shiftAll(sec) {
+    tl.shifted = true;
     readyTiles().forEach(function (t) {
       var c = get(t, 'getCurrentTime'), d = get(t, 'getDuration');
       if (c != null) cmd(t, 'seekTo', [Math.max(0, Math.min(d || Infinity, c + sec)), true]);

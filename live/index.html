@@ -9,7 +9,12 @@
 <meta name="theme-color" content="#0b0b0c">
 <meta property="og:title" content="ERA Live">
 <meta property="og:description" content="Toate camerele unui eveniment, într-un singur link.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0b0c'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ff3b30'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="logo/era-live-icon.svg">
+<link rel="apple-touch-icon" href="logo/era-live-icon-180.png">
+<meta property="og:image" content="https://lfenomenal.github.io/era-fieldops-site/live/logo/era-live-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root {
     color-scheme: dark;
@@ -48,8 +53,8 @@
   .row.top { height: 48px; }
   .row.sub { height: 40px; gap: 8px; border-top: 1px solid var(--line); }
   .hdr { position: sticky; top: 0; z-index: 40; }
-  .wordmark { flex: none; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
-  .wordmark span { font-weight: 400; color: var(--text-2); }
+  .brand { flex: none; display: block; }
+  .brand img { display: block; height: 24px; width: auto; }
   .vr { flex: none; width: 1px; height: 18px; background: var(--line-2); }
   .event { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
   .event-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -281,7 +286,7 @@
 <!-- ===================== viewer ===================== -->
 <header class="hdr bar" id="hdr" hidden>
   <div class="row top">
-    <a class="wordmark" href="./" title="Transmisiune nouă">ERA <span>Live</span></a>
+    <a class="brand" href="./" title="Transmisiune nouă"><img src="logo/era-live-logo-dark.svg" alt="ERA Live" width="82" height="24"></a>
     <span class="vr"></span>
     <div class="event"><span class="event-title" id="evTitle"></span><span class="event-meta" id="evMeta"></span></div>
     <span class="tally" id="status"><span id="statusTxt">CONECTARE</span></span>
@@ -352,7 +357,7 @@
   <div class="share-row">
     <button type="button" class="btn" id="dlQr">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Descarcă codul QR
+      Descarcă cardul QR
     </button>
     <button type="button" class="btn" id="nativeShare" hidden>Trimite…</button>
   </div>
@@ -360,7 +365,7 @@
 
 <!-- ===================== setup ===================== -->
 <div class="setup" id="setup" hidden>
-  <header class="bar"><div class="row top"><a class="wordmark" href="./">ERA <span>Live</span></a></div></header>
+  <header class="bar"><div class="row top"><a class="brand" href="./"><img src="logo/era-live-logo-dark.svg" alt="ERA Live" width="82" height="24"></a></div></header>
   <div class="setup-main">
     <form class="form" id="form" novalidate>
       <h1>Transmisiune nouă</h1>
@@ -1333,28 +1338,45 @@
     navigator.share({ title: (title ? title + ' · ' : '') + 'ERA Live', url: shareLink }).catch(function () {});
   });
 
-  // a PNG with a white margin prints and forwards better than the SVG
+  // a printable card (logo, QR, event name) on white: it prints and forwards better than the bare code
+  var SYS = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+  function loadImg(src, cb) {
+    var im = new Image();
+    im.onload = function () { cb(im); };
+    im.onerror = function () { cb(null); };
+    im.src = src;
+  }
   $('dlQr').addEventListener('click', function () {
     if (!qrSvg) return;
-    var size = 1200, pad = 90;
-    var img = new Image(), url = URL.createObjectURL(new Blob([qrSvg], { type: 'image/svg+xml' }));
-    img.onload = function () {
-      var c = document.createElement('canvas');
-      c.width = c.height = size;
-      var x = c.getContext('2d');
-      x.fillStyle = '#fff'; x.fillRect(0, 0, size, size);
-      x.imageSmoothingEnabled = false;
-      x.drawImage(img, pad, pad, size - pad * 2, size - pad * 2);
-      URL.revokeObjectURL(url);
-      c.toBlob(function (blob) {
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'era-live-qr.png';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    var W = 1200, H = 1480, Q = 860;
+    var c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    var qrUrl = URL.createObjectURL(new Blob([qrSvg], { type: 'image/svg+xml' }));
+    loadImg('logo/era-live-logo-light.svg', function (logo) {
+      loadImg(qrUrl, function (qr) {
+        URL.revokeObjectURL(qrUrl);
+        if (!qr) return;
+        if (logo) { var lh = 64, lw = logo.width / logo.height * lh; x.drawImage(logo, (W - lw) / 2, 110, lw, lh); }
+        x.imageSmoothingEnabled = false;
+        x.drawImage(qr, (W - Q) / 2, 250, Q, Q);
+        x.textAlign = 'center';
+        x.fillStyle = '#111112';
+        x.font = '600 50px ' + SYS;
+        x.fillText(title || 'Transmisiune live', W / 2, 1230, W - 160);
+        x.fillStyle = '#6e6e73';
+        x.font = '400 32px ' + SYS;
+        x.fillText('Scanează codul ca să vezi toate camerele.', W / 2, 1294, W - 160);
+        c.toBlob(function (blob) {
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'era-live-qr.png';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+        });
       });
-    };
-    img.src = url;
+    });
   });
 
   // ---------- edit, fullscreen, keyboard ----------

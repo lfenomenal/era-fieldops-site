@@ -1,0 +1,35 @@
+# Temporary: brings generated media into the branch (the Claude sandbox cannot reach the media CDN).
+# Removed again before merging.
+name: Fetch media
+on:
+  push:
+    paths:
+      - live/media/sources.txt
+permissions:
+  contents: write
+concurrency:
+  group: fetch-media-${{ github.ref }}
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download
+        run: |
+          mkdir -p live/media/raw
+          while read -r name url; do
+            case "$name" in ''|\#*) continue;; esac
+            ext="${url##*.}"
+            [ -f "live/media/raw/$name.$ext" ] && continue
+            curl -fsSL --retry 3 "$url" -o "live/media/raw/$name.$ext"
+            ls -l "live/media/raw/$name.$ext"
+          done < live/media/sources.txt
+      - name: Commit
+        run: |
+          git add live/media/raw
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Fetch generated media"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

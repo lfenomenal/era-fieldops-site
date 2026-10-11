@@ -1,2 +1,3 @@
 _backup-old-site/
 .claude/
+__pycache__/

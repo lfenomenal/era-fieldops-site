@@ -51,6 +51,8 @@ code { font: 0.86em var(--mono); color: var(--text); background: var(--surface-2
 .box { padding: 20px 22px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface); }
 .box > :first-child { margin-top: 0; }
 .box ul { padding-left: 20px; }
+.box.first { margin-top: 28px; }
+.top .brand.word { color: var(--text); font-weight: 700; letter-spacing: -0.01em; }
 .box .ttl { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
 
 .toc { margin-top: 32px; font-size: 15px; }

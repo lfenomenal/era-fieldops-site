@@ -65,6 +65,8 @@ code { font: 0.86em var(--mono); color: var(--text); background: var(--surface-2
 .tbl table { margin: 0; width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px; line-height: 1.55; }
 .tbl th, .tbl td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
 .tbl tr:last-child td { border-bottom: 0; }
+.tbl td:first-child { min-width: 210px; }
+.tbl td:first-child code { word-break: normal; overflow-wrap: anywhere; }
 .tbl th { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); background: var(--surface); }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
@@ -72,6 +74,11 @@ code { font: 0.86em var(--mono); color: var(--text); background: var(--surface-2
 .btn:hover { background: var(--surface-2); }
 .btn.solid { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; }
 .btn.solid:hover { background: #fff; }
+/* Refuz and Accept: same size, same look; the current choice is marked, not highlighted as "better" */
+.actions.pair .btn { flex: 1; min-width: 140px; justify-content: center; font-weight: 600; }
+.btn[aria-pressed="true"] { background: var(--surface-2); border-color: rgba(255, 255, 255, 0.45); }
+.btn[aria-pressed="true"]::before { content: '✓'; margin-right: 8px; }
+.btn.subtle { height: 34px; padding: 0 14px; font-size: 13px; color: var(--text-2); }
 .status { display: flex; gap: 10px; align-items: baseline; }
 .status i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); transform: translateY(-1px); }
 .status.on i { background: #30d158; }

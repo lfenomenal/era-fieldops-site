@@ -1,22 +1,35 @@
-// ERA Live cookie page: shows the YouTube choice and lets it be withdrawn
+// ERA Live cookie page: shows the YouTube choice and lets it be made or changed, Refuz and Accept alike
 (function () {
   'use strict';
-  // must match the viewer: key, version and the 6-month validity of the YouTube choice
-  var KEY = 'era-live:consent', VERSION = 1, VALID = 182 * 864e5;
-  var state = document.getElementById('consentState'), revoke = document.getElementById('revoke');
-  function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
-  function show() {
-    var c = read(), on = !!(c && c.yt === true && c.v === VERSION && typeof c.ts === 'number' && Date.now() - c.ts < VALID);
-    state.classList.toggle('on', on);
-    state.lastChild.textContent = on
-      ? 'Ți-ai dat acordul pentru YouTube în acest browser pe ' + new Date(c.ts).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) + '.'
-      : 'În acest browser nu ți-ai dat acordul pentru YouTube. Camerele se încarcă doar după ce apeși „Pornește camerele”.';
-    revoke.hidden = !on;
+  // must match app.js: key, version and the 6-month validity of the YouTube choice
+  var KEY = 'era-live:consent', VERSION = 2, VALID = 182 * 864e5;
+  var state = document.getElementById('consentState');
+  var accept = document.getElementById('accept'), refuse = document.getElementById('refuse');
+
+  function read() {
+    try {
+      var c = JSON.parse(localStorage.getItem(KEY) || 'null');
+      return c && c.v === VERSION && typeof c.yt === 'boolean' && typeof c.ts === 'number' && Date.now() - c.ts < VALID ? c : null;
+    } catch (e) { return null; }
   }
-  revoke.addEventListener('click', function () {
-    try { localStorage.removeItem(KEY); } catch (e) { /* storage blocked */ }
+  function choose(yt) {
+    try { localStorage.setItem(KEY, JSON.stringify({ v: VERSION, yt: yt, ts: Date.now() })); } catch (e) { /* storage blocked */ }
     show();
-  });
+  }
+  function show() {
+    var c = read();
+    var when = c ? new Date(c.ts).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    state.classList.toggle('on', !!(c && c.yt));
+    state.lastChild.textContent = !c
+      ? 'Nu ai ales încă în acest browser. Camerele YouTube se încarcă doar după ce apeși „Accept”.'
+      : c.yt
+        ? 'Ai acceptat cookie-urile YouTube în acest browser pe ' + when + '.'
+        : 'Ai refuzat cookie-urile YouTube în acest browser pe ' + when + '. ERA Live nu încarcă YouTube.';
+    accept.setAttribute('aria-pressed', String(!!(c && c.yt)));
+    refuse.setAttribute('aria-pressed', String(!!(c && !c.yt)));
+  }
+  accept.addEventListener('click', function () { choose(true); });
+  refuse.addEventListener('click', function () { choose(false); });
   document.getElementById('wipe').addEventListener('click', function () {
     try {
       // list first: removing an entry can reorder the rest

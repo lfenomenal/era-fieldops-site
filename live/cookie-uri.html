@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Politica de cookie-uri · ERA Live</title>
+<meta name="description" content="Ce păstrează ERA Live în browserul tău, ce cookie-uri pune YouTube și cum îți retragi acordul.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" type="image/svg+xml" href="logo/era-live-icon.svg">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+
+<header class="top"><div class="in">
+  <a class="brand" href="./"><img src="logo/era-live-logo-dark.svg" alt="ERA Live" width="75" height="22"></a>
+  <nav aria-label="Documente legale">
+    <a href="termeni.html">Termeni</a>
+    <a href="confidentialitate.html">Confidențialitate</a>
+    <a href="cookie-uri.html" aria-current="page">Cookie-uri</a>
+  </nav>
+</div></header>
+
+<main class="doc">
+  <h1>Politica de cookie-uri</h1>
+  <p class="updated">Ultima actualizare: 12 octombrie 2026</p>
+
+  <div class="box" style="margin-top:28px">
+    <p class="ttl">Pe scurt</p>
+    <ul>
+      <li>ERA Live nu pune cookie-uri proprii și nu folosește analiză de trafic sau reclame.</li>
+      <li>În browserul tău păstrăm trei informații mici, necesare funcțiilor pe care le folosești. Toate se șterg singure.</li>
+      <li>YouTube pune cookie-uri <strong>numai după ce apeși „Pornește camerele”</strong>, iar acordul îl poți retrage oricând de mai jos.</li>
+    </ul>
+  </div>
+
+  <h2 id="ce">1. Ce sunt cookie-urile și stocarea locală</h2>
+  <p>Cookie-urile sunt fișiere mici pe care un site le salvează în browser. Stocarea locală (localStorage) funcționează asemănător, dar informațiile rămân pe dispozitiv și nu sunt trimise automat către server. Legea nr. 506/2004 le tratează la fel: e nevoie de acordul tău, cu excepția celor strict necesare pentru un serviciu pe care l-ai cerut.</p>
+
+  <h2 id="era-live">2. Ce păstrează ERA Live în browserul tău</h2>
+  <p>Folosim doar stocarea locală a browserului, nu cookie-uri. Nimic de aici nu ne este trimis.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Nume</th><th>La ce folosește</th><th>Cât timp</th><th>Tip</th></tr></thead>
+    <tbody>
+      <tr><td><code>era-live:consent</code></td><td>Ține minte că ai acceptat YouTube, ca să nu te întrebăm la fiecare transmisiune.</td><td>6 luni, apoi te întrebăm din nou</td><td>Strict necesar</td></tr>
+      <tr><td><code>era-live:</code> + codurile camerelor</td><td>Aranjarea camerelor pentru o transmisiune: ordinea, aranjarea aleasă, mărimile și camerele ascunse.</td><td>90 de zile de la ultima deschidere a transmisiunii</td><td>Strict necesar (preferința pe care ai setat-o)</td></tr>
+      <tr><td><code>era-live:hint</code></td><td>Ține minte că ți-am arătat o dată sfatul despre mutarea camerelor.</td><td>12 luni</td><td>Strict necesar</td></tr>
+    </tbody>
+  </table></div>
+  <p>Acestea nu au nevoie de acord (art. 4 alin. (6) din Legea nr. 506/2004), pentru că servesc doar funcțiilor pe care le folosești și nu părăsesc dispozitivul tău.</p>
+
+  <h2 id="youtube">3. Cookie-urile YouTube</h2>
+  <p>Camerele sunt redate de playerul YouTube. Când apeși „Pornește camerele”, playerul se încarcă de pe domeniile Google. Google (YouTube) poate pune cookie-uri și poate salva date în browserul tău pentru:</p>
+  <ul>
+    <li>funcționarea playerului;</li>
+    <li>estimarea calității conexiunii;</li>
+    <li>securitate și prevenirea fraudelor;</li>
+    <li>statistici;</li>
+    <li>reclame.</li>
+  </ul>
+  <p>Exemple: <code>YSC</code>, <code>VISITOR_INFO1_LIVE</code>, <code>VISITOR_PRIVACY_METADATA</code> și <code>PREF</code>. Dacă ești conectat la un cont Google, pot apărea și altele.</p>
+  <p>Lista exactă, scopurile și duratele le stabilește Google și se pot schimba. Le găsești în pagina <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">Cum folosește Google cookie-urile</a> și în <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Politica de confidențialitate Google</a>.</p>
+  <p><strong>Fără acordul tău nu se încarcă nimic de la YouTube.</strong> Dacă nu vrei să-ți dai acordul, poți deschide fiecare cameră direct pe youtube.com, din lista de sub butonul „Pornește camerele”.</p>
+
+  <h2 id="altele">4. Altceva?</h2>
+  <p>Nu. GitHub Pages, unde este găzduit site-ul, nu pune cookie-uri vizitatorilor. Fonturile și generatorul de coduri QR sunt găzduite împreună cu site-ul. Nu folosim Google Analytics, pixeli de rețele sociale sau alte instrumente de urmărire.</p>
+
+  <h2 id="acord">5. Acordul tău pentru YouTube</h2>
+  <div class="box">
+    <p class="status" id="consentState"><i></i><span>Se verifică…</span></p>
+    <div class="actions">
+      <button type="button" class="btn solid" id="revoke" hidden>Retrage acordul pentru YouTube</button>
+      <button type="button" class="btn" id="wipe">Șterge toate datele ERA Live din acest browser</button>
+    </div>
+    <p class="updated" id="wipeNote" hidden>Gata. Nu mai există date ERA Live în acest browser.</p>
+  </div>
+  <p>Acordul îl poți retrage și din butonul ⓘ al oricărei transmisiuni. Retragerea oprește încărcarea YouTube în ERA Live. Cookie-urile pe care YouTube le-a pus deja trebuie șterse din setările browserului (vezi mai jos), pentru că aparțin domeniilor Google.</p>
+
+  <h2 id="browser">6. Cum ștergi sau blochezi cookie-urile</h2>
+  <p>În setările oricărui browser poți vedea, șterge și bloca cookie-urile și datele site-urilor. De exemplu:</p>
+  <ul>
+    <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer">Google Chrome</a>;</li>
+    <li><a href="https://support.mozilla.org/kb/clear-cookies-and-site-data-firefox" target="_blank" rel="noopener noreferrer">Mozilla Firefox</a>;</li>
+    <li>Safari, din Setări → Safari → Avansat → Date site-uri web;</li>
+    <li>Microsoft Edge, din Setări → Cookie-uri și permisiuni site.</li>
+  </ul>
+  <p>Dacă blochezi cookie-urile terțe, camerele YouTube pot să nu mai pornească.</p>
+
+  <h2 id="contact">7. Întrebări</h2>
+  <p>Ne scrii la <a href="mailto:office@erashield.ro">office@erashield.ro</a>. Mai multe despre datele tale găsești în <a href="confidentialitate.html">Politica de confidențialitate</a>.</p>
+</main>
+
+<footer class="foot"><div class="in">
+  <span>ERA Live · de la <a href="../">ERA FieldOPS</a></span>
+  <nav aria-label="Documente legale"><a href="./">ERA Live</a><a href="termeni.html">Termeni</a><a href="confidentialitate.html">Confidențialitate</a><a href="cookie-uri.html">Cookie-uri</a></nav>
+</div></footer>
+
+<script>
+(function () {
+  'use strict';
+  // must match the viewer: key, version and the 6-month validity of the YouTube choice
+  var KEY = 'era-live:consent', VERSION = 1, VALID = 182 * 864e5;
+  var state = document.getElementById('consentState'), revoke = document.getElementById('revoke');
+  function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function show() {
+    var c = read(), on = !!(c && c.yt === true && c.v === VERSION && typeof c.ts === 'number' && Date.now() - c.ts < VALID);
+    state.classList.toggle('on', on);
+    state.lastChild.textContent = on
+      ? 'Ți-ai dat acordul pentru YouTube în acest browser pe ' + new Date(c.ts).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) + '.'
+      : 'În acest browser nu ți-ai dat acordul pentru YouTube. Camerele se încarcă doar după ce apeși „Pornește camerele”.';
+    revoke.hidden = !on;
+  }
+  revoke.addEventListener('click', function () {
+    try { localStorage.removeItem(KEY); } catch (e) { /* storage blocked */ }
+    show();
+  });
+  document.getElementById('wipe').addEventListener('click', function () {
+    try {
+      // list first: removing an entry can reorder the rest
+      var keys = [];
+      for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+      keys.forEach(function (k) { if (k && k.indexOf('era-live:') === 0) localStorage.removeItem(k); });
+    } catch (e) { /* storage blocked */ }
+    document.getElementById('wipeNote').hidden = false;
+    show();
+  });
+  show();
+})();
+</script>
+</body>
+</html>

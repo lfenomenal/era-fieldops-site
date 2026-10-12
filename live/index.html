@@ -55,6 +55,7 @@
   .hdr { position: sticky; top: 0; z-index: 40; }
   .brand { flex: none; display: block; }
   .brand img { display: block; height: 24px; width: auto; }
+  .brand .mark { display: none; }
   .vr { flex: none; width: 1px; height: 18px; background: var(--line-2); }
   .event { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; }
   .event-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -206,6 +207,26 @@
   .copy-row .btn { height: 32px; }
   .share-row { display: flex; gap: 6px; margin-top: 8px; }
   .share-row .btn { flex: 1; height: 32px; justify-content: center; }
+  .info-links { list-style: none; margin-top: 14px; border-top: 1px solid var(--line); }
+  .info-links a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); color: var(--text); }
+  .info-links a:hover { color: #fff; }
+  .info-links small { color: var(--text-3); font-size: 12px; }
+  .info-note { margin-top: 8px; font-size: 12px; color: var(--text-3); }
+
+  /* ---------- YouTube consent: nothing from YouTube loads before this is accepted ---------- */
+  .gate { position: fixed; z-index: 35; inset: 0; display: grid; place-items: center; padding: 104px 16px 24px; overflow-y: auto; background: rgba(11, 11, 12, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .gate-card { width: min(460px, 100%); padding: 24px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6); }
+  .gate-card h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .gate-card p { margin-top: 8px; color: var(--text-2); }
+  .gate-card .fine { margin-top: 12px; font-size: 12px; color: var(--text-3); }
+  .gate-card a { color: var(--text-2); text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 2px; }
+  .gate-card a:hover { color: var(--text); }
+  .gate-go { margin-top: 18px; width: 100%; height: 40px; justify-content: center; border-radius: 999px; font-size: 14px; }
+  .gate-alt { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--text-2); font-size: 12px; }
+  .gate-alt summary { cursor: pointer; }
+  .gate-alt ul { list-style: none; margin-top: 8px; display: grid; gap: 2px; }
+  .gate-alt li a { display: flex; gap: 8px; padding: 4px 0; text-decoration: none; color: var(--text); }
+  .gate-alt li a span { font: 11px/1.6 var(--mono); color: var(--text-3); }
 
   /* ---------- landing (setup) ---------- */
   @font-face {
@@ -284,6 +305,7 @@
   .band { position: relative; margin-top: 120px; }
   .band-media { position: relative; height: clamp(300px, 42vw, 640px); overflow: hidden; }
   .band-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: drift 34s ease-in-out infinite alternate; }
+  .band-cap { position: absolute; z-index: 1; top: 18px; right: 20px; font-size: 11px; color: rgba(255, 255, 255, 0.42); }
   .band-media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.75) 78%, #000 100%); }
   .band .wrap { position: relative; z-index: 2; margin-top: clamp(-190px, -11vw, -70px); }
   .band h2 { font-size: clamp(40px, 6.2vw, 92px); font-weight: 700; line-height: 0.95; letter-spacing: -0.045em; }
@@ -349,6 +371,9 @@
   .lfoot .wrap { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--text-3); font-size: 13px; }
   .lfoot img { height: 20px; width: auto; opacity: 0.8; }
   .lfoot a:hover { color: var(--text-2); }
+  .lfoot nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .form-legal { margin-top: 14px; font-size: 12px; line-height: 1.55; color: var(--text-3); }
+  .form-legal a { color: var(--text-2); text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.2); text-underline-offset: 2px; }
 
   @media (prefers-reduced-motion: reduce) {
     .lw-cam img, .band img { animation: none; }
@@ -376,6 +401,7 @@
     .lw-cam[data-slot="0"] .lw-label { left: 10px; bottom: 10px; }
     .lw-hud { top: 10px; left: 10px; right: 10px; }
     .lw-cap { flex-direction: column; gap: 4px; }
+    .lfoot .wrap { flex-wrap: wrap; padding-top: 22px; padding-bottom: 22px; }
     .band-media { height: 64vw; }
     .form { padding: 18px; }
   }
@@ -387,6 +413,8 @@
     .transport .vr, .tb.sound span { display: none; }
     .row.top { gap: 10px; }
     .row.top .vr, .event-meta, .btn .lbl { display: none; }
+    .hdr .brand .full { display: none; }
+    .hdr .brand .mark { display: block; height: 20px; }
     .btn.has-lbl { width: 28px; padding: 0; justify-content: center; }
   }
   @media (max-width: 560px) {
@@ -405,7 +433,7 @@
 <!-- ===================== viewer ===================== -->
 <header class="hdr bar" id="hdr" hidden>
   <div class="row top">
-    <a class="brand" href="./" title="Transmisiune nouă"><img src="logo/era-live-logo-dark.svg" alt="ERA Live" width="82" height="24"></a>
+    <a class="brand" href="./" title="Transmisiune nouă"><img class="full" src="logo/era-live-logo-dark.svg" alt="ERA Live" width="82" height="24"><img class="mark" src="logo/era-live-mark-dark.svg" alt="ERA Live" width="22" height="20"></a>
     <span class="vr"></span>
     <div class="event"><span class="event-title" id="evTitle"></span><span class="event-meta" id="evMeta"></span></div>
     <span class="tally" id="status"><span id="statusTxt">CONECTARE</span></span>
@@ -416,6 +444,9 @@
     <button type="button" class="btn has-lbl" id="edit" aria-label="Editează camerele">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
       <span class="lbl">Editează</span>
+    </button>
+    <button type="button" class="btn icon" id="info" title="Termeni și confidențialitate" aria-label="Termeni și confidențialitate">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="11" x2="12" y2="16.5"/><line x1="12" y1="7.6" x2="12" y2="7.7"/></svg>
     </button>
     <button type="button" class="btn icon" id="fullscreen" title="Ecran complet" aria-label="Ecran complet">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -458,7 +489,39 @@
   <button type="button" class="tb sound" id="sound"></button>
 </div>
 
+<section class="gate" id="gate" hidden aria-labelledby="gateTitle">
+  <div class="gate-card">
+    <h2 id="gateTitle">Camerele vin de pe YouTube</h2>
+    <p>Ca să le pornească, browserul tău se conectează la YouTube (Google). YouTube primește adresa ta IP și poate salva cookie-uri pe dispozitivul tău.</p>
+    <button type="button" class="btn primary gate-go" id="gateOk">Pornește camerele</button>
+    <p class="fine">Apăsând „Pornește camerele” ești de acord cu <a href="termeni.html" target="_blank" rel="noopener">Termenii ERA Live</a> și cu <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">Termenii YouTube</a> și accepți cookie-urile YouTube, așa cum arată <a href="confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate</a> și <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Politica Google</a>. Alegerea rămâne 6 luni în acest browser și o poți retrage oricând din butonul ⓘ.</p>
+    <details class="gate-alt">
+      <summary>Fără acord: deschide camerele direct pe YouTube</summary>
+      <ul id="gateLinks"></ul>
+    </details>
+  </div>
+</section>
+
 <div class="toast" id="toast" role="status"></div>
+
+<dialog class="share" id="infoDlg" aria-labelledby="infoTitle">
+  <div class="share-head">
+    <h2 id="infoTitle">Termeni și confidențialitate</h2>
+    <button type="button" class="btn icon" id="infoClose" aria-label="Închide">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <p>ERA Live nu are conturi și nu trimite date despre tine către noi. Camerele sunt redate de playerul YouTube.</p>
+  <ul class="info-links">
+    <li><a href="termeni.html" target="_blank" rel="noopener">Termeni de utilizare <small>ERA Live</small></a></li>
+    <li><a href="confidentialitate.html" target="_blank" rel="noopener">Politica de confidențialitate <small>ERA Live</small></a></li>
+    <li><a href="cookie-uri.html" target="_blank" rel="noopener">Politica de cookie-uri <small>ERA Live</small></a></li>
+    <li><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">Termenii YouTube <small>youtube.com</small></a></li>
+    <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Politica de confidențialitate Google <small>google.com</small></a></li>
+  </ul>
+  <div class="share-row"><button type="button" class="btn" id="revoke">Retrage acordul pentru YouTube</button></div>
+  <p class="info-note" id="revokeNote">Camerele se opresc și YouTube nu se mai încarcă până nu îți dai din nou acordul. Cookie-urile puse deja de YouTube le ștergi din setările browserului.</p>
+</dialog>
 
 <dialog class="share" id="shareDlg" aria-labelledby="shareTitle">
   <div class="share-head">
@@ -512,12 +575,12 @@
         <canvas class="lw-dust" id="lwDust" aria-hidden="true"></canvas>
         <div class="lw-hud" aria-hidden="true"><span class="lw-live">LIVE</span><span class="lw-event">Concurs de gimnastică</span><span class="lw-tc" id="lwTc">00:41:12:00</span></div>
       </div>
-      <div class="lw-cap"><span>Atinge un aparat ca să-l vezi mare.</span><span>Imagini ilustrative</span></div>
+      <div class="lw-cap"><span>Atinge un aparat ca să-l vezi mare.</span><span>Imagini ilustrative, generate cu AI</span></div>
     </div>
   </header>
 
   <section class="band" aria-label="Cum funcționează">
-    <div class="band-media"><img src="media/arena.webp" srcset="media/arena-1200.webp 1200w, media/arena.webp 1792w" sizes="100vw" alt="" loading="lazy"></div>
+    <div class="band-media"><img src="media/arena.webp" srcset="media/arena-1200.webp 1200w, media/arena.webp 1792w" sizes="100vw" alt="" loading="lazy"><span class="band-cap">Imagine generată cu AI</span></div>
     <div class="wrap">
       <h2 class="display">O cameră la fiecare aparat.<br><span>Nimeni nu mai ratează nimic.</span></h2>
       <p>Când se concurează la mai multe aparate deodată, publicul nu mai trebuie să aleagă unde să se uite. ERA Live adună toate camerele pe un singur ecran.</p>
@@ -557,6 +620,7 @@
             Adaugă cameră
           </button>
         </div>
+        <p class="form-legal">Creând linkul confirmi că ai dreptul să transmiți aceste live-uri, inclusiv acordul persoanelor filmate (pentru copii, al părinților), și că ești de acord cu <a href="termeni.html" target="_blank" rel="noopener">Termenii de utilizare</a>.</p>
         <div class="form-foot">
           <span class="ready" id="ready" aria-live="polite"></span>
           <div class="foot-btns">
@@ -570,6 +634,7 @@
 
   <footer class="lfoot"><div class="wrap">
     <img src="logo/era-live-logo-dark.svg" alt="ERA Live" width="68" height="20">
+    <nav aria-label="Informații legale"><a href="termeni.html">Termeni</a><a href="confidentialitate.html">Confidențialitate</a><a href="cookie-uri.html">Cookie-uri</a></nav>
     <span>ERA Live · de la <a href="../">ERA FieldOPS</a></span>
   </div></footer>
 </div>
@@ -596,6 +661,33 @@
     fsOff: svg('<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>')
   };
   var pad2 = function (n) { return String(n).padStart(2, '0'); };
+
+  // ================= what stays in this browser =================
+
+  // Only three kinds of entries, never sent anywhere: the YouTube choice, each event's arrangement and
+  // whether the tip was shown. Each carries its date and is dropped once it is old (see cookie-uri.html).
+  var DAY = 864e5;
+  var CONSENT_KEY = 'era-live:consent', HINT_KEY = 'era-live:hint';
+  var CONSENT_V = 1;            // raise when the consent text changes, so everyone is asked again
+  var KEEP = { consent: 182 * DAY, hint: 365 * DAY, layout: 90 * DAY };
+  function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function store(k, v) {
+    try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode: nothing is kept */ }
+  }
+  (function prune() {
+    try {
+      // list first: removing an entry can reorder the rest, so a live index would skip some
+      var now = Date.now(), keys = [];
+      for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+      keys.forEach(function (k) {
+        if (!k || k.indexOf('era-live:') !== 0) return;
+        var v = load(k), ts = v && typeof v === 'object' ? v.ts : null;
+        var max = k === CONSENT_KEY ? KEEP.consent : k === HINT_KEY ? KEEP.hint : KEEP.layout;
+        if (typeof ts !== 'number' || now - ts > max || ts > now + DAY) localStorage.removeItem(k);
+      });
+    } catch (e) { /* storage blocked */ }
+  })();
+  function hasConsent() { var c = load(CONSENT_KEY); return !!(c && c.yt === true && c.v === CONSENT_V); }
 
   // ================= links =================
 
@@ -856,7 +948,7 @@
   // sizes: per camera, the share of the stage width it takes in the Liber layout
   var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0], sizes: {} };
   try {
-    var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    var saved = load(KEY);
     if (saved) {
       var order = (saved.order || []).filter(function (id) { return ids.indexOf(id) >= 0; });
       ids.forEach(function (id) { if (order.indexOf(id) < 0) order.push(id); });
@@ -874,7 +966,8 @@
   var audio = null;   // never restored: browsers block sound until the viewer taps
 
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+    state.ts = Date.now();
+    store(KEY, state);
   }
 
   // ================= players =================
@@ -900,22 +993,27 @@
 
   // The official IFrame API gives us each camera's position and lets us seek them together.
   // If it can't load, cameras still play and the sound buttons still work through plain postMessage.
-  var API = { ready: false, failed: false, pending: [] };
+  var API = { ready: false, failed: false, loading: false, pending: [] };
   window.onYouTubeIframeAPIReady = function () {
     API.ready = true; API.failed = false;
     API.pending.splice(0).forEach(attach);
   };
-  (function () {
+  // nothing is requested from YouTube until the viewer agrees (see the gate below)
+  var consented = hasConsent();
+  function loadAPI() {
+    if (API.loading) return;
+    API.loading = true;
     var s = document.createElement('script');
     s.src = 'https://www.youtube.com/iframe_api';
     s.async = true;
     s.onerror = function () { API.failed = true; tick(); };
     document.head.appendChild(s);
     setTimeout(function () { if (!API.ready) { API.failed = true; tick(); } }, 12000);
-  })();
+  }
+  if (consented) loadAPI();
 
   function mount(t) {
-    if (t.iframe) return;
+    if (t.iframe || !consented) return;
     var f = document.createElement('iframe');
     // muted autoplay is the only autoplay browsers allow; YouTube's own controls are replaced by the dock
     var q = 'autoplay=1&mute=1&playsinline=1&controls=0&disablekb=1&rel=0&iv_load_policy=3&fs=0&enablejsapi=1';
@@ -1629,11 +1727,53 @@
     });
   });
 
+  // ---------- YouTube consent and the legal links ----------
+
+  var gateLinks = $('gateLinks');
+  cams.forEach(function (c) {
+    var li = document.createElement('li'), a = document.createElement('a'), n = document.createElement('span');
+    a.href = 'https://www.youtube.com/watch?v=' + c.id;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    n.textContent = pad2(c.n);
+    a.appendChild(n);
+    a.appendChild(document.createTextNode(c.label));
+    li.appendChild(a);
+    gateLinks.appendChild(li);
+  });
+  $('gateOk').addEventListener('click', function () {
+    store(CONSENT_KEY, { v: CONSENT_V, yt: true, ts: Date.now() });
+    consented = true;
+    $('gate').hidden = true;
+    $('dock').hidden = false;
+    $('status').hidden = false;
+    loadAPI();
+    render();
+    tick();
+    hintOnce();
+  });
+
+  var infoDlg = $('infoDlg');
+  $('info').addEventListener('click', function () {
+    $('revoke').disabled = !consented;
+    if (typeof infoDlg.showModal === 'function') infoDlg.showModal(); else infoDlg.setAttribute('open', '');
+  });
+  $('infoClose').addEventListener('click', function () { infoDlg.close(); });
+  infoDlg.addEventListener('click', function (e) { if (e.target === infoDlg) infoDlg.close(); });
+  // withdrawing is as easy as agreeing: forget the choice and start over without YouTube
+  $('revoke').addEventListener('click', function () {
+    store(CONSENT_KEY, null);
+    location.reload();
+  });
+
   // ---------- edit, fullscreen, keyboard ----------
 
   function showViewer() {
     $('setup').hidden = true;
-    ['hdr', 'stage', 'dock'].forEach(function (id) { $(id).hidden = false; });
+    ['hdr', 'stage'].forEach(function (id) { $(id).hidden = false; });
+    $('dock').hidden = !consented;
+    $('status').hidden = !consented;
+    $('gate').hidden = consented;
     document.title = (title ? title + ' · ' : '') + 'ERA Live';
     relayout();
   }
@@ -1652,7 +1792,7 @@
   });
 
   document.addEventListener('keydown', function (e) {
-    if (!$('setup').hidden || dlg.open || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!$('setup').hidden || !consented || dlg.open || infoDlg.open || e.metaKey || e.ctrlKey || e.altKey) return;
     var el = e.target;
     if (el.closest && el.closest('input, textarea, select') && el.type !== 'range') return;
     var k = e.key, n = parseInt(k, 10), lk = k.toLowerCase();
@@ -1683,12 +1823,12 @@
   render();
   tick();
   requestAnimationFrame(function () { requestAnimationFrame(function () { stage.classList.remove('instant'); }); });
-  try {
-    if (cams.length > 1 && !localStorage.getItem('era-live:hint')) {
-      setTimeout(function () { toast('Trage de bara unei camere ca s-o muți și de colțul ei ca s-o mărești.', 5200); }, 1400);
-      localStorage.setItem('era-live:hint', '1');
-    }
-  } catch (e) { /* ignore */ }
+  function hintOnce() {
+    if (cams.length < 2 || load(HINT_KEY)) return;
+    setTimeout(function () { toast('Trage de bara unei camere ca s-o muți și de colțul ei ca s-o mărești.', 5200); }, 1400);
+    store(HINT_KEY, { ts: Date.now() });
+  }
+  if (consented) hintOnce();
 })();
 </script>
 </body>

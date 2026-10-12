@@ -2,8 +2,7 @@
 (function () {
   'use strict';
   var ID_RE = /^[A-Za-z0-9_-]{11}$/;
-  // MIN_W: YouTube requires every embedded player to be at least 200 x 200 px, i.e. 356 px wide at 16:9
-  var BAR = 26, GAP = 4, MAX_CAMS = 12, MIN_W = 356;
+  var BAR = 26, GAP = 4, MAX_CAMS = 12, MIN_W = 160;
   var LIVE_TOL = 12;            // seconds behind the live edge that still count as "live"
   var DVR_MAX = 12 * 3600;      // YouTube keeps at most 12 h of a live stream seekable
   var $ = function (id) { return document.getElementById(id); };
@@ -769,17 +768,9 @@
     return best;
   }
 
-  // as many columns as fit at YouTube's minimum player size
-  function minCols(n, W) { return Math.max(1, Math.min(n, Math.floor((W + GAP) / (MIN_W + GAP)))); }
-
   function gridRects(list, x0, y0, W, H, out) {
-    var n = list.length, f = fitGrid(n, W, H), cols = f.cols, w = Math.floor(f.w);
-    if (w < MIN_W) {
-      // they don't all fit on one screen at the minimum size: keep the size and let the page scroll
-      cols = minCols(n, W);
-      w = Math.floor((W - GAP * (cols - 1)) / cols);
-    }
-    var h = tileH(w), rows = Math.ceil(n / cols), total = rows * h + (rows - 1) * GAP;
+    var n = list.length, f = fitGrid(n, W, H), cols = f.cols, w = Math.max(80, Math.floor(f.w)), h = tileH(w);
+    var rows = Math.ceil(n / cols), total = rows * h + (rows - 1) * GAP;
     var oy = y0 + Math.max(0, (H - total) / 2);
     list.forEach(function (id, i) {
       var r = Math.floor(i / cols), c = i % cols;
@@ -789,30 +780,14 @@
     return oy + total;
   }
 
-  // Focus: how many cameras fit in a column beside the big one, sized so the column is exactly as tall as
-  // the big camera and none is under the minimum. More beside is better, as long as the big one stays big.
-  function focusSide(n, W, H) {
-    for (var k = Math.min(n, 4); k >= 1; k--) {
-      var tw = ((W - GAP) * 9 / 16 + BAR * (1 - k) - (k - 1) * GAP) / (9 * (k + 1) / 16), mw = W - tw - GAP;
-      if (tileH(mw) > H) {
-        // the big camera would be taller than the screen: size it by height and let the column follow
-        mw = Math.floor((H - BAR) * 16 / 9);
-        tw = Math.min(W - mw - GAP, ((tileH(mw) - (k - 1) * GAP) / k - BAR) * 16 / 9);
-      }
-      if (tw >= MIN_W && mw >= tw * 1.4) return { k: k, tw: Math.floor(tw), mw: Math.floor(mw) };
-    }
-    return null;
-  }
-
-  // rows of cameras at the minimum size, centred, that scroll with the page
-  function rowRects(list, y0, W, out) {
-    var cols = Math.max(1, Math.floor((W + GAP) / (MIN_W + GAP)));
-    var w = Math.floor((W - GAP * (cols - 1)) / cols), h = tileH(w), n = list.length;
+  // flowing columns that scroll — for phones, where fitting everything on one screen makes tiles too small
+  function flowRects(list, x0, y0, W, cols, out) {
+    var w = Math.floor((W - GAP * (cols - 1)) / cols), h = tileH(w), y = y0;
     list.forEach(function (id, i) {
-      var r = Math.floor(i / cols), c = i % cols, inRow = Math.min(cols, n - r * cols), rowW = inRow * w + (inRow - 1) * GAP;
-      out[id] = { x: (W - rowW) / 2 + c * (w + GAP), y: y0 + r * (h + GAP), w: w, h: h };
+      y = y0 + Math.floor(i / cols) * (h + GAP);
+      out[id] = { x: x0 + (i % cols) * (w + GAP), y: y, w: w, h: h };
     });
-    return n ? y0 + Math.ceil(n / cols) * (h + GAP) - GAP : y0;
+    return list.length ? y + h : y0;
   }
 
   function widthOf(id, W) {
@@ -874,22 +849,18 @@
       bottom = freeRects(vis, W, rects);
     } else if (state.layout === 'focus' && vis.length > 1) {
       var others = vis.filter(function (id) { return id !== state.focus; });
-      var side = W >= MIN_W * 2.5 && focusSide(others.length, W, H);
-      if (side) {
-        // the big camera, a column beside it exactly as tall, and any that don't fit underneath
-        var tw = side.tw, th = tileH(tw), mw = side.mw, mh = tileH(mw), k = side.k;
-        var below = others.slice(k), colH = k * th + (k - 1) * GAP;
-        var x0 = Math.max(0, Math.floor((W - mw - GAP - tw) / 2));
-        var y0 = below.length ? 0 : Math.max(0, Math.floor((H - Math.max(mh, colH)) / 2));
-        rects[state.focus] = { x: x0, y: y0, w: mw, h: mh };
-        others.slice(0, k).forEach(function (id, i) {
-          rects[id] = { x: x0 + mw + GAP, y: y0 + Math.max(0, Math.floor((mh - colH) / 2)) + i * (th + GAP), w: tw, h: th };
-        });
-        bottom = y0 + Math.max(mh, colH);
-        if (below.length) bottom = rowRects(below, bottom + GAP, W, rects);
+      if (W >= 760) {
+        // thumbnails fitted into a side column; the big camera gets every pixel they don't use
+        var side = Math.round(Math.min(Math.max(W * 0.26, 220), 440));
+        var used = function (sw) { var f = fitGrid(others.length, sw, H), w = Math.max(80, Math.floor(f.w)); return f.cols * w + (f.cols - 1) * GAP; };
+        var mw = Math.floor(Math.min(W - used(side) - GAP, (H - BAR) * 16 / 9));
+        var sw = used(W - mw - GAP);
+        var x0 = Math.max(0, (W - mw - GAP - sw) / 2), mh = tileH(mw);
+        rects[state.focus] = { x: x0, y: Math.max(0, (H - mh) / 2), w: mw, h: mh };
+        bottom = Math.max(mh, gridRects(others, x0 + mw + GAP, 0, sw, H, rects));
       } else {
         rects[state.focus] = { x: 0, y: 0, w: W, h: tileH(W) };
-        bottom = rowRects(others, tileH(W) + GAP, W, rects);
+        bottom = flowRects(others, 0, tileH(W) + GAP, W, 2, rects);
       }
     } else {
       bottom = gridRects(vis, 0, 0, W, H, rects);

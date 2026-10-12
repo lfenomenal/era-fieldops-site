@@ -31,9 +31,11 @@
   // Only three kinds of entries, never sent anywhere: the YouTube choice, each event's arrangement and
   // whether the tip was shown. Each carries its date and is dropped once it is old (see cookie-uri.html).
   var DAY = 864e5;
-  var CONSENT_KEY = 'era-live:consent', HINT_KEY = 'era-live:hint';
-  var CONSENT_V = 1;            // raise when the consent text changes, so everyone is asked again
-  var KEEP = { consent: 182 * DAY, hint: 365 * DAY, layout: 90 * DAY };
+  var CONSENT_KEY = 'era-live:consent', HINT_KEY = 'era-live:hint', NOTICE_KEY = 'era-live:notice';
+  // raise when the consent text changes, so everyone is asked again
+  // (2: the cookie question is separate from the terms, with Refuz and Accept side by side)
+  var CONSENT_V = 2;
+  var KEEP = { consent: 182 * DAY, hint: 365 * DAY, notice: 365 * DAY, layout: 90 * DAY };
   function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function store(k, v) {
     try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode: nothing is kept */ }
@@ -46,12 +48,14 @@
       keys.forEach(function (k) {
         if (!k || k.indexOf('era-live:') !== 0) return;
         var v = load(k), ts = v && typeof v === 'object' ? v.ts : null;
-        var max = k === CONSENT_KEY ? KEEP.consent : k === HINT_KEY ? KEEP.hint : KEEP.layout;
+        var max = k === CONSENT_KEY ? KEEP.consent : k === HINT_KEY ? KEEP.hint : k === NOTICE_KEY ? KEEP.notice : KEEP.layout;
         if (typeof ts !== 'number' || now - ts > max || ts > now + DAY) localStorage.removeItem(k);
       });
     } catch (e) { /* storage blocked */ }
   })();
-  function hasConsent() { var c = load(CONSENT_KEY); return !!(c && c.yt === true && c.v === CONSENT_V); }
+  // the YouTube choice: { v, yt: true (accepted) | false (refused), ts }, or null if not made yet
+  function consentChoice() { var c = load(CONSENT_KEY); return c && c.v === CONSENT_V && typeof c.yt === 'boolean' ? c : null; }
+  function hasConsent() { var c = consentChoice(); return !!(c && c.yt); }
 
   // ================= links =================
 
@@ -217,7 +221,12 @@
   });
 
   var onLeaveSetup = null;
+  // first visit on the landing: say what is (and isn't) stored; there is nothing to accept here
+  function showNotice(on) { $('cnotice').hidden = !on; }
+  $('cnoticeOk').addEventListener('click', function () { store(NOTICE_KEY, { ts: Date.now() }); showNotice(false); });
+
   function showSetup(editing) {
+    showNotice(!editing && !load(NOTICE_KEY));
     ['hdr', 'stage', 'dock'].forEach(function (id) { $(id).hidden = true; });
     $('setup').hidden = false;
     $('cancel').hidden = !editing;
@@ -1222,7 +1231,7 @@
     li.appendChild(a);
     gateLinks.appendChild(li);
   });
-  $('gateOk').addEventListener('click', function () {
+  function accept() {
     store(CONSENT_KEY, { v: CONSENT_V, yt: true, ts: Date.now() });
     consented = true;
     $('gate').hidden = true;
@@ -1232,19 +1241,45 @@
     render();
     tick();
     hintOnce();
-  });
+  }
+  function refuse() {
+    store(CONSENT_KEY, { v: CONSENT_V, yt: false, ts: Date.now() });
+    // players that are already running can't be unloaded cleanly: start over without YouTube
+    if (consented) { location.reload(); return; }
+    paintGate();
+    $('gateTitle').focus({ preventScroll: true });
+  }
+  // first question, or, once refused, the direct links and a way to change one's mind
+  function paintGate() {
+    var c = consentChoice(), refused = !!(c && !c.yt);
+    $('gateAsk').hidden = refused;
+    $('gateRefused').hidden = !refused;
+  }
+  $('gateOk').addEventListener('click', accept);
+  $('gateNo').addEventListener('click', refuse);
+  $('gateRetry').addEventListener('click', accept);
 
+  // the same choice, any time, from the ⓘ button
   var infoDlg = $('infoDlg');
+  function paintChoice() {
+    var c = consentChoice();
+    $('csLine').textContent = c
+      ? (c.yt ? 'Acceptate' : 'Refuzate') + ' în acest browser pe ' + new Date(c.ts).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) + '.'
+      : 'Nu ai ales încă.';
+    $('csOk').setAttribute('aria-pressed', String(!!(c && c.yt)));
+    $('csNo').setAttribute('aria-pressed', String(!!(c && !c.yt)));
+  }
   $('info').addEventListener('click', function () {
-    $('revoke').disabled = !consented;
+    paintChoice();
     if (typeof infoDlg.showModal === 'function') infoDlg.showModal(); else infoDlg.setAttribute('open', '');
   });
   $('infoClose').addEventListener('click', function () { infoDlg.close(); });
   infoDlg.addEventListener('click', function (e) { if (e.target === infoDlg) infoDlg.close(); });
-  // withdrawing is as easy as agreeing: forget the choice and start over without YouTube
-  $('revoke').addEventListener('click', function () {
-    store(CONSENT_KEY, null);
-    location.reload();
+  $('csOk').addEventListener('click', function () { infoDlg.close(); if (!consented) accept(); });
+  $('csNo').addEventListener('click', function () {
+    var c = consentChoice();
+    infoDlg.close();
+    if (!c || c.yt) refuse();
   });
 
   // ---------- edit, fullscreen, keyboard ----------
@@ -1255,6 +1290,7 @@
     $('dock').hidden = !consented;
     $('status').hidden = !consented;
     $('gate').hidden = consented;
+    if (!consented) paintGate();
     document.title = (title ? title + ' · ' : '') + 'ERA Live';
     relayout();
   }
@@ -1300,6 +1336,8 @@
   $('evTitle').textContent = title || 'Transmisiune live';
   $('evMeta').textContent = cams.length === 1 ? '1 cameră' : cams.length + ' camere';
   showViewer();
+  // the cookie question is the first thing on the page: put screen readers on it
+  if (!consented) $('gateTitle').focus({ preventScroll: true });
   stage.classList.add('instant');
   render();
   tick();

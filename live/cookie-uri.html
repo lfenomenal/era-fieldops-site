@@ -6,7 +6,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Politica de cookie-uri · ERA Live</title>
-<meta name="description" content="Ce păstrează ERA Live în browserul tău, ce cookie-uri pune YouTube și cum îți retragi acordul.">
+<meta name="description" content="Ce păstrează ERA Live în browserul tău, ce cookie-uri pune YouTube, de ce, cât timp și cum îți dai sau îți retragi acordul.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0b0b0c">
 <link rel="icon" type="image/svg+xml" href="logo/era-live-icon.svg">
@@ -30,55 +30,99 @@
   <div class="box first">
     <p class="ttl">Pe scurt</p>
     <ul>
-      <li>ERA Live nu pune cookie-uri proprii și nu folosește analiză de trafic sau reclame.</li>
-      <li>În browserul tău păstrăm trei informații mici, necesare funcțiilor pe care le folosești. Toate se șterg singure.</li>
-      <li>YouTube pune cookie-uri <strong>numai după ce apeși „Pornește camerele”</strong>, iar acordul îl poți retrage oricând de mai jos.</li>
+      <li>ERA Live nu pune cookie-uri proprii și nu folosește analiză de trafic, reclame sau pixeli de urmărire.</li>
+      <li>În browserul tău păstrăm patru informații mici, strict necesare funcțiilor pe care le folosești. Nu ne sunt trimise și se șterg singure.</li>
+      <li>YouTube pune cookie-uri <strong>numai dacă apeși „Accept”</strong> când deschizi o transmisiune. „Refuz” e la fel de ușor de apăsat. Alegerea o schimbi oricând, <a href="#acord">mai jos</a> sau din butonul ⓘ al transmisiunii.</li>
     </ul>
   </div>
 
-  <h2 id="ce">1. Ce sunt cookie-urile și stocarea locală</h2>
-  <p>Cookie-urile sunt fișiere mici pe care un site le salvează în browser. Stocarea locală (localStorage) funcționează asemănător, dar informațiile rămân pe dispozitiv și nu sunt trimise automat către server. Legea nr. 506/2004 le tratează la fel: e nevoie de acordul tău, cu excepția celor strict necesare pentru un serviciu pe care l-ai cerut.</p>
+  <nav class="toc" aria-label="Cuprins"><ol>
+    <li><a href="#ce">Ce sunt cookie-urile</a></li>
+    <li><a href="#temei">Pe ce temei le folosim</a></li>
+    <li><a href="#era-live">Ce păstrează ERA Live</a></li>
+    <li><a href="#youtube">Cookie-urile YouTube</a></li>
+    <li><a href="#altele">Alte servicii</a></li>
+    <li><a href="#acord">Setările tale</a></li>
+    <li><a href="#browser">Ștergere din browser</a></li>
+    <li><a href="#modificari">Modificări și contact</a></li>
+  </ol></nav>
 
-  <h2 id="era-live">2. Ce păstrează ERA Live în browserul tău</h2>
-  <p>Folosim doar stocarea locală a browserului, nu cookie-uri. Nimic de aici nu ne este trimis.</p>
+  <h2 id="ce">1. Ce sunt cookie-urile</h2>
+  <p>Cookie-urile sunt fișiere mici pe care un site le salvează în browser. Alte tehnologii fac același lucru:</p>
+  <ul>
+    <li><strong>stocarea locală</strong> (localStorage);</li>
+    <li><strong>baza de date a browserului</strong> (IndexedDB).</li>
+  </ul>
+  <p>Legea le tratează la fel pe toate, așa că în această pagină le numim pe scurt „cookie-uri”.</p>
+
+  <h2 id="temei">2. Pe ce temei le folosim</h2>
+  <ul>
+    <li><strong>Strict necesare.</strong> Pentru cele de care e nevoie ca să funcționeze ce ai cerut nu e nevoie de acord (art. 4 alin. (6) din Legea nr. 506/2004). Le explicăm totuși mai jos.</li>
+    <li><strong>Celelalte, în cazul nostru cele ale YouTube.</strong> Se pun numai cu acordul tău, dat înainte (art. 4 alin. (5) din Legea nr. 506/2004 și art. 6 alin. (1) lit. a) GDPR). Acordul e opțional, separat de acceptarea termenilor și îl poți retrage oricând, la fel de ușor cum l-ai dat.</li>
+  </ul>
+
+  <h2 id="era-live">3. Ce păstrează ERA Live în browserul tău</h2>
+  <p>Folosim doar stocarea locală a browserului. Nicio informație de aici nu ne este trimisă.</p>
   <div class="tbl"><table>
     <thead><tr><th>Nume</th><th>La ce folosește</th><th>Cât timp</th><th>Tip</th></tr></thead>
     <tbody>
-      <tr><td><code>era-live:consent</code></td><td>Ține minte că ai acceptat YouTube, ca să nu te întrebăm la fiecare transmisiune.</td><td>6 luni, apoi te întrebăm din nou</td><td>Strict necesar</td></tr>
+      <tr><td><code>era-live:consent</code></td><td>Ține minte dacă ai acceptat sau ai refuzat cookie-urile YouTube, și când. Așa nu te întrebăm la fiecare transmisiune.</td><td>6 luni, apoi te întrebăm din nou</td><td>Strict necesar</td></tr>
       <tr><td><code>era-live:</code> + codurile camerelor</td><td>Aranjarea camerelor pentru o transmisiune: ordinea, aranjarea aleasă, mărimile și camerele ascunse.</td><td>90 de zile de la ultima deschidere a transmisiunii</td><td>Strict necesar (preferința pe care ai setat-o)</td></tr>
       <tr><td><code>era-live:hint</code></td><td>Ține minte că ți-am arătat o dată sfatul despre mutarea camerelor.</td><td>12 luni</td><td>Strict necesar</td></tr>
+      <tr><td><code>era-live:notice</code></td><td>Ține minte că ai închis informarea despre cookie-uri de pe prima pagină.</td><td>12 luni</td><td>Strict necesar</td></tr>
     </tbody>
   </table></div>
-  <p>Acestea nu au nevoie de acord (art. 4 alin. (6) din Legea nr. 506/2004), pentru că servesc doar funcțiilor pe care le folosești și nu părăsesc dispozitivul tău.</p>
 
-  <h2 id="youtube">3. Cookie-urile YouTube</h2>
-  <p>Camerele sunt redate de playerul YouTube. Când apeși „Pornește camerele”, playerul se încarcă de pe domeniile Google. Google (YouTube) poate pune cookie-uri și poate salva date în browserul tău pentru:</p>
+  <h2 id="youtube">4. Cookie-urile YouTube</h2>
+  <p>Camerele sunt redate de playerul YouTube, un serviciu Google Ireland Limited. Playerul se încarcă <strong>numai după ce apeși „Accept”</strong>. Din acel moment, browserul tău se conectează direct la YouTube.</p>
+  <p>Google poate pune sau citi cookie-urile de mai jos. Ele sunt puse și citite de Google, nu de noi, pe domeniile Google, iar Google le poate folosi conform <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Politicii sale de confidențialitate</a>, inclusiv în SUA.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Nume</th><th>La ce folosește</th><th>Cât timp</th><th>Categorie</th></tr></thead>
+    <tbody>
+      <tr><td><code>YSC</code></td><td>Confirmă că cererile dintr-o sesiune vin chiar de la tine (securitate). Google îl folosește și pentru statistici despre redări.</td><td>Până închizi browserul</td><td>Securitate, statistici</td></tr>
+      <tr><td><code>VISITOR_INFO1_LIVE</code></td><td>Estimează viteza conexiunii ca să aleagă calitatea video. Google îl folosește și pentru statistici și reclame.</td><td>6 luni</td><td>Funcțional, statistici, marketing</td></tr>
+      <tr><td><code>VISITOR_PRIVACY_METADATA</code></td><td>Păstrează starea alegerilor tale de confidențialitate pentru YouTube.</td><td>Câteva luni, stabilită de Google</td><td>Funcțional</td></tr>
+      <tr><td><code>PREF</code></td><td>Preferințele playerului, de exemplu volumul sau calitatea.</td><td>8 luni de la ultima folosire</td><td>Funcțional</td></tr>
+      <tr><td><code>__Secure-ROLLOUT_TOKEN</code></td><td>Configurarea tehnică a serviciului YouTube.</td><td>Stabilită de Google</td><td>Funcțional</td></tr>
+      <tr><td><code>yt-remote-device-id</code>, <code>yt-remote-connected-devices</code> și alte <code>yt-remote-*</code></td><td>Stocare locală. Recunoaște dispozitivul pentru redarea pe alte ecrane (Cast).</td><td>Până le ștergi</td><td>Funcțional</td></tr>
+      <tr><td><code>ytidb::LAST_RESULT_ENTRY_KEY</code>, <code>YtIdbMeta</code>, <code>LogsDatabaseV2</code></td><td>Stocare locală și IndexedDB. Date interne ale playerului și jurnale de funcționare.</td><td>Până le ștergi</td><td>Funcțional, statistici</td></tr>
+      <tr><td>Cookie-urile contului Google, de exemplu <code>SID</code>, <code>HSID</code>, <code>SSID</code>, <code>APISID</code>, <code>SAPISID</code>, <code>__Secure-1PSID</code>, <code>__Secure-3PSID</code>, <code>LOGIN_INFO</code></td><td>Doar dacă ești conectat la un cont Google: autentificare, securitate, personalizare și reclame. Sunt puse de Google când te conectezi. Browserul le trimite către YouTube la redare.</td><td>Stabilită de Google</td><td>Necesar pentru cont, marketing</td></tr>
+    </tbody>
+  </table></div>
+  <p>Lista e cea documentată public de Google (<a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">Cum folosește Google cookie-urile</a>) și de catalogele de cookie-uri, la data de mai sus. Google poate schimba oricând numele, scopurile și duratele.</p>
+  <p>Browserul tău poate limita aceste date:</p>
   <ul>
-    <li>funcționarea playerului;</li>
-    <li>estimarea calității conexiunii;</li>
-    <li>securitate și prevenirea fraudelor;</li>
-    <li>statistici;</li>
-    <li>reclame.</li>
+    <li>Safari blochează implicit cookie-urile terților;</li>
+    <li>Firefox le izolează pe fiecare site;</li>
+    <li>Chrome izolează pe fiecare site stocarea locală a terților.</li>
   </ul>
-  <p>Exemple: <code>YSC</code>, <code>VISITOR_INFO1_LIVE</code>, <code>VISITOR_PRIVACY_METADATA</code> și <code>PREF</code>. Dacă ești conectat la un cont Google, pot apărea și altele.</p>
-  <p>Lista exactă, scopurile și duratele le stabilește Google și se pot schimba. Le găsești în pagina <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">Cum folosește Google cookie-urile</a> și în <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Politica de confidențialitate Google</a>.</p>
-  <p><strong>Fără acordul tău nu se încarcă nimic de la YouTube.</strong> Dacă nu vrei să-ți dai acordul, poți deschide fiecare cameră direct pe youtube.com, din lista de sub butonul „Pornește camerele”.</p>
+  <p>Reclamele personalizate de la Google le controlezi din <a href="https://myadcenter.google.com" target="_blank" rel="noopener noreferrer">My Ad Center</a>.</p>
+  <p><strong>Dacă refuzi</strong>, nu se încarcă nimic de la YouTube. Poți deschide fiecare cameră direct pe youtube.com, din lista care apare după „Refuz”. Acolo se aplică regulile YouTube.</p>
 
-  <h2 id="altele">4. Altceva?</h2>
-  <p>Nu. GitHub Pages, unde este găzduit site-ul, nu pune cookie-uri vizitatorilor. Fonturile și generatorul de coduri QR sunt găzduite împreună cu site-ul. Nu folosim Google Analytics, pixeli de rețele sociale sau alte instrumente de urmărire.</p>
+  <h2 id="altele">5. Alte servicii</h2>
+  <ul>
+    <li><strong>Găzduirea.</strong> GitHub Pages, unde stă site-ul, nu pune cookie-uri vizitatorilor.</li>
+    <li><strong>Fonturile și generatorul de coduri QR</strong> sunt găzduite împreună cu site-ul.</li>
+    <li><strong>Nu folosim</strong> Google Analytics, Facebook Pixel sau alte instrumente de urmărire sau de reclamă.</li>
+  </ul>
 
-  <h2 id="acord">5. Acordul tău pentru YouTube</h2>
+  <h2 id="acord">6. Setările tale</h2>
   <div class="box">
+    <p class="ttl">Cookie-uri YouTube</p>
     <p class="status" id="consentState"><i></i><span>Se verifică…</span></p>
+    <div class="actions pair">
+      <button type="button" class="btn" id="refuse">Refuz</button>
+      <button type="button" class="btn" id="accept">Accept</button>
+    </div>
     <div class="actions">
-      <button type="button" class="btn solid" id="revoke" hidden>Retrage acordul pentru YouTube</button>
-      <button type="button" class="btn" id="wipe">Șterge toate datele ERA Live din acest browser</button>
+      <button type="button" class="btn subtle" id="wipe">Șterge toate datele ERA Live din acest browser</button>
     </div>
     <p class="updated" id="wipeNote" hidden>Gata. Nu mai există date ERA Live în acest browser.</p>
   </div>
-  <p>Acordul îl poți retrage și din butonul ⓘ al oricărei transmisiuni. Retragerea oprește încărcarea YouTube în ERA Live. Cookie-urile pe care YouTube le-a pus deja trebuie șterse din setările browserului (vezi mai jos), pentru că aparțin domeniilor Google.</p>
+  <p>Alegerea o poți schimba și din butonul ⓘ al oricărei transmisiuni. Dacă refuzi după ce ai acceptat, ERA Live nu mai încarcă YouTube.</p>
+  <p>Cookie-urile pe care YouTube le-a pus deja aparțin domeniilor Google și nu le putem șterge noi. Le ștergi din setările browserului (secțiunea 7).</p>
 
-  <h2 id="browser">6. Cum ștergi sau blochezi cookie-urile</h2>
+  <h2 id="browser">7. Cum ștergi sau blochezi cookie-urile din browser</h2>
   <p>În setările oricărui browser poți vedea, șterge și bloca cookie-urile și datele site-urilor. De exemplu:</p>
   <ul>
     <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer">Google Chrome</a>;</li>
@@ -86,10 +130,11 @@
     <li>Safari, din Setări → Safari → Avansat → Date site-uri web;</li>
     <li>Microsoft Edge, din Setări → Cookie-uri și permisiuni site.</li>
   </ul>
-  <p>Dacă blochezi cookie-urile terțe, camerele YouTube pot să nu mai pornească.</p>
+  <p>Dacă blochezi cookie-urile terților, camerele YouTube pot să nu mai pornească.</p>
 
-  <h2 id="contact">7. Întrebări</h2>
-  <p>Ne scrii la <a href="mailto:office@erashield.ro">office@erashield.ro</a>. Mai multe despre datele tale găsești în <a href="confidentialitate.html">Politica de confidențialitate</a>.</p>
+  <h2 id="modificari">8. Modificări și contact</h2>
+  <p>Când schimbăm această politică, actualizăm data de la început. Dacă schimbarea privește cookie-urile YouTube, îți cerem din nou acordul.</p>
+  <p>Operatorul este ERA SHIELD SRL, CUI 45385357. Ne scrii la <a href="mailto:office@erashield.ro">office@erashield.ro</a>. Mai multe despre datele tale găsești în <a href="confidentialitate.html">Politica de confidențialitate</a>.</p>
 </main>
 
 <footer class="foot"><div class="in">

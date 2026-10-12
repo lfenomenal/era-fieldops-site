@@ -326,8 +326,9 @@
 
   var ids = cams.map(function (c) { return c.id; });
   var KEY = 'era-live:' + ids.join(',');
-  // sizes: per camera, the share of the stage width it takes in the Liber layout
-  var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0], sizes: {} };
+  // sizes: per camera, the share of the stage width it takes in the Liber layout; pos: where it sits there
+  var state = { order: ids.slice(), hidden: [], layout: ids.length > 1 ? 'grid' : 'single', focus: ids[0], sizes: {}, pos: {} };
+  var num = function (v, lo, hi) { return typeof v === 'number' && v >= lo && v <= hi; };
   try {
     var saved = load(KEY);
     if (saved) {
@@ -347,6 +348,8 @@
       ids.forEach(function (id) {
         var f = has(saved.sizes, id) ? saved.sizes[id] : null;
         if (typeof f === 'number' && f > 0 && f <= 1) state.sizes[id] = f;
+        var p = has(saved.pos, id) ? saved.pos[id] : null;
+        if (p && num(p.x, 0, 1) && num(p.y, -2, 50) && num(p.b, -5000, 5000)) state.pos[id] = { x: p.x, y: p.y, b: p.b };
       });
     }
   } catch (e) { /* private mode or a corrupt value: start fresh */ }
@@ -795,9 +798,9 @@
     return Math.max(Math.min(MIN_W, W), Math.min(W, Math.round(f * (W + GAP) - GAP)));
   }
 
-  // Liber: each camera keeps its own width and is dropped, in order, into the highest spot it
+  // Aranjează: each camera keeps its own width and is dropped, in order, into the highest spot it
   // fits (skyline packing), so small cameras tuck in beside and under big ones without overlapping.
-  function freeRects(list, W, out) {
+  function packRects(list, W, out) {
     var sky = [{ x: 0, w: W + GAP, y: 0 }], bottom = 0;
     list.forEach(function (id) {
       var w = widthOf(id, W), ww = w + GAP, h = tileH(w), best = null, xs = [];
@@ -830,23 +833,164 @@
     return bottom;
   }
 
-  // start Liber from whatever is on screen now, so the first resize changes only the camera being resized
+  // ---------- Liber: every camera stays where it is put ----------
+  // A place is kept relative to the stage width, so it scales with the window: x as a share of W + GAP,
+  // y as a share of it (y) plus pixels (b) for the title bars and gaps of the cameras stacked above.
+  // Cameras placed under or beside each other still touch after a resize or in full screen.
+  var HB = BAR - GAP * 9 / 16;   // a camera f wide is f * 9/16 of W + GAP tall, plus this
+  var SNAP = 10;                 // px within which a moving edge lines up with another
+  var moving = null;             // the camera being dragged in Liber: { id, x, y, a, b }
+  var pinned = null;             // the camera being dragged or resized: the others make way for it
+  var shown = {};                // what the stage shows now, per camera
+
+  function placeOf(id, W) {
+    var U = W + GAP, w = widthOf(id, W), p = state.pos[id];
+    return { id: id, x: Math.max(0, Math.min(W - w, p.x * U)), y: Math.max(0, p.y * U + p.b), w: w, h: tileH(w), f: (w + GAP) / U, a: p.y, b: p.b };
+  }
+
+  function overlap(r, o) { return r.x < o.x + o.w - 1 && o.x < r.x + r.w - 1 && r.y < o.y + o.h - 1 && o.y < r.y + r.h - 1; }
+
+  // Nothing covers anything: `fixed` stays put and any camera it lands on moves straight down, just
+  // below what it would cover, working from the top of the stage down.
+  function settle(rs, fixed) {
+    var done = fixed ? [fixed] : [];
+    rs.filter(function (r) { return r !== fixed; })
+      .sort(function (p, q) { return p.y - q.y || p.x - q.x; })
+      .forEach(function (r) {
+        for (var moved = true; moved;) {
+          moved = false;
+          done.forEach(function (o) {
+            if (!overlap(r, o)) return;
+            r.y = o.y + o.h + GAP; r.a = o.a + o.f * 9 / 16; r.b = o.b + HB + GAP;
+            moved = true;
+          });
+        }
+        done.push(r);
+      });
+  }
+
+  // where a camera r could line up: v is its top (or left) edge, g where to draw the guide
+  function yLines(r, others) {
+    var out = [{ v: 0, a: 0, b: 0, g: null }];
+    others.forEach(function (o) {
+      out.push({ v: o.y, a: o.a, b: o.b, g: o.y },
+        { v: o.y + o.h + GAP, a: o.a + o.f * 9 / 16, b: o.b + HB + GAP, g: o.y + o.h + GAP / 2 },
+        { v: o.y - GAP - r.h, a: o.a - r.f * 9 / 16, b: o.b - HB - GAP, g: o.y - GAP / 2 },
+        { v: o.y + o.h - r.h, a: o.a + (o.f - r.f) * 9 / 16, b: o.b, g: o.y + o.h });
+    });
+    return out.filter(function (c) { return c.v >= -0.5; });
+  }
+  function xLines(r, others, W) {
+    var out = [{ v: 0, g: null }, { v: W - r.w, g: null }];
+    others.forEach(function (o) {
+      out.push({ v: o.x, g: o.x }, { v: o.x + o.w + GAP, g: o.x + o.w + GAP / 2 },
+        { v: o.x - GAP - r.w, g: o.x - GAP / 2 }, { v: o.x + o.w - r.w, g: o.x + o.w });
+    });
+    return out.filter(function (c) { return c.v >= -0.5 && c.v <= W - r.w + 0.5; });
+  }
+  // the closest line within reach; one listed earlier (the stage's edges first) wins unless another is a pixel closer
+  function nearest(list, v, within) {
+    var best = null, d0 = within;
+    list.forEach(function (c) { var d = Math.abs(c.v - v); if (d <= d0) { best = c; d0 = d - 1; } });
+    return best;
+  }
+
+  // store pixel rects as places, recognising cameras that sit level with or right under another
+  function setPlaces(list, rects, W) {
+    var U = W + GAP, done = [];
+    list.slice().sort(function (p, q) { return rects[p].y - rects[q].y || rects[p].x - rects[q].x; }).forEach(function (id) {
+      var r = rects[id], m = nearest(yLines({ h: tileH(r.w), f: (r.w + GAP) / U }, done), r.y, 1.5);
+      state.sizes[id] = Math.min(1, (r.w + GAP) / U);
+      state.pos[id] = { x: Math.max(0, r.x / U), y: m ? m.a : r.y / U, b: m ? m.b : 0 };
+      done.push(placeOf(id, W));
+    });
+  }
+
+  // cameras without a place yet: if none has one, they are packed by their sizes; otherwise each
+  // goes to the highest free spot
+  function ensurePos(vis, W) {
+    var missing = vis.filter(function (id) { return !has(state.pos, id); });
+    if (!missing.length) return;
+    if (missing.length === vis.length) {
+      var rects = {};
+      packRects(vis, W, rects);
+      setPlaces(vis, rects, W);
+      return;
+    }
+    var U = W + GAP, placed = vis.filter(function (id) { return has(state.pos, id); }).map(function (id) { return placeOf(id, W); });
+    missing.forEach(function (id) {
+      var w = widthOf(id, W), h = tileH(w), xs = [0], ys = [0], best = null;
+      placed.forEach(function (o) { xs.push(o.x + o.w + GAP); ys.push(o.y + o.h + GAP); });
+      ys.forEach(function (y) {
+        xs.forEach(function (x) {
+          var c = { x: x, y: y, w: w, h: h };
+          if (x + w > W + 0.5 || placed.some(function (o) { return overlap(c, o); })) return;
+          if (!best || y < best.y - 0.5 || (Math.abs(y - best.y) <= 0.5 && x < best.x)) best = c;
+        });
+      });
+      var m = nearest(yLines({ h: h, f: (w + GAP) / U }, placed), best.y, 1.5);
+      state.pos[id] = { x: best.x / U, y: m ? m.a : best.y / U, b: m ? m.b : 0 };
+      placed.push(placeOf(id, W));
+    });
+  }
+
+  function freeLayout(vis, W, out) {
+    ensurePos(vis, W);
+    var rs = vis.map(function (id) { return placeOf(id, W); }), pin = null, bottom = 0;
+    rs.forEach(function (r) {
+      if (moving && r.id === moving.id) { r.x = moving.x; r.y = moving.y; r.a = moving.a; r.b = moving.b; }
+      if (r.id === pinned) pin = r;
+    });
+    settle(rs, pin);
+    rs.forEach(function (r) { out[r.id] = r; bottom = Math.max(bottom, r.y + r.h); });
+    return bottom;
+  }
+
+  // start Liber from whatever is on screen now, so the first move or resize changes only that camera
   function seedFree() {
-    var W = stage.clientWidth;
     if (state.layout === 'focus') {
       state.order = [state.focus].concat(state.order.filter(function (id) { return id !== state.focus; }));
     }
-    visible().forEach(function (id) {
-      var w = parseFloat(tiles[id].el.style.width);
-      if (w) state.sizes[id] = Math.min(1, (w + GAP) / (W + GAP));
-    });
+    setPlaces(visible().filter(function (id) { return shown[id]; }), shown, stage.clientWidth);
     state.layout = 'free';
+  }
+
+  // Aranjează: pack the cameras again, in the order they are read on screen, each keeping its size
+  function tidy() {
+    if (state.layout !== 'free') return;
+    var W = stage.clientWidth, rects = {};
+    var list = visible().sort(function (p, q) { var a = shown[p], b = shown[q]; return a && b ? a.y - b.y || a.x - b.x : 0; });
+    packRects(list, W, rects);
+    setPlaces(list, rects, W);
+    render();
+  }
+
+  // keep what the stage shows now: the moved camera's new place and those that made way for it
+  function commitFree() {
+    var U = stage.clientWidth + GAP;
+    visible().forEach(function (id) {
+      var r = shown[id], p = state.pos[id];
+      if (r && p) state.pos[id] = { x: moving && moving.id === id ? r.x / U : p.x, y: r.a, b: r.b };
+    });
+    moving = null; pinned = null;
+    guide(null, null);
+    render();
+  }
+
+  var guideV = document.createElement('i'), guideH = document.createElement('i');
+  guideV.className = 'guide v'; guideH.className = 'guide h';
+  guideV.hidden = guideH.hidden = true;
+  stage.appendChild(guideV); stage.appendChild(guideH);
+  function guide(x, y) {
+    guideV.hidden = x == null; guideH.hidden = y == null;
+    if (x != null) guideV.style.transform = 'translateX(' + Math.round(x) + 'px)';
+    if (y != null) guideH.style.transform = 'translateY(' + Math.round(y) + 'px)';
   }
 
   function compute(vis, W, H) {
     var rects = {}, bottom;
     if (state.layout === 'free') {
-      bottom = freeRects(vis, W, rects);
+      bottom = freeLayout(vis, W, rects);
     } else if (state.layout === 'focus' && vis.length > 1) {
       var others = vis.filter(function (id) { return id !== state.focus; });
       if (W >= 760) {
@@ -877,6 +1021,7 @@
     var W = stage.clientWidth;
     var H = Math.max(220, window.innerHeight - $('hdr').offsetHeight - dockH - 12);
     var res = compute(vis, W, H);
+    shown = res.rects;
     stage.style.height = res.height + 'px';
     vis.forEach(function (id) {
       var r = res.rects[id], el = tiles[id].el;
@@ -912,6 +1057,7 @@
     document.querySelectorAll('.seg button').forEach(function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.layout === state.layout));
     });
+    $('tidy').hidden = state.layout !== 'free' || vis.length < 2;
     var chips = $('chips');
     var focused = document.activeElement && document.activeElement.closest && document.activeElement.closest('.chip');
     var refocus = focused ? focused.dataset.id : null;
@@ -975,11 +1121,14 @@
   document.querySelector('.seg').addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
+    // Liber comes back as it was left; the first time, it starts from what is on screen
     if (b.dataset.layout === 'free' && state.layout !== 'free' &&
-        !visible().every(function (id) { return has(state.sizes, id); })) seedFree();
+        !visible().every(function (id) { return has(state.pos, id) || has(state.sizes, id); })) seedFree();
     state.layout = b.dataset.layout;
     render();
   });
+
+  $('tidy').addEventListener('click', tidy);
 
   $('chips').addEventListener('click', function (e) {
     var b = e.target.closest('.chip');
@@ -1018,8 +1167,11 @@
     if (!grip || e.button !== 0 || state.layout === 'single') return;
     e.preventDefault();
     if (state.layout !== 'free') { seedFree(); render(); }
-    var el = grip.parentNode;
-    rz = { id: el.dataset.id, el: el, w0: parseFloat(el.style.width), sx: e.clientX, sy: e.clientY, tag: document.createElement('span') };
+    var el = grip.parentNode, id = el.dataset.id, r = shown[id];
+    if (!r) return;
+    // the top-left corner stays put; whatever the camera grows over makes way
+    rz = { id: id, el: el, x: r.x, y: r.y, w0: r.w, base: shown, sx: e.clientX, sy: e.clientY, tag: document.createElement('span') };
+    pinned = id;
     rz.tag.className = 'size-tag';
     el.appendChild(rz.tag);
     el.classList.add('resizing');
@@ -1028,16 +1180,25 @@
   });
 
   function resizeMove(e) {
-    var W = stage.clientWidth, dx = e.clientX - rz.sx, dy = (e.clientY - rz.sy) * 16 / 9;
+    var W = stage.clientWidth, U = W + GAP, dx = e.clientX - rz.sx, dy = (e.clientY - rz.sy) * 16 / 9;
+    var max = W - rz.x, min = Math.min(MIN_W, max);
     // follow whichever direction the pointer moved more, so diagonal drags feel natural
-    var w = Math.max(Math.min(MIN_W, W), Math.min(W, rz.w0 + (Math.abs(dx) >= Math.abs(dy) ? dx : dy)));
-    var label = Math.round((w + GAP) / (W + GAP) * 100) + '%';
-    SNAPS.forEach(function (s) {
-      var sw = s[0] * (W + GAP) - GAP;
-      if (Math.abs(w - sw) < 14) { w = sw; label = s[1]; }
+    var w = Math.max(min, Math.min(max, rz.w0 + (Math.abs(dx) >= Math.abs(dy) ? dx : dy)));
+    // widths worth snapping to: full, 3/4, 2/3, 1/2, 1/3, 1/4 of the stage, its right edge, and the
+    // widths that line the right or bottom edge up with another camera
+    var lines = SNAPS.map(function (s) { return { v: s[0] * U - GAP, label: s[1] }; });
+    lines.push({ v: max });
+    visible().forEach(function (id) {
+      var o = rz.base[id];
+      if (id === rz.id || !o) return;
+      lines.push({ v: o.x - GAP - rz.x, gx: o.x - GAP / 2 }, { v: o.x + o.w - rz.x, gx: o.x + o.w },
+        { v: (o.y - GAP - rz.y - BAR) * 16 / 9, gy: o.y - GAP / 2 }, { v: (o.y + o.h - rz.y - BAR) * 16 / 9, gy: o.y + o.h });
     });
-    state.sizes[rz.id] = (w + GAP) / (W + GAP);
-    rz.tag.textContent = label;
+    var s = nearest(lines.filter(function (c) { return c.v >= min - 0.5 && c.v <= max + 0.5; }), w, 12);
+    if (s) w = s.v;
+    state.sizes[rz.id] = (w + GAP) / U;
+    rz.tag.textContent = (s && s.label) || Math.round((w + GAP) / U * 100) + '%';
+    guide(s && s.gx, s && s.gy);
     cancelAnimationFrame(rzRaf);
     rzRaf = requestAnimationFrame(relayout);
   }
@@ -1048,32 +1209,37 @@
     rz.el.classList.remove('resizing');
     document.body.classList.remove('is-resizing');
     rz = null;
-    render();
+    cancelAnimationFrame(rzRaf);
+    relayout();
+    commitFree();
   }
   stage.addEventListener('pointerup', endResize);
   stage.addEventListener('pointercancel', endResize);
 
-  // ---------- drag a camera by its bar onto another to swap them ----------
+  // ---------- drag a camera by its bar: in Liber anywhere, elsewhere onto another to swap them ----------
 
-  var drag = null;
+  var drag = null, dragRaf = 0;
   stage.addEventListener('pointerdown', function (e) {
     var bar = e.target.closest('.th');
-    if (!bar || e.target.closest('button') || e.button !== 0 || visible().length < 2) return;
-    var el = bar.parentNode, m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(el.style.transform) || [0, 0, 0];
-    drag = { el: el, id: el.dataset.id, x0: +m[1], y0: +m[2], sx: e.clientX, sy: e.clientY, on: false, target: null };
+    if (!bar || e.target.closest('button') || e.button !== 0) return;
+    var free = state.layout === 'free', el = bar.parentNode, id = el.dataset.id, r = shown[id];
+    if (!r || (!free && visible().length < 2)) return;
+    drag = { el: el, id: id, x0: r.x, y0: r.y, sx: e.pageX, sy: e.pageY, on: false, target: null, free: free, base: shown };
     bar.setPointerCapture(e.pointerId);
   });
 
   stage.addEventListener('pointermove', function (e) {
     if (rz) { resizeMove(e); return; }
     if (!drag) return;
-    var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    var dx = e.pageX - drag.sx, dy = e.pageY - drag.sy;
     if (!drag.on) {
       if (Math.abs(dx) + Math.abs(dy) < 8) return;
       drag.on = true;
       drag.el.classList.add('dragging');
       document.body.classList.add('is-dragging');
+      if (drag.free) pinned = drag.id;
     }
+    if (drag.free) { moveFree(drag.x0 + dx, drag.y0 + dy); return; }
     drag.el.style.transform = 'translate(' + (drag.x0 + dx) + 'px,' + (drag.y0 + dy) + 'px)';
     var over = null;
     visible().forEach(function (id) {
@@ -1088,6 +1254,19 @@
     }
   });
 
+  // Liber: the camera follows the pointer, lines up with edges close by, and those it lands on make way
+  function moveFree(x, y) {
+    var W = stage.clientWidth, U = W + GAP, me = drag.base[drag.id], r = { w: me.w, h: me.h, f: me.f };
+    var others = visible().filter(function (id) { return id !== drag.id && drag.base[id]; }).map(function (id) { return drag.base[id]; });
+    x = Math.max(0, Math.min(W - r.w, x));
+    y = Math.max(0, y);
+    var sx = nearest(xLines(r, others, W), x, SNAP), sy = nearest(yLines(r, others), y, SNAP);
+    moving = { id: drag.id, x: sx ? sx.v : x, y: sy ? sy.v : y, a: sy ? sy.a : y / U, b: sy ? sy.b : 0 };
+    guide(sx && sx.g, sy && sy.g);
+    cancelAnimationFrame(dragRaf);
+    dragRaf = requestAnimationFrame(relayout);
+  }
+
   function endDrag() {
     if (!drag) return;
     var d = drag;
@@ -1095,6 +1274,7 @@
     if (!d.on) return;
     d.el.classList.remove('dragging');
     document.body.classList.remove('is-dragging');
+    if (d.free) { cancelAnimationFrame(dragRaf); relayout(); commitFree(); return; }
     if (d.target) { tiles[d.target].el.classList.remove('drop-target'); swap(d.id, d.target); }
     else relayout();
   }
@@ -1296,6 +1476,7 @@
       document.querySelector('.seg [data-layout="' + { g: 'grid', f: 'focus', u: 'single', l: 'free' }[lk] + '"]').click();
     }
     else if (lk === 'm') $('sound').click();
+    else if (lk === 'a') tidy();
   });
 
   var raf = 0;

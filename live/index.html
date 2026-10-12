@@ -162,12 +162,25 @@
   .tc { flex: none; min-width: 76px; text-align: right; font: 500 12px/1 var(--mono); color: var(--text-2); font-variant-numeric: tabular-nums; }
   .tc.end { text-align: left; color: var(--text-3); }
   .tc.is-live { color: var(--live); font: 600 11px/1 var(--font); letter-spacing: 0.06em; }
-  .tl { -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 20px; background: transparent; cursor: pointer; --p: 100%; }
-  .tl::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: linear-gradient(var(--text), var(--text)) 0 0 / var(--p) 100% no-repeat, var(--surface-3); }
-  .tl::-moz-range-track { height: 3px; border-radius: 2px; background: linear-gradient(var(--text), var(--text)) 0 0 / var(--p) 100% no-repeat, var(--surface-3); }
-  .tl::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4.5px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
-  .tl::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
-  .tl:disabled { opacity: 0.35; cursor: default; }
+  /* the shared timeline: tap or click anywhere to jump, drag to scrub, every camera follows */
+  .scrub { position: relative; flex: 1; min-width: 0; height: 28px; cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent; --p: 100%; --h: 0%; }
+  .scrub:focus { outline: none; }
+  .scrub-track { position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--surface-3); overflow: hidden; transition: height 0.12s, margin-top 0.12s; }
+  .scrub:hover .scrub-track, .scrub.is-drag .scrub-track { height: 6px; margin-top: -3px; }
+  .scrub:focus-visible .scrub-track { outline: 2px solid rgba(255, 255, 255, 0.7); outline-offset: 3px; }
+  .scrub-hover { position: absolute; top: 0; bottom: 0; left: 0; width: var(--h); background: rgba(255, 255, 255, 0.22); opacity: 0; }
+  .scrub:hover .scrub-hover { opacity: 1; }
+  .scrub-fill { position: absolute; top: 0; bottom: 0; left: 0; width: var(--p); background: var(--text); }
+  .scrub-thumb { position: absolute; top: 50%; left: var(--p); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); transform: scale(0.8); transition: transform 0.12s; pointer-events: none; }
+  .scrub:hover .scrub-thumb, .scrub:focus-visible .scrub-thumb, .scrub.is-drag .scrub-thumb { transform: scale(1.15); }
+  .scrub-tip { position: absolute; bottom: calc(100% + 2px); left: 0; translate: -50% 0; padding: 5px 7px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line-2); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); font: 500 12px/1 var(--mono); white-space: nowrap; pointer-events: none; }
+  .scrub-tip.is-live { color: var(--live); font: 600 11px/1 var(--font); letter-spacing: 0.06em; }
+  .scrub.is-disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+  @media (pointer: coarse) {
+    .scrub { height: 40px; }
+    .scrub-track { height: 5px; margin-top: -2.5px; }
+    .scrub-thumb { transform: scale(1.15); }
+  }
   .live-btn {
     flex: none; height: 26px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border-radius: 5px;
     border: 1px solid var(--line-2); color: var(--text-2); font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
@@ -481,7 +494,11 @@
   </div>
   <div class="timeline">
     <span class="tc" id="tlLeft">--:--:--</span>
-    <input type="range" class="tl" id="tl" min="0" max="1" step="1" value="1" aria-label="Poziția în transmisiune, pentru toate camerele">
+    <div class="scrub is-disabled" id="tl" role="slider" tabindex="-1" aria-label="Poziția în transmisiune, pentru toate camerele" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-disabled="true">
+      <div class="scrub-track"><div class="scrub-hover"></div><div class="scrub-fill"></div></div>
+      <div class="scrub-thumb"></div>
+      <div class="scrub-tip" id="tlTip" hidden></div>
+    </div>
     <span class="tc end" id="tlRight"></span>
   </div>
   <button type="button" class="live-btn" id="goLive" title="Înapoi la LIVE (End)"><i></i>LIVE</button>
@@ -1135,11 +1152,28 @@
   // ================= shared timeline: every camera moves together =================
 
   var tl = { mode: 'none', behind: 0, window: 0, paused: false, dragging: false, shifted: false };
-  var slider = $('tl');
+  // the timeline's range: live = seconds relative to the live edge (-window .. 0), replay = 0 .. duration
+  var scrub = $('tl'), tip = $('tlTip');
+  var range = { min: 0, max: 0, value: 0, disabled: true };
 
-  function setFill() {
-    var min = +slider.min, max = +slider.max, v = +slider.value;
-    slider.style.setProperty('--p', (max > min ? (v - min) / (max - min) * 100 : 100) + '%');
+  function scrubLabel(v) { return tl.mode === 'live' ? liveLabel(-v) : fmt(v); }
+
+  function setRange(min, max, value, disabled) {
+    range.min = min; range.max = max; range.disabled = disabled;
+    if (!tl.dragging) range.value = value;
+    paintScrub();
+  }
+
+  function paintScrub() {
+    var span = range.max - range.min, f = span > 0 ? (range.value - range.min) / span : 1;
+    scrub.style.setProperty('--p', Math.max(0, Math.min(1, f)) * 100 + '%');
+    scrub.classList.toggle('is-disabled', range.disabled);
+    scrub.tabIndex = range.disabled ? -1 : 0;
+    scrub.setAttribute('aria-disabled', String(range.disabled));
+    scrub.setAttribute('aria-valuemin', String(Math.round(range.min)));
+    scrub.setAttribute('aria-valuemax', String(Math.round(range.max)));
+    scrub.setAttribute('aria-valuenow', String(Math.round(range.value)));
+    scrub.setAttribute('aria-valuetext', tl.mode === 'none' ? 'indisponibil' : scrubLabel(range.value));
   }
 
   function setStatus(kind, text) {
@@ -1164,7 +1198,7 @@
     ['back30', 'back10', 'fwd10'].forEach(function (id) { $(id).disabled = !canSeek; });
     if (!r) {
       tl.mode = 'none';
-      slider.disabled = true;
+      setRange(0, 0, 0, true);
       $('tlLeft').textContent = '--:--:--'; $('tlLeft').className = 'tc'; $('tlRight').textContent = '';
       $('goLive').hidden = true;
       if (API.failed) setStatus('', 'LIVE');
@@ -1178,7 +1212,7 @@
       var lr = edgeOf(r) != null ? r : ready.filter(function (t) { return edgeOf(t) != null; })[0];
       if (!lr) {
         tl.window = 0;
-        slider.disabled = true;
+        setRange(0, 0, 0, true);
         ['back30', 'back10', 'fwd10'].forEach(function (id) { $(id).disabled = true; });
         $('tlLeft').textContent = 'LIVE'; $('tlLeft').className = 'tc is-live'; $('tlRight').textContent = '';
         $('goLive').hidden = true;
@@ -1190,12 +1224,10 @@
       // YouTube keeps at most 12 h of a live seekable, counted back from the edge
       tl.window = Math.min(edge, DVR_MAX);
       if (!tl.dragging) tl.behind = Math.min(Math.max(0, edge - cur), tl.window);
-      slider.disabled = tl.window < 5;
-      slider.min = -Math.round(tl.window); slider.max = 0;
-      if (!tl.dragging) slider.value = -Math.round(tl.behind);
+      setRange(-Math.round(tl.window), 0, -Math.round(tl.behind), tl.window < 5);
       var at = tl.behind <= LIVE_TOL;
-      $('tlLeft').textContent = liveLabel(tl.behind);
-      $('tlLeft').className = 'tc' + (at ? ' is-live' : '');
+      $('tlLeft').textContent = tl.dragging ? scrubLabel(range.value) : liveLabel(tl.behind);
+      $('tlLeft').className = 'tc' + ((tl.dragging ? -range.value <= LIVE_TOL : at) ? ' is-live' : '');
       $('tlRight').textContent = '';
       $('goLive').hidden = false;
       $('goLive').classList.toggle('at-live', at);
@@ -1204,16 +1236,13 @@
       else setStatus('behind', at ? 'PAUZĂ' : liveLabel(tl.behind));
     } else {
       tl.mode = 'vod';
-      slider.disabled = !dur;
-      slider.min = 0; slider.max = Math.round(dur);
-      if (!tl.dragging) slider.value = Math.round(cur);
-      $('tlLeft').textContent = fmt(tl.dragging ? +slider.value : cur);
+      setRange(0, Math.round(dur), Math.round(cur), !dur);
+      $('tlLeft').textContent = fmt(tl.dragging ? range.value : cur);
       $('tlLeft').className = 'tc';
       $('tlRight').textContent = fmt(dur);
       $('goLive').hidden = true;
       setStatus('', 'RELUARE');
     }
-    setFill();
   }
   setInterval(tick, 500);
 
@@ -1271,17 +1300,74 @@
     setTimeout(tick, 150);
   }
 
-  slider.addEventListener('input', function () {
-    tl.dragging = true;
-    var v = +slider.value;
-    $('tlLeft').textContent = tl.mode === 'live' ? liveLabel(-v) : fmt(v);
-    setFill();
-  });
-  slider.addEventListener('change', function () {
-    var v = +slider.value;
+  // Move every camera to a point of the timeline. Landing close to the end means "back to LIVE".
+  function seekTimeline(v) {
+    if (tl.mode === 'live') {
+      var b = -v;
+      goBehind(b <= Math.max(LIVE_TOL, tl.window * 0.015) ? 0 : b);
+    } else if (tl.mode === 'vod') {
+      var r = refTile();
+      if (r) shiftAll(v - (get(r, 'getCurrentTime') || 0));
+    }
+  }
+
+  function scrubValueAt(x) {
+    var r = scrub.getBoundingClientRect(), f = r.width ? (x - r.left) / r.width : 1;
+    return Math.round(range.min + Math.max(0, Math.min(1, f)) * (range.max - range.min));
+  }
+
+  function scrubTip(x, v) {
+    var r = scrub.getBoundingClientRect();
+    tip.textContent = scrubLabel(v);
+    tip.classList.toggle('is-live', tl.mode === 'live' && -v <= LIVE_TOL);
+    tip.hidden = false;
+    var half = tip.offsetWidth / 2;
+    tip.style.left = Math.max(half, Math.min(r.width - half, x - r.left)) + 'px';
+    scrub.style.setProperty('--h', Math.max(0, Math.min(100, (x - r.left) / r.width * 100)) + '%');
+  }
+
+  var scrubbing = null;
+  function scrubTo(x) {
+    range.value = scrubValueAt(x);
+    paintScrub();
+    $('tlLeft').textContent = scrubLabel(range.value);
+    $('tlLeft').className = 'tc' + (tl.mode === 'live' && -range.value <= LIVE_TOL ? ' is-live' : '');
+    scrubTip(x, range.value);
+  }
+  function endScrub(commit) {
+    if (!scrubbing) return;
+    scrubbing = null;
     tl.dragging = false;
-    if (tl.mode === 'live') goBehind(-v);
-    else if (tl.mode === 'vod') { var r = refTile(); if (r) shiftAll(v - (get(r, 'getCurrentTime') || 0)); }
+    scrub.classList.remove('is-drag');
+    tip.hidden = true;
+    if (commit) seekTimeline(range.value); else tick();
+  }
+  scrub.addEventListener('pointerdown', function (e) {
+    if (range.disabled || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    try { scrub.setPointerCapture(e.pointerId); } catch (err) { /* old browsers: plain move events still work */ }
+    scrubbing = { id: e.pointerId };
+    tl.dragging = true;
+    scrub.classList.add('is-drag');
+    scrubTo(e.clientX);
+  });
+  scrub.addEventListener('pointermove', function (e) {
+    if (scrubbing) { if (e.pointerId === scrubbing.id) scrubTo(e.clientX); }
+    else if (e.pointerType === 'mouse' && !range.disabled) scrubTip(e.clientX, scrubValueAt(e.clientX));
+  });
+  scrub.addEventListener('pointerup', function (e) { if (scrubbing && e.pointerId === scrubbing.id) endScrub(true); });
+  scrub.addEventListener('pointercancel', function (e) { if (scrubbing && e.pointerId === scrubbing.id) endScrub(false); });
+  scrub.addEventListener('pointerleave', function () { if (!scrubbing) tip.hidden = true; });
+  // arrows and End are handled for the whole page; on the timeline, Home jumps to the start and PgUp/PgDn by a minute
+  scrub.addEventListener('keydown', function (e) {
+    if (range.disabled) return;
+    var k = e.key;
+    if (k === 'Home') seekTimeline(range.min);
+    else if (k === 'PageUp') seekBy(-60);
+    else if (k === 'PageDown') seekBy(60);
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
   });
   $('back30').addEventListener('click', function () { seekBy(-30); });
   $('back10').addEventListener('click', function () { seekBy(-10); });

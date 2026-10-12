@@ -2,6 +2,8 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Politica de cookie-uri · ERA Live</title>
 <meta name="description" content="Ce păstrează ERA Live în browserul tău, ce cookie-uri pune YouTube și cum îți retragi acordul.">
@@ -25,7 +27,7 @@
   <h1>Politica de cookie-uri</h1>
   <p class="updated">Ultima actualizare: 12 octombrie 2026</p>
 
-  <div class="box" style="margin-top:28px">
+  <div class="box first">
     <p class="ttl">Pe scurt</p>
     <ul>
       <li>ERA Live nu pune cookie-uri proprii și nu folosește analiză de trafic sau reclame.</li>
@@ -95,37 +97,6 @@
   <nav aria-label="Documente legale"><a href="./">ERA Live</a><a href="termeni.html">Termeni</a><a href="confidentialitate.html">Confidențialitate</a><a href="cookie-uri.html">Cookie-uri</a></nav>
 </div></footer>
 
-<script>
-(function () {
-  'use strict';
-  // must match the viewer: key, version and the 6-month validity of the YouTube choice
-  var KEY = 'era-live:consent', VERSION = 1, VALID = 182 * 864e5;
-  var state = document.getElementById('consentState'), revoke = document.getElementById('revoke');
-  function read() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
-  function show() {
-    var c = read(), on = !!(c && c.yt === true && c.v === VERSION && typeof c.ts === 'number' && Date.now() - c.ts < VALID);
-    state.classList.toggle('on', on);
-    state.lastChild.textContent = on
-      ? 'Ți-ai dat acordul pentru YouTube în acest browser pe ' + new Date(c.ts).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) + '.'
-      : 'În acest browser nu ți-ai dat acordul pentru YouTube. Camerele se încarcă doar după ce apeși „Pornește camerele”.';
-    revoke.hidden = !on;
-  }
-  revoke.addEventListener('click', function () {
-    try { localStorage.removeItem(KEY); } catch (e) { /* storage blocked */ }
-    show();
-  });
-  document.getElementById('wipe').addEventListener('click', function () {
-    try {
-      // list first: removing an entry can reorder the rest
-      var keys = [];
-      for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
-      keys.forEach(function (k) { if (k && k.indexOf('era-live:') === 0) localStorage.removeItem(k); });
-    } catch (e) { /* storage blocked */ }
-    document.getElementById('wipeNote').hidden = false;
-    show();
-  });
-  show();
-})();
-</script>
+<script src="cookie-uri.js"></script>
 </body>
 </html>

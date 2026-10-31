@@ -435,7 +435,7 @@
     if (t.player) { try { t.player.destroy(); } catch (e) { /* already gone */ } }
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
-    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0;
+    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0;
     if (audio === t.id) audio = null;
   }
 
@@ -524,7 +524,7 @@
 
   // ================= shared timeline: every camera moves together =================
 
-  var tl = { mode: 'none', behind: 0, window: 0, paused: false, dragging: false, shifted: false };
+  var tl = { mode: 'none', behind: 0, want: 0, window: 0, paused: false, dragging: false, shifted: false };
   // the timeline's range: live = seconds relative to the live edge (-window .. 0), replay = 0 .. duration
   var scrub = $('tl'), tip = $('tlTip');
   var range = { min: 0, max: 0, value: 0, disabled: true };
@@ -607,6 +607,7 @@
       $('goLive').title = at ? 'Ești la LIVE' : 'Înapoi la LIVE (End)';
       if (at && playing) setStatus('live', 'LIVE');
       else setStatus('behind', at ? 'PAUZĂ' : liveLabel(tl.behind));
+      keepTogether(ready);
     } else {
       tl.mode = 'vod';
       setRange(0, Math.round(dur), Math.round(cur), !dur);
@@ -619,6 +620,63 @@
   }
   setInterval(tick, 500);
 
+  // Live watchdog. Cameras were lined up only when they started or when LIVE was pressed, so one that
+  // buffered, or was slowed down by the browser (background tab, weak network), stayed behind for good
+  // while the others were live. Every few seconds each camera is checked against where the viewer is
+  // (LIVE, or the same distance back as the timeline) and put back there if it has drifted; a camera
+  // that is stuck (not started, paused by the browser, a stream that only now went live) is restarted.
+  var DRIFT_TOL = 4;            // seconds a rewound camera may be off the others before it is moved back
+  var CATCHUP_TOL = 8;          // seconds behind the live edge before a camera is brought back to LIVE
+  function keepTogether(ready) {
+    if (tl.paused || tl.dragging || API.failed) return;
+    // judged against where the viewer asked to be, not the followed camera, which may be the one lagging
+    var now = nowS(), want = tl.want, atLive = want <= LIVE_TOL;
+    ready.forEach(function (t) {
+      if (now < (t.nextCheck || 0)) return;
+      var s = get(t, 'getPlayerState');
+      if (s === 0) return;      // this stream has ended: leave it
+      if (s !== 1 && s !== 3) {
+        // not playing although the viewer didn't pause: nudge it, and reload it if it stays stuck
+        t.stuckSince = t.stuckSince || now;
+        t.nextCheck = now + 5;
+        if (now - t.stuckSince > 40) { t.stuckSince = 0; reload(t); }
+        else cmd(t, 'playVideo');
+        return;
+      }
+      t.stuckSince = 0;
+      if (s !== 1) return;      // buffering: give it time, it is checked again once it plays
+      var e = edgeOf(t), c = get(t, 'getCurrentTime');
+      if (e == null) { t.pendingBehind = atLive ? null : want; return; }
+      if (c == null) return;
+      var lag = e - c;
+      if (atLive) {
+        if (lag <= CATCHUP_TOL) return;
+        // aim past the estimate (YouTube stops at the real edge) and re-learn the edge from there
+        t.recalibUntil = now + 5;
+        cmd(t, 'seekTo', [e + 5, true]);
+      } else {
+        if (Math.abs(lag - want) <= DRIFT_TOL) return;
+        cmd(t, 'seekTo', [Math.max(0, e - want), true]);
+      }
+      t.nextCheck = now + 10;   // let the seek settle before judging this camera again
+    });
+  }
+
+  // tear a camera down and load it again, keeping its sound if it had it
+  function reload(t) {
+    var had = audio === t.id;
+    unmount(t);
+    if (had) audio = t.id;
+    mount(t);
+  }
+
+  // coming back to the tab: browsers slow down background videos, so line everyone up at once
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    ids.forEach(function (id) { tiles[id].nextCheck = 0; });
+    tick();
+  });
+
   function paintPlay(playing) {
     var b = $('playAll');
     b.innerHTML = playing ? ICON.pause : ICON.play;
@@ -630,7 +688,7 @@
   // Live: put every camera the same distance behind its own live edge, which also re-syncs them.
   function goBehind(b) {
     b = Math.max(0, Math.min(b, tl.window || 0));
-    tl.behind = b;
+    tl.behind = b; tl.want = b;
     readyTiles().forEach(function (t) {
       var e = edgeOf(t);
       if (e == null) { t.pendingBehind = b || null; return; }
@@ -668,6 +726,8 @@
     var ready = readyTiles();
     var playing = ready.length ? ready.some(function (t) { var s = get(t, 'getPlayerState'); return s === 1 || s === 3; }) : !tl.paused;
     tl.paused = playing;
+    // resuming a live after a pause: stay where it was paused, the watchdog keeps everyone there
+    if (!playing) tl.want = tl.behind;
     eachMounted(function (t) { cmd(t, playing ? 'pauseVideo' : 'playVideo'); });
     paintPlay(!playing);
     setTimeout(tick, 150);

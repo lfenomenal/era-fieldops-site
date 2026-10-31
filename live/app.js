@@ -435,7 +435,7 @@
     if (t.player) { try { t.player.destroy(); } catch (e) { /* already gone */ } }
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
-    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0; t.jumpAt = 0;
+    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0; t.jumpAt = 0; t.played = false;
     if (audio === t.id) audio = null;
   }
 
@@ -481,6 +481,7 @@
     // a jump to LIVE that the player took as "past the end": a fresh load always starts at the live edge
     if (s === 0 && nowS() - (t.jumpAt || 0) < 15) { t.jumpAt = 0; reload(t); return; }
     if (s === 1) {
+      if (!t.played) { t.played = true; startTogether(); }
       var c = get(t, 'getCurrentTime');
       // the first time a camera plays, YouTube has put it at the live edge; after LIVE was pressed, likewise
       if (c && (t.edge0 == null || nowS() < (t.recalibUntil || 0))) { t.edge0 = c; t.edgeT = nowS(); t.recalibUntil = 0; }
@@ -766,6 +767,29 @@
     else if (tl.mode === 'vod') shiftAll(sec);
   }
 
+  // Cameras load one after the other, each starting wherever YouTube put it at that moment. Once every
+  // camera on screen is playing (or 12 s after the first one, if one never comes), they all jump to the
+  // live edge in the same instant, so they start out together.
+  var startSync = { done: false, first: 0 };
+  function startTogether() {
+    if (startSync.done) return;
+    var now = nowS();
+    if (!startSync.first) {
+      startSync.first = now;
+      setTimeout(startTogether, 12500);
+    }
+    var vis = visible().map(function (id) { return tiles[id]; });
+    var all = vis.every(function (t) { return t.played; });
+    if (!all && now - startSync.first < 12) return;
+    startSync.done = true;
+    // a short wait so the last one to start has some video buffered before the jump
+    setTimeout(function () {
+      if (tl.mode !== 'live' || tl.paused || tl.want > LIVE_TOL) return;
+      if (DEBUG) dbgLines.push('+' + (nowS() - dbgT0).toFixed(1) + 's toate: pornire sincronizată');
+      goBehind(0);
+    }, 1500);
+  }
+
   // Jump far past the estimated edge: YouTube stops at the real live edge, wherever that is, so this
   // works even when the estimate is off. The edge is then re-learned from where it landed.
   function jumpToLive(t) {
@@ -784,6 +808,7 @@
     tl.lastLive = nowS();
     if (again) {
       tl.behind = 0; tl.want = 0;
+      startSync = { done: false, first: 0 };
       eachMounted(reload);
       tick();
       return;

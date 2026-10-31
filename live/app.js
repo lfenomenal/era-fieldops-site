@@ -445,6 +445,7 @@
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
     t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0; t.jumpAt = 0; t.played = false;
+    t.latS = []; t.lat = null; t.edgeLatS = []; t.edgeLat = null; t.hasClock = false; t.syncRest = 0; t.syncOver = 0; t.fwdTried = false;
     if (audio === t.id) audio = null;
   }
 
@@ -475,9 +476,7 @@
   // live edge is (using it sent "back 10 s" to the start of the stream). getCurrentTime() and seekTo()
   // do share the stream's own timeline, so each camera's live edge is learned from where YouTube starts
   // playing it, then moved forward with the clock.
-  // a camera's delay: what the link sets by hand plus what the auto-sync worked out (see autoSync)
-  function dl(t) { return (delays[t.id] || 0) + (autoDl[t.id] || 0); }
-  var autoDl = {};
+  function dl(t) { return delays[t.id] || 0; }
   function nowS() { return performance.now() / 1000; }
 
   function edgeOf(t) {
@@ -491,7 +490,10 @@
   function onState(t, s) {
     dbgLog(t, 'stare ' + stateName(s));
     // a jump to LIVE that the player took as "past the end": a fresh load always starts at the live edge
-    if (s === 0 && nowS() - (t.jumpAt || 0) < 15) { t.jumpAt = 0; reload(t); return; }
+    if (s === 0 && nowS() - (t.jumpAt || 0) < 15) { t.jumpAt = 0; reload(t, 'terminat după salt'); return; }
+    // the clock sync only trusts what a camera reports once it has been playing steadily for a moment
+    if (s !== 1) t.latS = [];
+    else t.settleUntil = nowS() + 1.5;
     if (s === 1) {
       if (!t.played) { t.played = true; startTogether(); }
       var c = get(t, 'getCurrentTime');
@@ -614,7 +616,11 @@
       cur = get(lr, 'getCurrentTime') || 0;
       // YouTube keeps at most 12 h of a live seekable, counted back from the edge
       tl.window = Math.min(edge, DVR_MAX);
-      if (!tl.dragging) tl.behind = Math.min(Math.max(0, edge - cur - dl(lr)), tl.window);
+      sampleClocks(ready);
+      var sync = clockTarget(ready);
+      // with the clock sync on, "behind" is measured against the shared target, not the camera's own edge
+      var behindNow = sync != null && lr.lat != null ? lr.lat - sync - dl(lr) : edge - cur - dl(lr);
+      if (!tl.dragging) tl.behind = Math.min(Math.max(0, behindNow), tl.window);
       setRange(-Math.round(tl.window), 0, -Math.round(tl.behind), tl.window < 5);
       var at = tl.behind <= LIVE_TOL;
       $('tlLeft').textContent = tl.dragging ? scrubLabel(range.value) : liveLabel(tl.behind);
@@ -626,7 +632,7 @@
       if (at && playing) setStatus('live', 'LIVE');
       else setStatus('behind', at ? 'PAUZĂ' : liveLabel(tl.behind));
       keepTogether(ready);
-      autoSync(ready);
+      clockSync(ready, sync);
     } else {
       tl.mode = 'vod';
       setRange(0, Math.round(dur), Math.round(cur), !dur);
@@ -648,23 +654,23 @@
   function dbgLog(t, msg) {
     if (!DEBUG) return;
     dbgLines.push('+' + (nowS() - dbgT0).toFixed(1) + 's ' + t.cam.label + ': ' + msg);
-    if (dbgLines.length > 60) dbgLines.shift();
+    if (dbgLines.length > 80) dbgLines.shift();
   }
   function dbgText() {
     var out = ['ERA Live diagnostic ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
-    out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState));
-    out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | înainte (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
+    out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState) + (syncTarget != null ? ', țintă ' + f1(syncTarget) + ' s în urma realității' : ''));
+    out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | întârziere (s) | întârziere la LIVE (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
     visible().forEach(function (id) {
       var t = tiles[id];
       if (!t.ready) { out.push(t.cam.label + ' | ' + (t.iframe ? 'conectare' : 'neîncărcat')); return; }
       var c = get(t, 'getCurrentTime'), e = edgeOf(t), lf = get(t, 'getVideoLoadedFraction');
       out.push([t.cam.label, stateName(get(t, 'getPlayerState')), f1(c), f1(e), e != null && c != null ? f1(e - c) : '–', f1(dl(t)),
-        refTime(t) != null ? new Date(refTime(t) * 1000).toISOString().slice(11, 23) : '–', f1(t.syncAhead),
+        refTime(t) != null ? new Date(refTime(t) * 1000).toISOString().slice(11, 23) : '–', f1(t.lat), f1(t.edgeLat),
         f1(get(t, 'getDuration')), get(t, 'getPlaybackQuality') || '–', lf != null ? Math.round(lf * 100) + '%' : '–',
         isLive(t) ? 'da' : 'nu', t.jumps || 0, t.reloads || 0].join(' | '));
     });
-    return out.concat(['', 'evenimente:'], dbgLines.slice(-25)).join('\n');
+    return out.concat(['', 'evenimente:'], dbgLines.slice(-50)).join('\n');
   }
   if (DEBUG) {
     dbgEl = document.createElement('div');
@@ -738,46 +744,76 @@
 
   // ---------- auto-sync: line the cameras up by the real time of the picture they show ----------
   // Each stream reaches YouTube with its own latency, so being at every stream's live edge doesn't mean
-  // showing the same moment. On a live, the player can report the wall-clock time of the frame on screen
-  // (getMediaReferenceTime, not in the documented API, so used only if it answers sensibly). Every few
-  // seconds the cameras ahead of the one furthest behind are held back by the difference.
-  var SYNC_TOL = 0.6, syncAt = 0, syncState = 'așteaptă';
+  // showing the same moment. On a live, the player reports the wall-clock time of the frame on screen
+  // (getMediaReferenceTime, not in the documented API, so used only if it answers with a clock). From it,
+  // each camera's delay behind real time is known. All cameras are held at one shared delay: that of the
+  // slowest stream at its own live edge. A camera that drifts more than SYNC_TOL from it, twice in a row,
+  // is moved by exactly the difference (forward if it fell behind, back if it is ahead), then left alone
+  // for a while. This is the only thing that moves a camera that has a clock; the edge-based watchdog
+  // only looks after cameras without one.
+  var SYNC_TOL = 1.0, SYNC_EVERY = 3, SYNC_REST = 8;
+  var syncAt = 0, syncState = 'așteaptă', syncTarget = null;
   function refTime(t) {
     var v = get(t, 'getMediaReferenceTime');
     if (typeof v !== 'number' || !isFinite(v)) return null;
     if (v > 1e12) v /= 1000;              // milliseconds, just in case
     return v > 1e9 ? v : null;            // seconds since 1970, or it isn't a clock
   }
-  function autoSync(ready) {
-    var now = nowS();
-    if (now < syncAt || params.has('nosync')) return;
-    syncAt = now + 6;
-    if (tl.paused || tl.dragging || tl.want > LIVE_TOL || ready.length < 2) return;
-    var list = [];
-    for (var i = 0; i < ready.length; i++) {
-      var t = ready[i];
-      if (get(t, 'getPlayerState') !== 1) return;          // only when every camera is playing
+  function median(a) { var b = a.slice().sort(function (x, y) { return x - y; }); return b[b.length >> 1]; }
+  // every tick: each camera's delay behind real time, and what it would be at its own live edge
+  function sampleClocks(ready) {
+    var now = nowS(), wall = Date.now() / 1000;
+    ready.forEach(function (t) {
       var rt = refTime(t);
-      if (rt == null) { syncState = 'indisponibil'; return; }
-      list.push({ t: t, rt: rt });
-    }
-    var min = Math.min.apply(null, list.map(function (x) { return x.rt; }));
-    var moved = false;
-    list.forEach(function (x) {
-      var d = x.rt - min;                                   // seconds this camera is ahead
-      x.t.syncAhead = d;
-      if (d <= SYNC_TOL) return;
-      autoDl[x.t.id] = Math.min(60, (autoDl[x.t.id] || 0) + d);
-      var c = get(x.t, 'getCurrentTime');
-      if (c != null) { x.t.recalibUntil = 0; x.t.nextCheck = now + 6; cmd(x.t, 'seekTo', [Math.max(0, c - d), true]); }
-      dbgLog(x.t, 'auto-sync −' + d.toFixed(1) + ' s');
+      t.hasClock = rt != null;
+      if (!t.hasClock || get(t, 'getPlayerState') !== 1 || now < (t.settleUntil || 0)) return;
+      t.latS = (t.latS || []).concat([wall - rt]).slice(-6);
+      t.lat = median(t.latS);
+      var e = edgeOf(t), c = get(t, 'getCurrentTime');
+      if (e != null && c != null) {
+        t.edgeLatS = (t.edgeLatS || []).concat([t.lat - Math.max(0, e - c)]).slice(-20);
+        t.edgeLat = median(t.edgeLatS);
+      }
+    });
+  }
+  // the shared delay: the slowest stream at its live edge (null if fewer than two cameras have a clock)
+  function clockTarget(ready) {
+    if (params.has('nosync')) { syncTarget = null; return null; }
+    var withClock = ready.filter(function (t) { return t.hasClock && t.edgeLat != null; });
+    if (!ready.some(function (t) { return t.hasClock; }) && ready.length) syncState = 'indisponibil';
+    if (withClock.length < 2) { syncTarget = null; return null; }
+    syncTarget = Math.max.apply(null, withClock.map(function (t) { return t.edgeLat; }));
+    return syncTarget;
+  }
+  function clockSync(ready, target) {
+    var now = nowS();
+    if (target == null || now < syncAt) return;
+    syncAt = now + SYNC_EVERY;
+    if (tl.paused || tl.dragging) return;
+    var moved = false, off = false;
+    ready.forEach(function (t) {
+      if (!t.hasClock || t.lat == null || now < (t.syncRest || 0) || now < (t.settleUntil || 0)) return;
+      var err = t.lat - (target + tl.want + dl(t));   // > 0: behind the others, < 0: ahead of them
+      if (Math.abs(err) <= SYNC_TOL) { t.syncOver = 0; return; }
+      off = true;
+      if (++t.syncOver < 2) return;                    // twice in a row, so one odd reading moves nothing
+      t.syncOver = 0;
+      if (err > 0 && t.fwdTried) {
+        // already moved forward and still behind: it is at its own live edge and can't go further, so
+        // this stream is the slow one now and the others will wait for it
+        t.fwdTried = false; t.edgeLatS = [t.lat]; t.edgeLat = t.lat;
+        dbgLog(t, 'la capătul stream-ului, celelalte se aliniază după ea');
+        return;
+      }
+      t.fwdTried = err > 0;
+      var c = get(t, 'getCurrentTime');
+      if (c == null) return;
+      t.recalibUntil = 0; t.syncRest = now + SYNC_REST; t.nextCheck = now + SYNC_REST; t.latS = [];
+      cmd(t, 'seekTo', [Math.max(0, c + err), true]);
+      dbgLog(t, 'auto-sync ' + (err > 0 ? '+' : '−') + Math.abs(err).toFixed(1) + ' s');
       moved = true;
     });
-    // keep the delays as small as they can be: the camera furthest behind holds none
-    var low = Math.min.apply(null, list.map(function (x) { return autoDl[x.t.id] || 0; }));
-    if (low > 0) list.forEach(function (x) { autoDl[x.t.id] -= low; });
-    syncState = moved ? 'aliniere' : 'sincronizat';
-    if (moved) syncAt = now + 10;                           // let the seeks settle before measuring again
+    syncState = moved || off ? 'aliniere' : 'sincronizat';
   }
 
   // Live watchdog. Cameras were lined up only when they started or when LIVE was pressed, so one that
@@ -800,12 +836,13 @@
         // not playing although the viewer didn't pause: nudge it, and reload it if it stays stuck
         t.stuckSince = t.stuckSince || now;
         t.nextCheck = now + 5;
-        if (now - t.stuckSince > 40) { t.stuckSince = 0; reload(t); }
+        if (now - t.stuckSince > 40) { t.stuckSince = 0; reload(t, 'blocat 40 s'); }
         else cmd(t, 'playVideo');
         return;
       }
       t.stuckSince = 0;
       if (s !== 1) return;      // buffering: give it time, it is checked again once it plays
+      if (t.hasClock && syncTarget != null) return;   // the clock sync keeps this one in place
       var e = edgeOf(t), c = get(t, 'getCurrentTime');
       var target = want + dl(t);
       if (e == null) { t.pendingBehind = target || null; return; }
@@ -826,9 +863,9 @@
   }
 
   // tear a camera down and load it again, keeping its sound if it had it
-  function reload(t) {
+  function reload(t, why) {
     var had = audio === t.id;
-    t.reloads = (t.reloads || 0) + 1; dbgLog(t, 'reîncărcare');
+    t.reloads = (t.reloads || 0) + 1; dbgLog(t, 'reîncărcare' + (typeof why === 'string' ? ' (' + why + ')' : ''));
     unmount(t);
     if (had) audio = t.id;
     mount(t);
@@ -922,7 +959,7 @@
     if (again) {
       tl.behind = 0; tl.want = 0;
       startSync = { done: false, first: 0 };
-      eachMounted(reload);
+      eachMounted(function (t) { reload(t, 'LIVE apăsat din nou'); });
       tick();
       return;
     }

@@ -445,7 +445,7 @@
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
     t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0; t.jumpAt = 0; t.played = false;
-    t.latS = []; t.lat = null; t.edgeLatS = []; t.edgeLat = null; t.hasClock = false; t.syncRest = 0; t.syncOver = 0; t.fwdTried = false;
+    t.latS = []; t.lat = null; t.edgeLatS = []; t.edgeLat = null; t.hasClock = false; t.syncRest = 0; t.syncOver = 0; t.fwdTried = false; t.offS = []; t.off = null;
     if (audio === t.id) audio = null;
   }
 
@@ -641,6 +641,7 @@
       $('tlRight').textContent = fmt(dur);
       $('goLive').hidden = true;
       setStatus('', 'RELUARE');
+      replaySync(ready, r);
     }
   }
   setInterval(tick, 500);
@@ -657,7 +658,7 @@
     if (dbgLines.length > 80) dbgLines.shift();
   }
   function dbgText() {
-    var out = ['ERA Live diagnostic v28 ' + new Date().toISOString(), navigator.userAgent,
+    var out = ['ERA Live diagnostic v29 ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
     out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState) + (syncTarget != null ? ', țintă ' + f1(syncTarget) + ' s în urma realității' : ''));
     out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | întârziere (s) | întârziere la LIVE (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
@@ -816,6 +817,39 @@
       moved = true;
     });
     syncState = moved || off ? 'aliniere' : 'sincronizat';
+  }
+
+  // Replay: the streams started at different times, so the same position in each is a different moment
+  // (a real event showed cameras up to a minute apart). The YouTube clock of a replay moves with the
+  // position, so clock minus position is a fixed number per camera; with it every camera is put at the
+  // moment the followed camera shows.
+  function replaySync(ready, ref) {
+    var now = nowS();
+    ready.forEach(function (t) {
+      var rt = refTime(t), c = get(t, 'getCurrentTime');
+      if (rt == null || c == null || get(t, 'getPlayerState') !== 1 || now < (t.settleUntil || 0)) return;
+      t.offS = (t.offS || []).concat([rt - c]).slice(-15);
+      t.off = median(t.offS);
+    });
+    if (params.has('nosync') || now < syncAt || !ref || ref.off == null) return;
+    syncAt = now + SYNC_EVERY;
+    if (tl.paused || tl.dragging) { return; }
+    var at = get(ref, 'getCurrentTime') + ref.off, moved = false, off = false;
+    syncTarget = null;
+    ready.forEach(function (t) {
+      if (t === ref || t.off == null || now < (t.syncRest || 0) || now < (t.settleUntil || 0)) return;
+      var err = (get(t, 'getCurrentTime') + t.off) - at;   // > 0: ahead of the followed camera
+      t.lat = -err;
+      if (Math.abs(err) <= 0.5) { t.syncOver = 0; return; }
+      off = true;
+      if (++t.syncOver < 2) return;
+      t.syncOver = 0; t.syncRest = now + SYNC_REST;
+      var c = get(t, 'getCurrentTime');
+      cmd(t, 'seekTo', [Math.max(0, c - err), true]);
+      dbgLog(t, 'sync reluare ' + (err > 0 ? '−' : '+') + Math.abs(err).toFixed(1) + ' s');
+      moved = true;
+    });
+    syncState = ready.some(function (t) { return t.off != null; }) ? (moved || off ? 'aliniere reluare' : 'reluare sincronizată') : 'indisponibil';
   }
 
   // Live watchdog. Cameras were lined up only when they started or when LIVE was pressed, so one that

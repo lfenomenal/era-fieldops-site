@@ -477,6 +477,7 @@
   }
 
   function onState(t, s) {
+    dbgLog(t, 'stare ' + stateName(s));
     // a jump to LIVE that the player took as "past the end": a fresh load always starts at the live edge
     if (s === 0 && nowS() - (t.jumpAt || 0) < 15) { t.jumpAt = 0; reload(t); return; }
     if (s === 1) {
@@ -622,6 +623,49 @@
   }
   setInterval(tick, 500);
 
+  // ---------- diagnostics: add &debug to the link to see how far each camera is from its live edge ----------
+  var DEBUG = params.has('debug'), dbgEl = null, dbgLines = [], dbgT0 = nowS();
+  function stateName(s) {
+    return { '-1': 'nepornit', 0: 'terminat', 1: 'rulează', 2: 'pauză', 3: 'buffering', 5: 'pregătit' }[s] || String(s);
+  }
+  function f1(v) { return typeof v === 'number' && isFinite(v) ? v.toFixed(1) : '–'; }
+  function dbgLog(t, msg) {
+    if (!DEBUG) return;
+    dbgLines.push('+' + (nowS() - dbgT0).toFixed(1) + 's ' + t.cam.label + ': ' + msg);
+    if (dbgLines.length > 60) dbgLines.shift();
+  }
+  function dbgText() {
+    var out = ['ERA Live diagnostic ' + new Date().toISOString(), navigator.userAgent,
+      'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
+    out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
+    visible().forEach(function (id) {
+      var t = tiles[id];
+      if (!t.ready) { out.push(t.cam.label + ' | ' + (t.iframe ? 'conectare' : 'neîncărcat')); return; }
+      var c = get(t, 'getCurrentTime'), e = edgeOf(t), lf = get(t, 'getVideoLoadedFraction');
+      out.push([t.cam.label, stateName(get(t, 'getPlayerState')), f1(c), f1(e), e != null && c != null ? f1(e - c) : '–',
+        f1(get(t, 'getDuration')), get(t, 'getPlaybackQuality') || '–', lf != null ? Math.round(lf * 100) + '%' : '–',
+        isLive(t) ? 'da' : 'nu', t.jumps || 0, t.reloads || 0].join(' | '));
+    });
+    return out.concat(['', 'evenimente:'], dbgLines.slice(-25)).join('\n');
+  }
+  if (DEBUG) {
+    dbgEl = document.createElement('div');
+    dbgEl.style.cssText = 'position:fixed;left:8px;top:8px;z-index:9999;max-width:calc(100vw - 16px);max-height:60vh;overflow:auto;' +
+      'background:rgba(0,0,0,.85);color:#7CFC9A;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;border-radius:6px;white-space:pre';
+    var pre = document.createElement('div'), btn = document.createElement('button');
+    btn.type = 'button'; btn.textContent = 'Copiază diagnosticul';
+    btn.style.cssText = 'display:block;margin-bottom:6px;font:inherit;padding:4px 8px;cursor:pointer';
+    btn.addEventListener('click', function () {
+      var txt = dbgText();
+      var done = function () { btn.textContent = 'Copiat ✓'; setTimeout(function () { btn.textContent = 'Copiază diagnosticul'; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { window.prompt('Copiază:', txt); });
+      else window.prompt('Copiază:', txt);
+    });
+    dbgEl.appendChild(btn); dbgEl.appendChild(pre);
+    document.body.appendChild(dbgEl);
+    setInterval(function () { pre.textContent = dbgText(); }, 500);
+  }
+
   // Live watchdog. Cameras were lined up only when they started or when LIVE was pressed, so one that
   // buffered, or was slowed down by the browser (background tab, weak network), stayed behind for good
   // while the others were live. Every few seconds each camera is checked against where the viewer is
@@ -669,6 +713,7 @@
   // tear a camera down and load it again, keeping its sound if it had it
   function reload(t) {
     var had = audio === t.id;
+    t.reloads = (t.reloads || 0) + 1; dbgLog(t, 'reîncărcare');
     unmount(t);
     if (had) audio = t.id;
     mount(t);
@@ -726,6 +771,7 @@
   function jumpToLive(t) {
     var e = edgeOf(t), c = get(t, 'getCurrentTime'), now = nowS();
     t.recalibUntil = now + 8; t.jumpAt = now; t.overSince = 0;
+    t.jumps = (t.jumps || 0) + 1; dbgLog(t, 'salt la LIVE');
     t.nextCheck = now + 10;
     cmd(t, 'seekTo', [Math.max(e || 0, c || 0) + 3600, true]);
   }

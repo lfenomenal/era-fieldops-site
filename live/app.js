@@ -657,7 +657,7 @@
     if (dbgLines.length > 80) dbgLines.shift();
   }
   function dbgText() {
-    var out = ['ERA Live diagnostic v27 ' + new Date().toISOString(), navigator.userAgent,
+    var out = ['ERA Live diagnostic v28 ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
     out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState) + (syncTarget != null ? ', țintă ' + f1(syncTarget) + ' s în urma realității' : ''));
     out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | întârziere (s) | întârziere la LIVE (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
@@ -759,6 +759,7 @@
     if (v > 1e12) v /= 1000;              // milliseconds, just in case
     return v > 1e9 ? v : null;            // seconds since 1970, or it isn't a clock
   }
+  function c0(t) { return get(t, 'getCurrentTime') || 0; }
   function median(a) { var b = a.slice().sort(function (x, y) { return x - y; }); return b[b.length >> 1]; }
   // every tick: each camera's delay behind real time, and what it would be at its own live edge
   function sampleClocks(ready) {
@@ -798,7 +799,8 @@
       off = true;
       if (++t.syncOver < 2) return;                    // twice in a row, so one odd reading moves nothing
       t.syncOver = 0;
-      if (err > 0 && t.fwdTried) {
+      var e0 = edgeOf(t);
+      if (err > 0 && t.fwdTried && e0 != null && e0 - c0(t) < 2) {
         // already moved forward and still behind: it is at its own live edge and can't go further, so
         // this stream is the slow one now and the others will wait for it
         t.fwdTried = false; t.edgeLatS = [t.lat]; t.edgeLat = t.lat;

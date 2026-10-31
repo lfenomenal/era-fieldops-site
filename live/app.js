@@ -657,7 +657,7 @@
     if (dbgLines.length > 80) dbgLines.shift();
   }
   function dbgText() {
-    var out = ['ERA Live diagnostic ' + new Date().toISOString(), navigator.userAgent,
+    var out = ['ERA Live diagnostic v27 ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
     out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState) + (syncTarget != null ? ', țintă ' + f1(syncTarget) + ' s în urma realității' : ''));
     out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | întârziere (s) | întârziere la LIVE (s) | durată | calitate | încărcat | live | salturi | reîncărcări');

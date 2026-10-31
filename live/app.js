@@ -631,6 +631,8 @@
       $('goLive').title = at ? 'Ești la LIVE. Apasă ca să resincronizezi toate camerele' : 'Înapoi la LIVE (End)';
       if (at && playing) setStatus('live', 'LIVE');
       else setStatus('behind', at ? 'PAUZĂ' : liveLabel(tl.behind));
+      // until the first clock alignment is done the cameras may still jump: say so instead of LIVE
+      if (sync != null && !syncInit && at && playing) setStatus('behind', 'SINCRONIZARE');
       keepTogether(ready);
       clockSync(ready, sync);
     } else {
@@ -657,10 +659,31 @@
     dbgLines.push('+' + (nowS() - dbgT0).toFixed(1) + 's ' + t.cam.label + ': ' + msg);
     if (dbgLines.length > 80) dbgLines.shift();
   }
+  // What each stream's own delay says about how it is set up, and what to change in YouTube Studio.
+  // YouTube: Ultra-low latency is under ~5 s for most viewers, Low under ~10 s, Normal more.
+  function setupCheck() {
+    var rows = [], slow = [];
+    visible().forEach(function (id) {
+      var t = tiles[id];
+      if (t.edgeLat == null) return;
+      var kind = t.edgeLat <= 7 ? 'probabil ultra-scăzută' : t.edgeLat <= 13 ? 'probabil scăzută' : 'probabil normală';
+      rows.push('  ' + t.cam.label + ': ' + f1(t.edgeLat) + ' s la LIVE (' + kind + ')');
+      if (t.edgeLat > 7) slow.push(t.cam.label);
+    });
+    if (!rows.length) return [];
+    var all = rows.length, spread = Math.max.apply(null, visible().map(function (id) { return tiles[id].edgeLat || 0; })) -
+      Math.min.apply(null, visible().filter(function (id) { return tiles[id].edgeLat != null; }).map(function (id) { return tiles[id].edgeLat; }));
+    var out = ['', 'verificare transmisiuni (întârzierea fiecărui stream la LIVE-ul lui):'].concat(rows);
+    if (slow.length) out.push('  → în YouTube Studio puneți pe „Latență ultra-scăzută”: ' + slow.join(', ') +
+      ' (spectatorii văd tot cu întârzierea celui mai lent stream)');
+    else if (all > 1) out.push('  → setări bune' + (spread > 3 ? '; diferența de ' + f1(spread) + ' s vine din encodere/rețea' : ''));
+    return out;
+  }
   function dbgText() {
-    var out = ['ERA Live diagnostic v29 ' + new Date().toISOString(), navigator.userAgent,
+    var out = ['ERA Live diagnostic v30 ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
     out.push('auto-sync: ' + (params.has('nosync') ? 'oprit' : syncState) + (syncTarget != null ? ', țintă ' + f1(syncTarget) + ' s în urma realității' : ''));
+    out = out.concat(setupCheck());
     out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | ceas YouTube | întârziere (s) | întârziere la LIVE (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
     visible().forEach(function (id) {
       var t = tiles[id];
@@ -753,7 +776,7 @@
   // for a while. This is the only thing that moves a camera that has a clock; the edge-based watchdog
   // only looks after cameras without one.
   var SYNC_TOL = 1.0, SYNC_EVERY = 3, SYNC_REST = 8;
-  var syncAt = 0, syncState = 'așteaptă', syncTarget = null;
+  var syncAt = 0, syncState = 'așteaptă', syncTarget = null, syncInit = false, syncSince = nowS();
   function refTime(t) {
     var v = get(t, 'getMediaReferenceTime');
     if (typeof v !== 'number' || !isFinite(v)) return null;
@@ -792,6 +815,29 @@
     if (target == null || now < syncAt) return;
     syncAt = now + SYNC_EVERY;
     if (tl.paused || tl.dragging) return;
+    // First alignment: as soon as every camera with a clock has been measured a few times, all of them
+    // move once, together, instead of one by one over half a minute (each move costs a short rebuffer).
+    if (!syncInit) {
+      // wait for the start-up jump to LIVE (it changes every camera's position) unless it never comes
+      if (!(startSync.jumpedAt && now - startSync.jumpedAt > 2) && now - syncSince < 20) return;
+      var clocked = ready.filter(function (t) { return t.hasClock; });
+      var measured = clocked.every(function (t) { return (t.edgeLatS || []).length >= 3 && t.lat != null; });
+      if (!measured && now - syncSince < 20) return;
+      syncInit = true;
+      clocked.forEach(function (t) {
+        if (t.lat == null) return;
+        var err = t.lat - (target + tl.want + dl(t));
+        t.syncRest = now + SYNC_REST; t.syncOver = 0; t.latS = [];
+        if (Math.abs(err) <= 0.5) return;
+        var c = get(t, 'getCurrentTime');
+        if (c == null) return;
+        t.recalibUntil = 0; t.nextCheck = now + SYNC_REST; t.fwdTried = err > 0;
+        cmd(t, 'seekTo', [Math.max(0, c + err), true]);
+        dbgLog(t, 'aliniere inițială ' + (err > 0 ? '+' : '−') + Math.abs(err).toFixed(1) + ' s');
+      });
+      syncState = 'aliniere';
+      return;
+    }
     var moved = false, off = false;
     ready.forEach(function (t) {
       if (!t.hasClock || t.lat == null || now < (t.syncRest || 0) || now < (t.settleUntil || 0)) return;
@@ -959,6 +1005,7 @@
   var startSync = { done: false, first: 0 };
   function startTogether() {
     if (startSync.done) return;
+    syncInit = false; syncSince = nowS();
     var now = nowS();
     if (!startSync.first) {
       startSync.first = now;
@@ -971,6 +1018,7 @@
     // a short wait so the last one to start has some video buffered before the jump
     setTimeout(function () {
       if (tl.mode !== 'live' || tl.paused || tl.want > LIVE_TOL) return;
+      startSync.jumpedAt = nowS();
       if (DEBUG) dbgLines.push('+' + (nowS() - dbgT0).toFixed(1) + 's toate: pornire sincronizată');
       goBehind(0);
     }, 1500);

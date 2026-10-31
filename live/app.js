@@ -94,6 +94,8 @@
     var p = new URLSearchParams();
     if (title) p.set('t', title);
     list.forEach(function (c) { p.append('c', c.id + (c.name ? '~' + c.name : '')); });
+    // per-camera delays (see "delays" below) travel with the link
+    list.forEach(function (c) { if (delays[c.id]) p.append('d', c.id + '~' + delays[c.id]); });
     return location.pathname + '#' + p.toString();
   }
   function isEventHash(h) { return /(^|&)(t|c)=/.test(String(h || '').replace(/^#/, '')); }
@@ -116,6 +118,13 @@
   // opening another event (only the part after '#' changes) starts the page over
   window.addEventListener('hashchange', function () { if (isEventHash(location.hash)) location.reload(); });
   var title = clean(params.get('t'), 120);
+  // d=ID~seconds: hold that camera this many seconds behind its live edge, to make up for a stream that
+  // reaches YouTube faster than the others (each stream has its own latency, which the page can't see)
+  var delays = {};
+  params.getAll('d').slice(0, 50).forEach(function (v) {
+    var k = v.indexOf('~'), id = v.slice(0, k), sec = parseFloat(v.slice(k + 1));
+    if (k > 0 && ID_RE.test(id) && isFinite(sec) && sec > 0) delays[id] = Math.min(30, Math.round(sec * 2) / 2);
+  });
   var cams = [];
   params.getAll('c').slice(0, 50).forEach(function (v) {
     var k = v.indexOf('~'), id = k < 0 ? v : v.slice(0, k), name = k < 0 ? '' : clean(v.slice(k + 1), 40);
@@ -466,6 +475,7 @@
   // live edge is (using it sent "back 10 s" to the start of the stream). getCurrentTime() and seekTo()
   // do share the stream's own timeline, so each camera's live edge is learned from where YouTube starts
   // playing it, then moved forward with the clock.
+  function dl(t) { return delays[t.id] || 0; }
   function nowS() { return performance.now() / 1000; }
 
   function edgeOf(t) {
@@ -505,7 +515,9 @@
     if (audio === t.id) { cmd(t, 'unMute'); cmd(t, 'setVolume', [100]); } else cmd(t, 'mute');
     // a camera that appears while everyone is rewound joins them instead of starting at the live edge
     if (tl.mode === 'live' && tl.behind > LIVE_TOL) {
-      t.pendingBehind = tl.behind;
+      t.pendingBehind = tl.behind + dl(t);
+    } else if (dl(t)) {
+      t.pendingBehind = dl(t);
     } else if (tl.mode === 'vod' && tl.shifted) {
       // only once the viewer has moved through the replay; before that every camera simply starts with the others
       var r = refTile(t), c = r && get(r, 'getCurrentTime');
@@ -600,7 +612,7 @@
       cur = get(lr, 'getCurrentTime') || 0;
       // YouTube keeps at most 12 h of a live seekable, counted back from the edge
       tl.window = Math.min(edge, DVR_MAX);
-      if (!tl.dragging) tl.behind = Math.min(Math.max(0, edge - cur), tl.window);
+      if (!tl.dragging) tl.behind = Math.min(Math.max(0, edge - cur - dl(lr)), tl.window);
       setRange(-Math.round(tl.window), 0, -Math.round(tl.behind), tl.window < 5);
       var at = tl.behind <= LIVE_TOL;
       $('tlLeft').textContent = tl.dragging ? scrubLabel(range.value) : liveLabel(tl.behind);
@@ -638,12 +650,12 @@
   function dbgText() {
     var out = ['ERA Live diagnostic ' + new Date().toISOString(), navigator.userAgent,
       'mod=' + tl.mode + ' înUrmă=' + f1(tl.behind) + ' dorit=' + f1(tl.want) + ' pauză=' + tl.paused + ' API=' + (API.failed ? 'eșuat' : API.ready ? 'ok' : 'încărcare'), ''];
-    out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | durată | calitate | încărcat | live | salturi | reîncărcări');
+    out.push('cameră | stare | timp | LIVE estimat | în urmă (s) | decalaj | durată | calitate | încărcat | live | salturi | reîncărcări');
     visible().forEach(function (id) {
       var t = tiles[id];
       if (!t.ready) { out.push(t.cam.label + ' | ' + (t.iframe ? 'conectare' : 'neîncărcat')); return; }
       var c = get(t, 'getCurrentTime'), e = edgeOf(t), lf = get(t, 'getVideoLoadedFraction');
-      out.push([t.cam.label, stateName(get(t, 'getPlayerState')), f1(c), f1(e), e != null && c != null ? f1(e - c) : '–',
+      out.push([t.cam.label, stateName(get(t, 'getPlayerState')), f1(c), f1(e), e != null && c != null ? f1(e - c) : '–', f1(dl(t)),
         f1(get(t, 'getDuration')), get(t, 'getPlaybackQuality') || '–', lf != null ? Math.round(lf * 100) + '%' : '–',
         isLive(t) ? 'da' : 'nu', t.jumps || 0, t.reloads || 0].join(' | '));
     });
@@ -655,14 +667,66 @@
       'background:rgba(0,0,0,.85);color:#7CFC9A;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;padding:8px 10px;border-radius:6px;white-space:pre';
     var pre = document.createElement('div'), btn = document.createElement('button');
     btn.type = 'button'; btn.textContent = 'Copiază diagnosticul';
-    btn.style.cssText = 'display:block;margin-bottom:6px;font:inherit;padding:4px 8px;cursor:pointer';
+    btn.style.cssText = 'display:inline-block;margin:0 6px 6px 0;font:inherit;padding:4px 8px;cursor:pointer;background:#7CFC9A;color:#000;border:0;border-radius:4px';
     btn.addEventListener('click', function () {
       var txt = dbgText();
       var done = function () { btn.textContent = 'Copiat ✓'; setTimeout(function () { btn.textContent = 'Copiază diagnosticul'; }, 1500); };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { window.prompt('Copiază:', txt); });
       else window.prompt('Copiază:', txt);
     });
-    dbgEl.appendChild(btn); dbgEl.appendChild(pre);
+    // per-camera delay: hold back the cameras that are ahead until every one shows the same moment
+    var ctl = document.createElement('div');
+    ctl.style.cssText = 'white-space:normal;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #2a5';
+    var head = document.createElement('div');
+    head.textContent = 'Decalaj pe cameră (ține în urmă camerele care sunt înainte):';
+    ctl.appendChild(head);
+    var bstyle = 'font:inherit;font-size:16px;font-weight:700;min-width:40px;padding:4px 10px;margin:0 3px;cursor:pointer;' +
+      'background:#7CFC9A;color:#000;border:0;border-radius:4px';
+    cams.forEach(function (c) {
+      var row = document.createElement('div'), name = document.createElement('span'), val = document.createElement('span');
+      row.style.cssText = 'display:flex;align-items:center;gap:4px;margin:3px 0';
+      name.textContent = c.label; name.style.cssText = 'flex:1;min-width:90px';
+      val.style.cssText = 'min-width:44px;text-align:center';
+      var show = function () { val.textContent = (delays[c.id] || 0).toFixed(1) + ' s'; };
+      var step = function (d) {
+        var v = Math.max(0, Math.min(30, (delays[c.id] || 0) + d));
+        if (v) delays[c.id] = v; else delete delays[c.id];
+        show();
+        var t = tiles[c.id];
+        dbgLog(t, 'decalaj ' + v.toFixed(1) + ' s');
+        if (!t.ready || tl.mode !== 'live') return;
+        var e = edgeOf(t);
+        if (e != null) { t.recalibUntil = 0; t.nextCheck = nowS() + 4; cmd(t, 'seekTo', [Math.max(0, e - tl.want - v), true]); }
+      };
+      [['−', -0.5], ['+', 0.5]].forEach(function (x, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.textContent = x[0]; b.style.cssText = bstyle;
+        b.addEventListener('click', function () { step(x[1]); });
+        if (i === 0) { row.appendChild(name); row.appendChild(b); row.appendChild(val); } else row.appendChild(b);
+      });
+      show();
+      ctl.appendChild(row);
+    });
+    var linkBtn = document.createElement('button');
+    linkBtn.type = 'button'; linkBtn.textContent = 'Copiază linkul cu decalaje';
+    linkBtn.style.cssText = 'display:block;margin-top:6px;font:inherit;padding:4px 8px;cursor:pointer;background:#7CFC9A;color:#000;border:0;border-radius:4px';
+    linkBtn.addEventListener('click', function () {
+      var url = location.origin + eventUrl(title, cams);
+      var done = function () { linkBtn.textContent = 'Link copiat ✓'; setTimeout(function () { linkBtn.textContent = 'Copiază linkul cu decalaje'; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () { window.prompt('Copiază:', url); });
+      else window.prompt('Copiază:', url);
+    });
+    ctl.appendChild(linkBtn);
+    dbgEl.appendChild(ctl);
+    // the numbers can be folded away so the cameras stay visible on a phone while tuning
+    var fold = document.createElement('button');
+    fold.type = 'button'; fold.textContent = 'Ascunde detaliile';
+    fold.style.cssText = btn.style.cssText;
+    fold.addEventListener('click', function () {
+      pre.hidden = !pre.hidden;
+      fold.textContent = pre.hidden ? 'Arată detaliile' : 'Ascunde detaliile';
+    });
+    dbgEl.appendChild(btn); dbgEl.appendChild(fold); dbgEl.appendChild(pre);
     document.body.appendChild(dbgEl);
     setInterval(function () { pre.textContent = dbgText(); }, 500);
   }
@@ -694,18 +758,19 @@
       t.stuckSince = 0;
       if (s !== 1) return;      // buffering: give it time, it is checked again once it plays
       var e = edgeOf(t), c = get(t, 'getCurrentTime');
-      if (e == null) { t.pendingBehind = atLive ? null : want; return; }
+      var target = want + dl(t);
+      if (e == null) { t.pendingBehind = target || null; return; }
       if (c == null) return;
       var lag = e - c;
-      if (atLive) {
+      if (atLive && !dl(t)) {
         if (lag <= CATCHUP_TOL) { t.overSince = 0; return; }
         t.overSince = t.overSince || now;
         if (now - t.overSince < CATCHUP_HOLD) return;
         t.overSince = 0;
         jumpToLive(t);
       } else {
-        if (Math.abs(lag - want) <= DRIFT_TOL) return;
-        cmd(t, 'seekTo', [Math.max(0, e - want), true]);
+        if (Math.abs(lag - target) <= (atLive ? 1.5 : DRIFT_TOL)) return;
+        cmd(t, 'seekTo', [Math.max(0, e - target), true]);
       }
       t.nextCheck = now + 10;   // let the seek settle before judging this camera again
     });
@@ -740,13 +805,12 @@
     b = Math.max(0, Math.min(b, tl.window || 0));
     tl.behind = b; tl.want = b;
     readyTiles().forEach(function (t) {
-      var e = edgeOf(t);
-      if (b === 0) { t.pendingBehind = null; jumpToLive(t); return; }
-      if (e == null) { t.pendingBehind = b; return; }
-      {
-        t.recalibUntil = 0;
-        cmd(t, 'seekTo', [Math.max(0, e - b), true]);
-      }
+      var e = edgeOf(t), target = b + dl(t);
+      // to LIVE: jump to the real edge first, then (if this camera has a delay) step back from there
+      if (b === 0) { t.pendingBehind = dl(t) || null; jumpToLive(t); return; }
+      if (e == null) { t.pendingBehind = target; return; }
+      t.recalibUntil = 0;
+      cmd(t, 'seekTo', [Math.max(0, e - target), true]);
     });
     if (!tl.paused) eachMounted(function (t) { cmd(t, 'playVideo'); });
     tick();

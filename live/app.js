@@ -435,7 +435,7 @@
     if (t.player) { try { t.player.destroy(); } catch (e) { /* already gone */ } }
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
-    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0;
+    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0;
     if (audio === t.id) audio = null;
   }
 
@@ -626,7 +626,8 @@
   // (LIVE, or the same distance back as the timeline) and put back there if it has drifted; a camera
   // that is stuck (not started, paused by the browser, a stream that only now went live) is restarted.
   var DRIFT_TOL = 4;            // seconds a rewound camera may be off the others before it is moved back
-  var CATCHUP_TOL = 8;          // seconds behind the live edge before a camera is brought back to LIVE
+  var CATCHUP_TOL = 3;          // seconds behind the live edge before a camera is brought back to LIVE
+  var CATCHUP_HOLD = 2;         // ...for this long in a row, so a momentary dip doesn't cause a seek
   function keepTogether(ready) {
     if (tl.paused || tl.dragging || API.failed) return;
     // judged against where the viewer asked to be, not the followed camera, which may be the one lagging
@@ -650,7 +651,10 @@
       if (c == null) return;
       var lag = e - c;
       if (atLive) {
-        if (lag <= CATCHUP_TOL) return;
+        if (lag <= CATCHUP_TOL) { t.overSince = 0; return; }
+        t.overSince = t.overSince || now;
+        if (now - t.overSince < CATCHUP_HOLD) return;
+        t.overSince = 0;
         // aim past the estimate (YouTube stops at the real edge) and re-learn the edge from there
         t.recalibUntil = now + 5;
         cmd(t, 'seekTo', [e + 5, true]);

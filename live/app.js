@@ -435,7 +435,7 @@
     if (t.player) { try { t.player.destroy(); } catch (e) { /* already gone */ } }
     if (t.iframe && t.iframe.parentNode) t.iframe.remove();
     t.iframe = null; t.player = null; t.ready = false; t.prevDur = null; t.growing = false;
-    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0;
+    t.edge0 = null; t.edgeT = 0; t.pendingBehind = null; t.recalibUntil = 0; t.nextCheck = 0; t.stuckSince = 0; t.overSince = 0; t.jumpAt = 0;
     if (audio === t.id) audio = null;
   }
 
@@ -477,6 +477,8 @@
   }
 
   function onState(t, s) {
+    // a jump to LIVE that the player took as "past the end": a fresh load always starts at the live edge
+    if (s === 0 && nowS() - (t.jumpAt || 0) < 15) { t.jumpAt = 0; reload(t); return; }
     if (s === 1) {
       var c = get(t, 'getCurrentTime');
       // the first time a camera plays, YouTube has put it at the live edge; after LIVE was pressed, likewise
@@ -604,7 +606,7 @@
       $('tlRight').textContent = '';
       $('goLive').hidden = false;
       $('goLive').classList.toggle('at-live', at);
-      $('goLive').title = at ? 'Ești la LIVE' : 'Înapoi la LIVE (End)';
+      $('goLive').title = at ? 'Ești la LIVE. Apasă ca să resincronizezi toate camerele' : 'Înapoi la LIVE (End)';
       if (at && playing) setStatus('live', 'LIVE');
       else setStatus('behind', at ? 'PAUZĂ' : liveLabel(tl.behind));
       keepTogether(ready);
@@ -655,9 +657,7 @@
         t.overSince = t.overSince || now;
         if (now - t.overSince < CATCHUP_HOLD) return;
         t.overSince = 0;
-        // aim past the estimate (YouTube stops at the real edge) and re-learn the edge from there
-        t.recalibUntil = now + 5;
-        cmd(t, 'seekTo', [e + 5, true]);
+        jumpToLive(t);
       } else {
         if (Math.abs(lag - want) <= DRIFT_TOL) return;
         cmd(t, 'seekTo', [Math.max(0, e - want), true]);
@@ -695,12 +695,9 @@
     tl.behind = b; tl.want = b;
     readyTiles().forEach(function (t) {
       var e = edgeOf(t);
-      if (e == null) { t.pendingBehind = b || null; return; }
-      if (b === 0) {
-        // aim a little past the estimate (YouTube stops at the real edge), then re-learn the edge from there
-        t.recalibUntil = nowS() + 5;
-        cmd(t, 'seekTo', [e + 5, true]);
-      } else {
+      if (b === 0) { t.pendingBehind = null; jumpToLive(t); return; }
+      if (e == null) { t.pendingBehind = b; return; }
+      {
         t.recalibUntil = 0;
         cmd(t, 'seekTo', [Math.max(0, e - b), true]);
       }
@@ -724,7 +721,29 @@
     else if (tl.mode === 'vod') shiftAll(sec);
   }
 
-  function goLive() { tl.paused = false; goBehind(0); }
+  // Jump far past the estimated edge: YouTube stops at the real live edge, wherever that is, so this
+  // works even when the estimate is off. The edge is then re-learned from where it landed.
+  function jumpToLive(t) {
+    var e = edgeOf(t), c = get(t, 'getCurrentTime'), now = nowS();
+    t.recalibUntil = now + 8; t.jumpAt = now; t.overSince = 0;
+    t.nextCheck = now + 10;
+    cmd(t, 'seekTo', [Math.max(e || 0, c || 0) + 3600, true]);
+  }
+
+  // LIVE: every camera jumps to its live edge. Pressed again while already at LIVE, every camera is
+  // reloaded at once, the surest way to have them all start again from the live edge together.
+  function goLive() {
+    var again = tl.mode === 'live' && !tl.paused && tl.want <= LIVE_TOL && nowS() - (tl.lastLive || 0) > 1;
+    tl.paused = false;
+    tl.lastLive = nowS();
+    if (again) {
+      tl.behind = 0; tl.want = 0;
+      eachMounted(reload);
+      tick();
+      return;
+    }
+    goBehind(0);
+  }
 
   function togglePlay() {
     var ready = readyTiles();
